@@ -4,6 +4,7 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 
 /// <summary>
 /// Generates a TextMeshPro SDF asset from <b>Outfit</b> (Google Fonts / OFL), sets it as the project default,
