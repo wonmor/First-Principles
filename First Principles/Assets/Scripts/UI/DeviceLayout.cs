@@ -80,8 +80,9 @@ public static class DeviceLayout
     public static Vector2 LevelSelectScrollAnchorMin =>
         IsTabletLike() ? new Vector2(0.1f, 0.08f) : new Vector2(0.04f, 0.08f);
 
+    // Top of scroll sits below the “Math tips & snippets” chip (chip ~0.81–0.86 on phone).
     public static Vector2 LevelSelectScrollAnchorMax =>
-        IsTabletLike() ? new Vector2(0.9f, 0.78f) : new Vector2(0.96f, 0.8f);
+        IsTabletLike() ? new Vector2(0.9f, 0.72f) : new Vector2(0.96f, 0.74f);
 
     public static float LevelSelectScrollSensitivity => IsTabletLike() ? 44f : 28f;
 

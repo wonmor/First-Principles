@@ -122,7 +122,6 @@ public class LevelSelectController : MonoBehaviour
         CopyFontFromAny(titleTmp);
         LocalizationManager.ApplyTextDirection(titleTmp);
 
-        CreateMathArticlesButton(panel.transform, canvas.transform);
         CreateLevelSelectLanguagePicker(panel.transform);
 
         // Scrollable list (many levels + readable on small screens).
@@ -147,10 +146,11 @@ public class LevelSelectController : MonoBehaviour
         viewportRt.anchorMax = Vector2.one;
         viewportRt.offsetMin = Vector2.zero;
         viewportRt.offsetMax = Vector2.zero;
+        // Mask + Image with alpha 0 often produces an empty stencil so list rows never show.
+        viewportGo.AddComponent<RectMask2D>();
         var vImg = viewportGo.AddComponent<Image>();
         vImg.color = new Color(0f, 0f, 0f, 0f);
-        var mask = viewportGo.AddComponent<Mask>();
-        mask.showMaskGraphic = false;
+        vImg.raycastTarget = true;
         scroll.viewport = viewportRt;
 
         var contentGo = new GameObject("Content");
@@ -177,6 +177,13 @@ public class LevelSelectController : MonoBehaviour
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
+        float rowH = tablet ? 92f : 84f;
+        float spacingY = tablet ? 20f : 18f;
+        int rowCount = GameLevelCatalog.LevelCount + 1;
+        int padVertical = vlg.padding.top + vlg.padding.bottom;
+        var contentLe = contentGo.AddComponent<LayoutElement>();
+        contentLe.minHeight = rowCount * rowH + Mathf.Max(0, rowCount - 1) * spacingY + padVertical;
+
         graphicCalculatorEntryTmp = CreateLevelButton(contentRt, LocalizationManager.Get("ui.graphic_calculator_mode", "Graphic calculator mode"), LaunchGraphCalculator);
 
         for (int i = 0; i < GameLevelCatalog.LevelCount; i++)
@@ -186,12 +193,42 @@ public class LevelSelectController : MonoBehaviour
             levelRowLabels.Add(rowTmp);
         }
 
+        RebuildScrollContent(scroll, contentRt);
+
+        // After TMP mesh/layout settles (esp. first frame), rebuild again so rows aren't height 0.
+        StartCoroutine(FinalizeScrollAfterTmpLayout(scroll, contentRt));
+
+        // Under scroll in hierarchy so the list stays visible; chip sits in the band above scroll (see anchors).
+        CreateMathArticlesButton(panel.transform, canvas.transform);
+
+        CreateBackButton(panel.transform);
+    }
+
+    private static void RebuildScrollContent(ScrollRect scroll, RectTransform contentRt)
+    {
+        if (contentRt == null)
+            return;
+
+        for (int i = 0; i < contentRt.childCount; i++)
+        {
+            var tmp = contentRt.GetChild(i).GetComponentInChildren<TextMeshProUGUI>();
+            if (tmp != null)
+                tmp.ForceMeshUpdate(true);
+        }
+
         LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
-        scroll.verticalNormalizedPosition = 1f;
 
-        CreateBackButton(panel.transform);
+        if (scroll != null)
+            scroll.verticalNormalizedPosition = 1f;
+    }
+
+    private static IEnumerator FinalizeScrollAfterTmpLayout(ScrollRect scroll, RectTransform contentRt)
+    {
+        yield return null;
+        yield return new WaitForEndOfFrame();
+        RebuildScrollContent(scroll, contentRt);
     }
 
     private void CreateMathArticlesButton(Transform panelRoot, Transform canvasTransform)
@@ -200,8 +237,9 @@ public class LevelSelectController : MonoBehaviour
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(panelRoot, false);
         bool tablet = DeviceLayout.IsTabletLike();
-        rt.anchorMin = new Vector2(0.5f, tablet ? 0.81f : 0.8f);
-        rt.anchorMax = new Vector2(0.5f, tablet ? 0.81f : 0.8f);
+        // Above scroll region (see DeviceLayout.LevelSelectScrollAnchorMax).
+        rt.anchorMin = new Vector2(0.5f, tablet ? 0.84f : 0.83f);
+        rt.anchorMax = new Vector2(0.5f, tablet ? 0.84f : 0.83f);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.sizeDelta = new Vector2(tablet ? 620f : 560f, tablet ? 68f : 62f);
         rt.anchoredPosition = Vector2.zero;
@@ -230,6 +268,8 @@ public class LevelSelectController : MonoBehaviour
         mathTipsTmp.fontSize = tablet ? 32 : 28;
         mathTipsTmp.alignment = TextAlignmentOptions.Center;
         mathTipsTmp.color = new Color(0.9f, 0.96f, 1f, 1f);
+        mathTipsTmp.textWrappingMode = TextWrappingModes.Normal;
+        mathTipsTmp.overflowMode = TextOverflowModes.Overflow;
         CopyFontFromAny(mathTipsTmp);
         LocalizationManager.ApplyTextDirection(mathTipsTmp);
 
