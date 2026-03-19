@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour
     private void Awake()
     {
         // Keep things single-scene: if another instance somehow appears, destroy it.
-        if (FindObjectsByType<LevelManager>(FindObjectsSortMode.None).Length > 1)
+        if (FindObjectsByType<LevelManager>().Length > 1)
         {
             Destroy(gameObject);
             return;
@@ -59,10 +59,10 @@ public class LevelManager : MonoBehaviour
 
     private void SetupReferences()
     {
-        functionPlotter = FindFirstObjectByType<FunctionPlotter>();
-        curveRenderer = FindFirstObjectByType<LineRendererUI>();
-        derivRenderer = FindFirstObjectByType<DerivRendererUI>();
-        gridRenderer = FindFirstObjectByType<GridRendererUI>();
+        functionPlotter = FindAnyObjectByType<FunctionPlotter>();
+        curveRenderer = FindAnyObjectByType<LineRendererUI>();
+        derivRenderer = FindAnyObjectByType<DerivRendererUI>();
+        gridRenderer = FindAnyObjectByType<GridRendererUI>();
 
         if (functionPlotter == null || curveRenderer == null || derivRenderer == null || gridRenderer == null)
         {
@@ -140,15 +140,15 @@ public class LevelManager : MonoBehaviour
         if (storyText != null)
             return;
 
-        var canvas = FindFirstObjectByType<Canvas>();
+        var canvas = FindAnyObjectByType<Canvas>();
         if (canvas == null)
         {
             Debug.LogWarning("LevelManager: Could not find Canvas. Story text will not be created.");
             return;
         }
 
-        // Grab font/material from an existing on-screen TMP before we add StoryText (avoids FindFirstObjectByType picking the new empty label).
-        var fontSource = FindFirstObjectByType<TextMeshProUGUI>();
+        // Copy font from an existing scene TMP before we add StoryText (so the new label is not the one we sample).
+        var fontSource = FindAnyObjectByType<TextMeshProUGUI>();
 
         var storyGo = new GameObject("StoryText");
         storyGo.transform.SetParent(canvas.transform, false);
@@ -165,6 +165,9 @@ public class LevelManager : MonoBehaviour
             if (fontSource.fontSharedMaterial != null)
                 tmp.fontSharedMaterial = fontSource.fontSharedMaterial;
         }
+
+        if (tmp.font == null && TMP_Settings.defaultFontAsset != null)
+            tmp.font = TMP_Settings.defaultFontAsset;
 
         var rt = tmp.rectTransform;
         rt.anchorMin = new Vector2(0.5f, 1f);
@@ -190,7 +193,7 @@ public class LevelManager : MonoBehaviour
         }
 
         // Fallback: first Image with a sprite.
-        var allImages = FindObjectsByType<Image>(FindObjectsSortMode.None);
+        var allImages = FindObjectsByType<Image>();
         foreach (var img in allImages)
         {
             if (img != null && img.sprite != null)

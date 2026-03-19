@@ -14,7 +14,7 @@ public class LevelSelectController : MonoBehaviour
 
     private void Start()
     {
-        var canvas = FindFirstObjectByType<Canvas>();
+        var canvas = FindAnyObjectByType<Canvas>();
         if (canvas == null)
         {
             Debug.LogError("LevelSelectController: No Canvas in scene.");
@@ -78,9 +78,11 @@ public class LevelSelectController : MonoBehaviour
 
     private static void CopyFontFromAny(TextMeshProUGUI target)
     {
-        var any = FindFirstObjectByType<TextMeshProUGUI>();
+        var any = FindAnyObjectByType<TextMeshProUGUI>();
         if (any != null && any != target && any.font != null)
             target.font = any.font;
+        if (target.font == null && TMP_Settings.defaultFontAsset != null)
+            target.font = TMP_Settings.defaultFontAsset;
     }
 
     private void CreateLevelButton(Transform parent, string label, UnityAction onClick)
