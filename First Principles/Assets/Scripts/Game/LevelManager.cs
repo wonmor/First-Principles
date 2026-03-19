@@ -198,9 +198,8 @@ public class LevelManager : MonoBehaviour
         if (stageHudText != null && stageHudText.transform.parent != null)
             stageHudText.transform.parent.gameObject.SetActive(false);
 
-        functionPlotter.functionType = FunctionType.Power;
         functionPlotter.transA = 1f;
-        functionPlotter.transK = 0.35f;
+        functionPlotter.transK = 1f;
         functionPlotter.transC = 0f;
         functionPlotter.transD = 0f;
         functionPlotter.power = 2;
@@ -210,6 +209,7 @@ public class LevelManager : MonoBehaviour
         functionPlotter.xEnd = 12f;
         functionPlotter.step = 0.06f;
         functionPlotter.SetEquationExtraSuffix("");
+        functionPlotter.SetCustomExpression("x^2");
 
         if (curveRenderer != null)
         {
@@ -227,13 +227,18 @@ public class LevelManager : MonoBehaviour
         if (riemannRenderer != null)
             riemannRenderer.ClearStrips();
 
-        var transGo = GameObject.Find("TransButton");
-        var scaleGo = GameObject.Find("ScaleButton");
-        LayoutCalculatorToolButtons(transGo, scaleGo);
-
         var canvas = FindAnyObjectByType<Canvas>();
         var safe = canvas != null ? MobileUiRoots.GetSafeContentParent(canvas.transform) as RectTransform : null;
         var hintParent = safe != null ? safe : canvas?.transform as RectTransform;
+        float bridgeControls = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset : 22f;
+        float transRowBottom = bridgeControls + 74f;
+
+        GraphCalculatorEquationPanel.Ensure(hintParent, functionPlotter, FindPrimaryEquationTmp(), transRowBottom + 102f, 94f);
+
+        var transGo = GameObject.Find("TransButton");
+        var scaleGo = GameObject.Find("ScaleButton");
+        LayoutCalculatorToolButtons(transGo, scaleGo, transRowBottom);
+
         TextMeshProUGUI paramHint = null;
         if (hintParent != null && GameObject.Find("FaxasGraphParamHint") == null)
         {
@@ -244,7 +249,7 @@ public class LevelManager : MonoBehaviour
             hrt.anchorMax = new Vector2(0.5f, 0f);
             hrt.pivot = new Vector2(0.5f, 0f);
             bool tablet = DeviceLayout.IsTabletLike();
-            float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset + 200f : 210f;
+            float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset + 312f : 318f;
             hrt.anchoredPosition = new Vector2(0f, up);
             hrt.sizeDelta = new Vector2(tablet ? 960f : 860f, tablet ? 118f : 108f);
 
@@ -276,12 +281,11 @@ public class LevelManager : MonoBehaviour
         if (controlsHintText != null)
         {
             controlsHintText.text =
-                "<color=#7a8399>Faxas-style graph</color>  <b>Trans</b> <color=#5c6577>transforms</color>  ·  " +
-                "<b>Scale</b> <color=#5c6577>zoom ±</color>  ·  <b>Pinch</b>  ·  <b>Back</b> menu";
+                "<color=#7a8399>Faxas-style</color>  <b>Type f(u)</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>Pinch</b>  ·  <b>Back</b>";
         }
     }
 
-    private static void LayoutCalculatorToolButtons(GameObject transGo, GameObject scaleGo)
+    private static void LayoutCalculatorToolButtons(GameObject transGo, GameObject scaleGo, float anchoredBottomY)
     {
         var canvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
         if (canvas == null)
@@ -293,7 +297,7 @@ public class LevelManager : MonoBehaviour
             return;
 
         bool tablet = DeviceLayout.IsTabletLike();
-        float bottom = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset + 74f : 108f;
+        float bottom = anchoredBottomY;
         float w = tablet ? 210f : 198f;
         float h = tablet ? 100f : 92f;
 

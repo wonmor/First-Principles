@@ -22,11 +22,11 @@ public static class GraphCalculatorEquationPanel
         var root = new GameObject(RootName);
         var rt = root.AddComponent<RectTransform>();
         rt.SetParent(parent, false);
-        rt.anchorMin = new Vector2(0f, 0f);
-        rt.anchorMax = new Vector2(1f, 0f);
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
         rt.pivot = new Vector2(0.5f, 0f);
         rt.anchoredPosition = new Vector2(0f, bottomY);
-        rt.sizeDelta = new Vector2(0f, panelHeight);
+        rt.sizeDelta = new Vector2(w, panelHeight);
 
         var bg = root.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(bg);
@@ -103,6 +103,7 @@ public static class GraphCalculatorEquationPanel
         input.textViewport = tArt;
         input.lineType = TMP_InputField.LineType.SingleLine;
         input.characterValidation = TMP_InputField.CharacterValidation.None;
+        input.text = plotter.customExpression;
 
         var statusGo = new GameObject("Status");
         var srt = statusGo.AddComponent<RectTransform>();

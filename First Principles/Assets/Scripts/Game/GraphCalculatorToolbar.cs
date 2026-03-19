@@ -134,6 +134,7 @@ public class GraphCalculatorToolbar : MonoBehaviour
         hint.alignment = TextAlignmentOptions.Center;
         hint.text =
             $"<b>Faxas Instruments-style graphing</b>\n" +
+            $"<size=88%><color=#c4d0e8>Type <b>f(u)</b> below (variable <b>x</b> in the box = inner u). Then:</color></size>\n" +
             $"<size=92%><b>Trans</b> → {names[paramIndex]} · double-tap <b>+</b> · hold <b>−</b> · " +
             $"<b>Scale</b> zoom in / hold zoom out · two-finger <b>pinch</b></size>\n" +
             $"<size=88%><color=#a8b2d1>A={plot.transA:0.##} &nbsp;k={plot.transK:0.##} &nbsp;C={plot.transC:0.##} &nbsp;D={plot.transD:0.##} &nbsp;&nbsp;" +
