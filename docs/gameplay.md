@@ -57,8 +57,8 @@ Legacy **Trans** / **Scale** tuning buttons on the Game UI are **disabled**; tun
 ## Level flow
 
 1. **Menu** — Entry and scene fade; footer shows **Credits** (GAME GENESIS × ORCH AEROSPACE), version, proprietary / initiative line, and **Unity** trademark notice ([`CREDITS.md`](../CREDITS.md) for full attribution).
-2. **LevelSelect** — `LevelSelectController` builds a **scrollable** list from **`GameLevelCatalog.DisplayNames`**, plus a **Math tips & snippets** button that opens **`MathArticlesOverlay`** (`LearningArticleLibrary`). Choosing a level calls **`LevelSelection.SetSelectedLevel`** and loads **Game**.
-3. **Game** — `LevelManager` reads **`LevelSelection.ConsumeSelectedLevel`**, applies the level theme to **`FunctionPlotter`**, regenerates obstacles, and spawns / resets the player.
+2. **LevelSelect** — `LevelSelectController` builds a **scrollable** list from **`GameLevelCatalog.DisplayNames`**, plus **Math tips & snippets** (`MathArticlesOverlay` / `LearningArticleLibrary`). Choosing a level calls **`LevelSelection.SetSelectedLevel`** and loads **Game**. A bottom **SceneCreditsFooter** matches Menu copy (`SceneCreditsFooter.cs`).
+3. **Game** — `LevelManager` reads **`LevelSelection.ConsumeSelectedLevel`**, applies the level theme to **`FunctionPlotter`**, regenerates obstacles, and spawns / resets the player. The same **SceneCreditsFooter** strip appears above the controls hint bar.
 
 ## Spawn position
 
@@ -72,5 +72,6 @@ The generator picks a **spawn column** among the “safe start” columns where 
 ## UI polish
 
 - **Story** text appears at the top with the **level name** and fades (TMP).
+- **Math concepts** (top-right during play) opens the same scrollable **LearningArticleLibrary** reader as Level select’s *Math tips & snippets* — including an on-device explanation of how the main graph, derivative, platforms, Riemann strips, and stages map to calculus.
 - **Controls** hint bar at the bottom shows move / jump hints.
 - **Stage** panel uses a dark “glass” backing and accent strip consistent with the Limbo-like aesthetic.

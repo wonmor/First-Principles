@@ -8,8 +8,23 @@ public static class LearningArticleLibrary
     /// <summary>Large verbatim TMP block; embedded newlines are meaningful for paragraph breaks.</summary>
     public static string GetLevelSelectArticleRichText()
     {
-        return @"<b><size=120%>Math tips & snippets</size></b>
-<size=90%>Short reads tied to the graph + platformer stages. Tap the dark backdrop or Close when done.</size>
+        return @"<b><size=120%>Math concepts — in-game reader</size></b>
+<size=90%>Use <b>Math concepts</b> while playing, or <b>Math tips & snippets</b> on Level select — same scrollable notes. Tap the dark backdrop or <b>Close</b> to dismiss.</size>
+
+<b><size=115%>How this game teaches calculus (read the graph while you play)</size></b>
+<size=92%>
+• <b>Main curve</b> — the thick path on the Cartesian grid is y = f(x) for this stage. Your character tries to stand on platforms that follow that shape. The <b>Equation</b> label (when visible) names the rule being plotted.
+
+• <b>Derivative curve f′(x)</b> — drawn as a second graph; values come from a <i>numerical</i> derivative (sampled slopes). On many levels, <b>where f′ is large enough you get solid ground</b>; where it falls short you can fall through — the platformer is tied to slope logic.
+
+• <b>Stages & “pops”</b> — the <b>Stage</b> HUD counts story beats. As you move right, the derivative visualization can <i>pop</i> or recolor at set x-values (like curtain lifts between ideas in a lesson).
+
+• <b>Riemann sums / area</b> — some levels shade rectangles or build <i>stair</i> platforms from left-, right-, or midpoint-rule samples. That pictures ∫ f(x) dx as the limit of Σ f(x*)·Δx.
+
+• <b>Story text</b> — the banner at the top ties each level to the math (series, polar, physics metaphors, etc.). Pause and read; it fades so the run stays readable.
+
+Everything below is a <b>topic glossary</b> you can skim between deaths or after finishing a graph.
+</size>
 
 <b><size=110%>1. Derivatives = slope & rate</size></b>
 The derivative f'(x) measures how steeply f(x) rises or falls. In physics it is often a <i>rate</i>: how fast position changes (velocity), how fast temperature changes along a bar, etc. In this game, the derivative helps decide where the ground exists.

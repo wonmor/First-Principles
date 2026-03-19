@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Runtime scroll overlay for <see cref="LearningArticleLibrary"/> (level select etc.).
+/// Full-screen scroll overlay for <see cref="LearningArticleLibrary"/> — opened from <b>Level select</b>
+/// (<i>Math tips &amp; snippets</i>) or from the <b>Game</b> scene (<i>Math concepts</i>).
 /// </summary>
 public static class MathArticlesOverlay
 {

@@ -12,7 +12,7 @@ using UnityEngine.UI;
 // Flow (single-scene Game):
 //   1. Start() → SetupReferences() finds FunctionPlotter / renderers / plane, adds
 //      GraphObstacleGenerator & DerivativePopAnimator if missing, creates runtime UI
-//      (ObstaclesRoot, player, story TMP, HUD), Riemann overlay helper, touch controls.
+//      (ObstaclesRoot, player, story TMP, HUD, Math concepts overlay button), Riemann helper, touch.
 //   2. BuildSampleLevels() populates `levels`. CRITICAL: index order must match
 //      GameLevelCatalog.DisplayNames (level select uses the same indices).
 //   3. LoadLevel(i) → ApplyLevelTheme(def) pushes params into FunctionPlotter and HUD
@@ -297,6 +297,8 @@ public class LevelManager : MonoBehaviour
             stageHudText = tmp;
         }
 
+        CreateMathConceptsButtonIfNeeded(canvas, equationStyle);
+
         if (controlsHintText == null)
         {
             bool tabletUi = DeviceLayout.IsTabletLike();
@@ -345,10 +347,54 @@ public class LevelManager : MonoBehaviour
             controlsHintText = tmp;
         }
 
-        CreateSceneCreditsFooterStrip(canvas, equationStyle, panelSprite);
+        CreateSceneCreditsFooterStrip(canvas, equationStyle);
     }
 
-    private void CreateSceneCreditsFooterStrip(Canvas canvas, TextMeshProUGUI equationStyle, Sprite panelSprite)
+    /// <summary>Top-right control: opens <see cref="MathArticlesOverlay"/> (same body as level-select math tips).</summary>
+    private void CreateMathConceptsButtonIfNeeded(Canvas canvas, TextMeshProUGUI equationStyle)
+    {
+        if (canvas == null || GameObject.Find("MathConceptsButton") != null)
+            return;
+
+        var safe = MobileUiRoots.GetSafeContentParent(canvas.transform);
+        var parent = safe != null ? safe : canvas.transform;
+        bool tablet = DeviceLayout.IsTabletLike();
+        float topPad = DeviceLayout.PreferOnScreenGameControls ? 12f : 20f;
+
+        var go = new GameObject("MathConceptsButton");
+        var rt = go.AddComponent<RectTransform>();
+        rt.SetParent(parent, false);
+        rt.anchorMin = new Vector2(1f, 1f);
+        rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(1f, 1f);
+        rt.anchoredPosition = new Vector2(-18f, -topPad);
+        rt.sizeDelta = new Vector2(tablet ? 248f : 220f, tablet ? 52f : 48f);
+
+        var img = go.AddComponent<Image>();
+        img.color = new Color(0.16f, 0.35f, 0.42f, 0.95f);
+
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(() => MathArticlesOverlay.Open(canvas.transform));
+
+        var textGo = new GameObject("Text");
+        var trt = textGo.AddComponent<RectTransform>();
+        trt.SetParent(go.transform, false);
+        trt.anchorMin = Vector2.zero;
+        trt.anchorMax = Vector2.one;
+        trt.offsetMin = new Vector2(8f, 4f);
+        trt.offsetMax = new Vector2(-8f, -4f);
+
+        var tmp = textGo.AddComponent<TextMeshProUGUI>();
+        tmp.text = "Math concepts";
+        tmp.fontSize = tablet ? 24 : 21;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = new Color(0.92f, 0.97f, 1f, 1f);
+        tmp.raycastTarget = false;
+        ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.48f);
+    }
+
+    private void CreateSceneCreditsFooterStrip(Canvas canvas, TextMeshProUGUI equationStyle)
     {
         if (canvas == null || GameObject.Find("SceneCreditsFooter") != null)
             return;
