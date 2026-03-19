@@ -377,11 +377,12 @@ public class LevelSelectController : MonoBehaviour
         var go = new GameObject("BackButton");
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(parent, false);
-        rt.anchorMin = new Vector2(0.5f, tablet ? 0.048f : 0.055f);
-        rt.anchorMax = new Vector2(0.5f, tablet ? 0.048f : 0.055f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(tablet ? 300f : 260f, tablet ? 64f : 58f);
-        rt.anchoredPosition = Vector2.zero;
+        float margin = tablet ? 20f : 16f;
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.zero;
+        rt.pivot = Vector2.zero;
+        rt.sizeDelta = new Vector2(tablet ? 220f : 195f, tablet ? 50f : 46f);
+        rt.anchoredPosition = new Vector2(margin, margin);
 
         var img = go.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
@@ -404,7 +405,7 @@ public class LevelSelectController : MonoBehaviour
 
         backTmp = textGo.AddComponent<TextMeshProUGUI>();
         backTmp.text = LocalizationManager.Get("ui.back_menu", "Back to Menu");
-        backTmp.fontSize = tablet ? 30 : 26;
+        backTmp.fontSize = tablet ? 23 : 21;
         backTmp.alignment = TextAlignmentOptions.Center;
         backTmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(backTmp);
