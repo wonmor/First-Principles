@@ -220,13 +220,13 @@ public class FunctionPlotter : MonoBehaviour
 
             // Engineering / applied: u = transK*(x - transD); `power` ↔ oscillation index; `baseN` ↔ decay strength.
             FunctionType.DampedOscillator => DampedOscillatorY(u, transA, transC, power, baseN),
-            FunctionType.HyperbolicCosine => transA * (Mathf.Cosh(Mathf.Clamp(u, -8f, 8f)) + transC),
+            FunctionType.HyperbolicCosine => transA * ((float)System.Math.Cosh(Mathf.Clamp(u, -8f, 8f)) + transC),
             FunctionType.FullWaveRectifiedSine => transA * (Mathf.Abs(Mathf.Sin(u)) + transC),
 
             // AP Calculus BC & polar: u = transK*(x - transD) plays the role of θ in polar captions.
             FunctionType.Arctangent => transA * Mathf.Atan(u) + transC,
             FunctionType.Logistic => LogisticY(u, transA, transC, baseN),
-            FunctionType.HyperbolicSine => transA * Mathf.Sinh(Mathf.Clamp(u, -4f, 4f)) + transC,
+            FunctionType.HyperbolicSine => transA * (float)System.Math.Sinh(Mathf.Clamp(u, -4f, 4f)) + transC,
             FunctionType.ExponentialDecay => transA * Mathf.Exp(-Mathf.Max(0.02f, transK) * Mathf.Abs(u)) + transC,
             FunctionType.PolarCardioid => transA * (1f + Mathf.Cos(u)) + transC,
             FunctionType.PolarRose => transA * Mathf.Cos(Mathf.Max(1, power) * u) + transC,

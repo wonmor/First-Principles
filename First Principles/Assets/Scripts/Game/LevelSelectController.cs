@@ -210,7 +210,7 @@ public class LevelSelectController : MonoBehaviour
         footerTmp = go.AddComponent<TextMeshProUGUI>();
         footerTmp.text = SceneCreditsFooter.BuildCompactRichText();
         footerTmp.richText = true;
-        footerTmp.enableWordWrapping = true;
+        footerTmp.textWrappingMode = TextWrappingModes.Normal;
         footerTmp.fontSize = tablet ? 17 : 15;
         footerTmp.alignment = TextAlignmentOptions.Bottom;
         footerTmp.color = new Color(0.9f, 0.91f, 0.94f, 0.95f);
@@ -299,7 +299,7 @@ public class LevelSelectController : MonoBehaviour
         levelSelectLangTmp.fontSize = tablet ? 20 : 18;
         levelSelectLangTmp.alignment = TextAlignmentOptions.Center;
         levelSelectLangTmp.color = new Color(0.93f, 0.96f, 1f, 1f);
-        levelSelectLangTmp.enableWordWrapping = true;
+        levelSelectLangTmp.textWrappingMode = TextWrappingModes.Normal;
         CopyFontFromAny(levelSelectLangTmp);
         RefreshLevelSelectLanguageLabel();
     }

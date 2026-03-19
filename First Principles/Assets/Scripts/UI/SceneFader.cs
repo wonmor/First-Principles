@@ -202,7 +202,7 @@ public class SceneFader : MonoBehaviour
         faxasMenuButtonText.fontSize = tablet ? 26 : 22;
         faxasMenuButtonText.alignment = TextAlignmentOptions.Center;
         faxasMenuButtonText.color = new Color(0.92f, 0.98f, 1f, 1f);
-        faxasMenuButtonText.enableWordWrapping = true;
+        faxasMenuButtonText.textWrappingMode = TextWrappingModes.Normal;
         faxasMenuButtonText.richText = true;
         LocalizationManager.ApplyTextDirection(faxasMenuButtonText);
         var refTmp = play.GetComponentInChildren<TextMeshProUGUI>();
@@ -265,7 +265,7 @@ public class SceneFader : MonoBehaviour
         menuLanguageButtonLabel.fontSize = tablet ? 22 : 19;
         menuLanguageButtonLabel.alignment = TextAlignmentOptions.Center;
         menuLanguageButtonLabel.color = new Color(0.93f, 0.96f, 1f, 1f);
-        menuLanguageButtonLabel.enableWordWrapping = true;
+        menuLanguageButtonLabel.textWrappingMode = TextWrappingModes.Normal;
 
         var refTmp = Object.FindAnyObjectByType<TextMeshProUGUI>();
         if (refTmp != null && refTmp.font != null)

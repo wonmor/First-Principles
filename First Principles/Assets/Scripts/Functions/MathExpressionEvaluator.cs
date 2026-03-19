@@ -304,11 +304,11 @@ public static class MathExpressionEvaluator
         {
             // identifiers: x, pi, e, functions
             if (MatchInsensitive("sinh"))
-                return Mathf.Sinh(ClampArg(ExpectFn1Arg(), 4f));
+                return (float)System.Math.Sinh(ClampArg(ExpectFn1Arg(), 4f));
             if (MatchInsensitive("cosh"))
-                return Mathf.Cosh(ClampArg(ExpectFn1Arg(), 8f));
+                return (float)System.Math.Cosh(ClampArg(ExpectFn1Arg(), 8f));
             if (MatchInsensitive("tanh"))
-                return Mathf.Tanh(ClampArg(ExpectFn1Arg(), 8f));
+                return (float)System.Math.Tanh(ClampArg(ExpectFn1Arg(), 8f));
             if (MatchInsensitive("asin"))
                 return Mathf.Asin(ExpectFn1Arg());
             if (MatchInsensitive("acos"))

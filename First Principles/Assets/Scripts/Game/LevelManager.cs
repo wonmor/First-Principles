@@ -351,7 +351,7 @@ public class LevelManager : MonoBehaviour
 
             paramHint = hintGo.AddComponent<TextMeshProUGUI>();
             paramHint.richText = true;
-            paramHint.enableWordWrapping = true;
+            paramHint.textWrappingMode = TextWrappingModes.Normal;
             paramHint.fontSize = tablet ? 22 : 19;
             paramHint.alignment = TextAlignmentOptions.Top;
             paramHint.color = new Color(0.9f, 0.93f, 0.98f, 0.96f);
@@ -486,7 +486,7 @@ public class LevelManager : MonoBehaviour
         tmp.fontSizeMax = 34;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.richText = true;
-        tmp.enableWordWrapping = true;
+        tmp.textWrappingMode = TextWrappingModes.Normal;
         ApplyPrimaryUiTypography(tmp, FindPrimaryEquationTmp(), outlineWidth: 0.06f, outlineAlpha: 0.35f);
 
         var rt = tmp.rectTransform;
@@ -567,7 +567,7 @@ public class LevelManager : MonoBehaviour
 
             var tmp = textGo.AddComponent<TextMeshProUGUI>();
             tmp.richText = true;
-            tmp.enableWordWrapping = false;
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
             tmp.fontSize = 28;
             tmp.enableAutoSizing = true;
             tmp.fontSizeMin = 18;
@@ -614,9 +614,8 @@ public class LevelManager : MonoBehaviour
 
             var tmp = textGo.AddComponent<TextMeshProUGUI>();
             tmp.richText = true;
-            tmp.enableWordWrapping = false;
+            tmp.textWrappingMode = TextWrappingModes.Normal;
             tmp.fontSize = 21;
-            tmp.enableWordWrapping = true;
             tmp.alignment = TextAlignmentOptions.Midline;
             tmp.color = new Color(0.82f, 0.85f, 0.92f, 0.92f);
             tmp.characterSpacing = 0.25f;
@@ -700,7 +699,7 @@ public class LevelManager : MonoBehaviour
         var ftmp = footerGo.AddComponent<TextMeshProUGUI>();
         ftmp.text = SceneCreditsFooter.BuildCompactRichText();
         ftmp.richText = true;
-        ftmp.enableWordWrapping = true;
+        ftmp.textWrappingMode = TextWrappingModes.Normal;
         ftmp.fontSize = tabletUi ? 16 : 14;
         ftmp.alignment = TextAlignmentOptions.Bottom;
         ftmp.color = new Color(0.88f, 0.89f, 0.92f, 0.9f);

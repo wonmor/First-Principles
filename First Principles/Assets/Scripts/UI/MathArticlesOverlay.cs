@@ -144,7 +144,7 @@ public static class MathArticlesOverlay
         body.lineSpacing = 4f;
         body.alignment = TextAlignmentOptions.TopLeft;
         body.color = new Color(0.92f, 0.93f, 0.96f, 1f);
-        body.enableWordWrapping = true;
+        body.textWrappingMode = TextWrappingModes.Normal;
         body.richText = true;
         body.margin = new Vector4(12f, 12f, 12f, 12f);
         CopyFont(body);
@@ -156,7 +156,7 @@ public static class MathArticlesOverlay
         var le = tmpGo.AddComponent<LayoutElement>();
         le.minWidth = 1f;
 
-        root.SetAsLastSibling();
+        root.transform.SetAsLastSibling();
     }
 
     private static void RefreshCloseLabel()
