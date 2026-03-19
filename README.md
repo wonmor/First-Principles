@@ -13,7 +13,7 @@ The project pairs a **Cartesian graph UI** (functions + numeric derivatives) wit
 
 **Localization:** UI strings and level titles in **English, Arabic, French, Chinese (Simplified), Korean, Japanese, German, and Spanish** (`Assets/Resources/Localization/*.txt`). Menu & level select include a language chip; choice is saved in `PlayerPrefs`. Long level stories default to English unless you add optional `story.N` keys per locale. For Arabic/CJK rendering in TMP, add font fallbacks (see `Assets/Resources/Localization/README.md`).
 
-**Input:** The **[Input System](https://docs.unity3d.com/Packages/com.unity.inputsystem@latest)** package is enabled (`com.unity.inputsystem` in `Packages/manifest.json`; **Player → Active Input Handling → Input System Package**). See [`docs/troubleshooting.md`](docs/troubleshooting.md#input-system-new).
+**Input:** The **[Input System](https://docs.unity3d.com/Packages/com.unity.inputsystem@latest)** package is enabled (`com.unity.inputsystem` in `Packages/manifest.json`; **Player → Active Input Handling → Input System Package**). At runtime, `UiInputModuleBootstrap` replaces legacy `StandaloneInputModule` with `InputSystemUIInputModule` on each `EventSystem` so menus work without `UnityEngine.Input`. See [`docs/troubleshooting.md`](docs/troubleshooting.md) (Input System + uGUI section).
 
 **Links:** [Demo (YouTube)](https://www.youtube.com/watch?v=yo540yl4Xhs) · [Legacy wiki](https://github.com/GameGenesis/First-Principles/wiki/First-Principles-Official-Documentation) · [Promo video](https://www.youtube.com/watch?v=k0soEFAK-CQ)
 
