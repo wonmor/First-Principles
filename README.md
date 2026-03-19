@@ -5,9 +5,11 @@ Developed by [Rayan Kaissi](https://github.com/GameGenesis) and [John Seong](htt
 
 ---
 
-## Alpha build 0.3+
+## Beta build 1.0
 
-The project pairs a **Cartesian graph UI** (functions + numeric derivatives) with **Limbo-style** gameplay: **platforms** follow the curve and **gaps / hazards** follow derivative rules, with **staged progression** (HUD), **level select**, and typography matched to the main equation label.
+The project pairs a **Cartesian graph UI** (functions + numeric derivatives) with **Limbo-style** gameplay: **platforms** follow the curve and **gaps / hazards** follow derivative rules, with **staged progression** (HUD), **level select**, primer plus **Taylor / Maclaurin / series / multivar** levels, and typography matched to the main equation label.
+
+**Player build version** (Unity **Project Settings → Player**): **1.0** (`bundleVersion`).
 
 **Links:** [Demo (YouTube)](https://www.youtube.com/watch?v=yo540yl4Xhs) · [Legacy wiki](https://github.com/GameGenesis/First-Principles/wiki/First-Principles-Official-Documentation) · [Promo video](https://www.youtube.com/watch?v=k0soEFAK-CQ)
 

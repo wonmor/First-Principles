@@ -404,9 +404,39 @@ public class LevelManager : MonoBehaviour
     {
         levels.Clear();
 
-        // Stage parameters are tuned to fit within the current UI grid range.
+        var primerStageColors = new[]
+        {
+            new Color(0.78f, 0.62f, 1f, 1f),
+            new Color(1f, 0.84f, 0.4f, 1f),
+            new Color(0.5f, 0.86f, 1f, 1f),
+            new Color(1f, 0.55f, 0.72f, 1f)
+        };
+
         levels.Add(MakeLevel(
             GameLevelCatalog.DisplayNames[0],
+            FunctionType.Power,
+            curveColor: new Color(0.96f, 0.82f, 0.45f, 1f),
+            derivativeColor: new Color(0.55f, 0.78f, 1f, 1f),
+            transA: 0.38f,
+            transK: 0.42f,
+            transC: -1.85f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<color=#c4b5fd><b>Derivative</b></color> = slope of the tangent — how fast <b>f(x)</b> rises or falls at each step.\n\n" +
+                "<color=#fde047>Gold light</color> traces your path; <color=#7dd3fc>ice-blue</color> is f'(x) sculpting <i>where the floor exists</i>.\n\n" +
+                "<size=92%><color=#a8b2d1>Where f'(x) clears the rule, platforms hold; where it falls short, the void opens. Each bright <b>pop</b> is another act in the analysis you're walking through.</color></size>",
+            derivativePopTriggerCountOverride: 4,
+            applyGridTheming: true,
+            gridCenter: new Color(0.55f, 0.45f, 0.92f, 0.4f),
+            gridOutside: new Color(0.4f, 0.36f, 0.62f, 0.11f),
+            levelStageColors: primerStageColors,
+            storyPauseSecondsOverride: 2.95f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[1],
             FunctionType.Power,
             curveColor: new Color(0.9f, 0.3f, 1f, 1f),
             derivativeColor: new Color(1f, 0.76f, 0.1f, 1f),
@@ -421,7 +451,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[1],
+            GameLevelCatalog.DisplayNames[2],
             FunctionType.Sine,
             curveColor: new Color(0.2f, 1f, 0.7f, 1f),
             derivativeColor: new Color(0.2f, 0.8f, 1f, 1f),
@@ -436,7 +466,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[2],
+            GameLevelCatalog.DisplayNames[3],
             FunctionType.Cosine,
             curveColor: new Color(1f, 0.6f, 0.2f, 1f),
             derivativeColor: new Color(0.9f, 0.2f, 0.6f, 1f),
@@ -451,7 +481,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[3],
+            GameLevelCatalog.DisplayNames[4],
             FunctionType.Absolute,
             curveColor: new Color(0.4f, 0.7f, 1f, 1f),
             derivativeColor: new Color(1f, 0.15f, 0.15f, 1f),
@@ -463,6 +493,111 @@ public class LevelManager : MonoBehaviour
             baseN: 2,
             story:
                 "The absolute curve folds into a single path. Where the traveler crosses the turning point, the derivative flips—and so does the ground."
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[5],
+            FunctionType.MaclaurinExpSeries,
+            curveColor: new Color(0.3f, 0.95f, 0.65f, 1f),
+            derivativeColor: new Color(0.95f, 0.45f, 0.25f, 1f),
+            transA: 0.48f,
+            transK: 0.14f,
+            transC: -2.05f,
+            transD: 0f,
+            power: 10,
+            baseN: 2,
+            story:
+                "<color=#86efac>Taylor polynomials</color> hug a smooth function near a point. <b>Maclaurin</b> is Taylor centered at <b>0</b>.\n\n" +
+                "Here the trail is a high-degree partial sum of <b>e^u</b> — polynomials stacking toward the infinite series that rebuilds the exponential.",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.25f, 0.55f, 0.42f, 0.38f),
+            gridOutside: new Color(0.2f, 0.35f, 0.32f, 0.12f),
+            storyPauseSecondsOverride: 2.35f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[6],
+            FunctionType.MaclaurinSinSeries,
+            curveColor: new Color(0.45f, 0.78f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.5f, 0.85f, 1f),
+            transA: 0.52f,
+            transK: 0.52f,
+            transC: -2f,
+            transD: 0f,
+            power: 8,
+            baseN: 2,
+            story:
+                "<color=#7dd3fc>Odd powers of u</color> alternate signs — that is the Maclaurin DNA of <b>sin(u)</b>.\n\n" +
+                "This graph is a truncated Taylor stack climbing toward the endless sine wave; every extra term is another promise the series keeps near 0.",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.28f, 0.42f, 0.65f, 0.38f),
+            gridOutside: new Color(0.2f, 0.3f, 0.48f, 0.11f),
+            storyPauseSecondsOverride: 2.3f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[7],
+            FunctionType.GeometricSeriesPartial,
+            curveColor: new Color(0.85f, 0.7f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.35f, 0.55f, 1f),
+            transA: 0.42f,
+            transK: 0.038f,
+            transC: -2.1f,
+            transD: 0.5f,
+            power: 16,
+            baseN: 2,
+            story:
+                "A <color=#f5d0fe>geometric series</color> stacks powers of <b>u</b>. Inside its radius of convergence the tail shrinks — partial sums <i>stabilize</i> toward a limit.\n\n" +
+                "Feel how the derivative of that finite stack reshapes the terrain as you move along <b>x</b>.",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.62f, 0.35f, 0.72f, 0.36f),
+            gridOutside: new Color(0.42f, 0.28f, 0.5f, 0.11f),
+            storyPauseSecondsOverride: 2.25f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[8],
+            FunctionType.MultivarSaddleSlice,
+            curveColor: new Color(0.5f, 0.85f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.65f, 0.2f, 1f),
+            transA: 0.11f,
+            transK: 0.42f,
+            transC: 2.15f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "Think <b>z = x² − y₀²</b> with <b>y₀</b> fixed — a <color=#38bdf8>slice</color> through a <i>saddle surface</i>.\n\n" +
+                "The x-derivative still reads the landscape: multivariable ideas, one-variable motion.",
+            derivativePopTriggerCountOverride: 4,
+            applyGridTheming: true,
+            gridCenter: new Color(0.22f, 0.42f, 0.62f, 0.4f),
+            gridOutside: new Color(0.18f, 0.3f, 0.45f, 0.12f),
+            storyPauseSecondsOverride: 2.5f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[9],
+            FunctionType.MultivarParaboloidSlice,
+            curveColor: new Color(1f, 0.92f, 0.55f, 1f),
+            derivativeColor: new Color(0.55f, 0.35f, 1f, 1f),
+            transA: 0.095f,
+            transK: 0.4f,
+            transC: 1.75f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "Now <b>z = x² + y₀²</b>: an <color=#fde047>elliptic paraboloid</color>. Freezing <b>y₀</b> traces a <i>bowl</i> in your plane.\n\n" +
+                "Gradients in multivar calculus point uphill; here the slice still shows how steeply the bowl climbs as you sprint.",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.55f, 0.48f, 0.28f, 0.38f),
+            gridOutside: new Color(0.4f, 0.35f, 0.22f, 0.11f),
+            storyPauseSecondsOverride: 2.35f
         ));
     }
 
@@ -477,7 +612,13 @@ public class LevelManager : MonoBehaviour
         float transD,
         int power,
         int baseN,
-        string story)
+        string story,
+        int derivativePopTriggerCountOverride = 0,
+        bool applyGridTheming = false,
+        Color gridCenter = default,
+        Color gridOutside = default,
+        Color[] levelStageColors = null,
+        float storyPauseSecondsOverride = 0f)
     {
         var def = ScriptableObject.CreateInstance<LevelDefinition>();
         def.levelName = name;
@@ -502,11 +643,31 @@ public class LevelManager : MonoBehaviour
         def.platformThicknessGrid = 0.6f;
         def.hazardHeightGrid = 0.5f;
 
-        def.stageDerivativePopColors = new List<Color>(defaultStageCount);
-        for (int i = 0; i < defaultStageCount; i++)
+        int popN = derivativePopTriggerCountOverride > 0 ? derivativePopTriggerCountOverride : defaultStageCount;
+        def.derivativePopTriggerCount = derivativePopTriggerCountOverride;
+        def.applyGridTheming = applyGridTheming;
+        if (applyGridTheming)
         {
-            float t = defaultStageCount == 1 ? 0f : (float)i / (defaultStageCount - 1);
-            def.stageDerivativePopColors.Add(Color.Lerp(derivativeColor, Color.white, 0.35f * t));
+            def.gridCenterLineTheming = gridCenter;
+            def.gridOutsideLineTheming = gridOutside;
+        }
+
+        if (storyPauseSecondsOverride > 0.01f)
+            def.storyPauseSeconds = storyPauseSecondsOverride;
+
+        def.stageDerivativePopColors = new List<Color>(popN);
+        if (levelStageColors != null && levelStageColors.Length >= popN)
+        {
+            for (int i = 0; i < popN; i++)
+                def.stageDerivativePopColors.Add(levelStageColors[i]);
+        }
+        else
+        {
+            for (int i = 0; i < popN; i++)
+            {
+                float t = popN == 1 ? 0f : (float)i / (popN - 1);
+                def.stageDerivativePopColors.Add(Color.Lerp(derivativeColor, Color.white, 0.35f * t));
+            }
         }
 
         def.storyText = story;
@@ -548,20 +709,51 @@ public class LevelManager : MonoBehaviour
         curveRenderer.color = def.curveColor;
         derivRenderer.color = def.derivativeColor;
 
-        // Stage pop setup.
-        stagePopColors = def.stageDerivativePopColors ?? new List<Color>();
-        if (stagePopColors.Count == 0)
+        int popN = def.derivativePopTriggerCount > 0 ? def.derivativePopTriggerCount : defaultStageCount;
+        var fromDef = def.stageDerivativePopColors;
+        if (fromDef != null && fromDef.Count >= popN && fromDef.Count == popN)
+            stagePopColors = new List<Color>(fromDef);
+        else if (fromDef != null && fromDef.Count >= popN)
+            stagePopColors = fromDef.GetRange(0, popN);
+        else
         {
-            stagePopColors = new List<Color>(defaultStageCount);
-            for (int i = 0; i < defaultStageCount; i++)
-                stagePopColors.Add(def.derivativeColor);
+            stagePopColors = new List<Color>(popN);
+            for (int i = 0; i < popN; i++)
+            {
+                float t = popN == 1 ? 0f : (float)i / (popN - 1);
+                stagePopColors.Add(Color.Lerp(def.derivativeColor, Color.white, 0.35f * t));
+            }
         }
 
-        stageTriggerXGrid = new List<float>(defaultStageCount);
+        stageTriggerXGrid = new List<float>(popN);
         float width = gridRenderer.gridSize.x;
-        for (int i = 1; i <= defaultStageCount; i++)
+        for (int i = 1; i <= popN; i++)
+            stageTriggerXGrid.Add((i / (float)(popN + 1)) * width);
+
+        storyMiddlePauseSeconds = def.storyPauseSeconds > 0.01f ? def.storyPauseSeconds : 1.65f;
+
+        if (gridRenderer != null)
         {
-            stageTriggerXGrid.Add((i / (float)(defaultStageCount + 1)) * width);
+            if (!gridThemeBaselineCaptured)
+            {
+                savedGridCenterLine = gridRenderer.centerLine;
+                savedGridOutsideLine = gridRenderer.outsideLine;
+                gridThemeBaselineCaptured = true;
+            }
+
+            if (def.applyGridTheming)
+            {
+                gridRenderer.centerLine = def.gridCenterLineTheming;
+                gridRenderer.outsideLine = def.gridOutsideLineTheming;
+            }
+            else
+            {
+                gridRenderer.centerLine = savedGridCenterLine;
+                gridRenderer.outsideLine = savedGridOutsideLine;
+            }
+
+            gridRenderer.enabled = false;
+            gridRenderer.enabled = true;
         }
 
         // Story.
@@ -614,7 +806,7 @@ public class LevelManager : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(storyMiddlePauseSeconds);
 
         t = 0f;
         float fadeOut = 0.35f;

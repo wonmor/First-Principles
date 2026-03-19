@@ -13,6 +13,19 @@ permalink: /gameplay/
 
 Level parameters (colors, function type, transformation coefficients, story text) are defined in code via **`LevelManager`** sample levels / **`LevelDefinition`**.
 
+### Sample level lineup (10)
+
+| # | Theme |
+|---|--------|
+| 1 | **First Principles Primer** — rich tutorial copy, aurora grid, four stage pops |
+| 2–5 | Classic **Power / Sine / Cosine / Absolute** |
+| 6 | **Maclaur partial sum of e^x** |
+| 7 | **Maclaurin partial sum of sin(x)** |
+| 8 | **Geometric series** partial sum Σu^k |
+| 9–10 | **Multivar slices** — saddle z = x² − y₀² and paraboloid z = x² + y₀² |
+
+Special levels can **tint the grid** and adjust how long story text stays on screen.
+
 ## Controls (platformer)
 
 | Input | Action |

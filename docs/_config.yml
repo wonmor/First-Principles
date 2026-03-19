@@ -1,7 +1,7 @@
 # Jekyll / GitHub Pages (publish from Settings → Pages → Branch: main, folder /docs)
 # Fix baseurl to match your repo name if different.
 title: "First Principles"
-description: "Interactive Unity graphing calculator and derivative-driven platformer — documentation"
+description: "Beta 1.0 — Interactive Unity graphing calculator and derivative-driven platformer — documentation"
 url: "https://gamegenesis.github.io"
 baseurl: "/First-Principles"
 

@@ -5,7 +5,9 @@ title: Home
 
 # First Principles — documentation
 
-**First Principles** is an open-source **Unity 6** project that combines a **graphing calculator** (functions and numeric derivatives on a grid) with a **Limbo-inspired 2D platformer**: platforms and hazards are driven by the curve and its derivative, with **staged progression** and per-level themes.
+**Release: Beta 1.0**
+
+**First Principles** is an open-source **Unity 6** project that combines a **graphing calculator** (functions and numeric derivatives on a grid) with a **Limbo-inspired 2D platformer**: platforms and hazards are driven by the curve and its derivative, with **staged progression** and per-level themes (including primer, series, and multivariable slices).
 
 Developed by [Rayan Kaissi](https://github.com/GameGenesis) and [John Seong](https://github.com/wonmor) as part of *College Math For Toddlers* (MIT).
 

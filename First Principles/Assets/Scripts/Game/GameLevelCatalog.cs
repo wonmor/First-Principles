@@ -13,6 +13,7 @@ public static class GameLevelCatalog
         "Shadows of Cosine",
         "Absolute Path",
         "Maclaurin: e^x",
+        "Maclaurin: sin(x)",
         "Series: geometric tail",
         "Saddle slice (multivar)",
         "Paraboloid slice (multivar)"
