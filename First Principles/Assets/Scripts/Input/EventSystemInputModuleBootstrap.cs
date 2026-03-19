@@ -13,7 +13,7 @@ public static class EventSystemInputModuleBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void EnsureInputSystemUiModule()
     {
-        var eventSystems = Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
+        var eventSystems = Object.FindObjectsByType<EventSystem>(FindObjectsInactive.Exclude);
         foreach (var es in eventSystems)
         {
             if (es == null)
