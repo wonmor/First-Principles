@@ -388,7 +388,7 @@ public class LevelManager : MonoBehaviour
             paramHint = hintGo.AddComponent<TextMeshProUGUI>();
             paramHint.richText = true;
             paramHint.textWrappingMode = TextWrappingModes.Normal;
-            paramHint.fontSize = tablet ? 26 : 23;
+            paramHint.fontSize = UiTypography.Scale(tablet ? 26 : 23);
             paramHint.alignment = TextAlignmentOptions.Top;
             paramHint.color = new Color(0.9f, 0.93f, 0.98f, 0.96f);
             ApplyPrimaryUiTypography(paramHint, FindPrimaryEquationTmp(), outlineWidth: 0.12f, outlineAlpha: 0.45f);
@@ -516,10 +516,10 @@ public class LevelManager : MonoBehaviour
 
         var tmp = storyGo.AddComponent<TextMeshProUGUI>();
         tmp.text = "";
-        tmp.fontSize = 38;
+        tmp.fontSize = UiTypography.Scale(38);
         tmp.enableAutoSizing = true;
-        tmp.fontSizeMin = 22;
-        tmp.fontSizeMax = 42;
+        tmp.fontSizeMin = UiTypography.Scale(22);
+        tmp.fontSizeMax = UiTypography.Scale(42);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.richText = true;
         tmp.textWrappingMode = TextWrappingModes.Normal;
@@ -605,10 +605,10 @@ public class LevelManager : MonoBehaviour
             var tmp = textGo.AddComponent<TextMeshProUGUI>();
             tmp.richText = true;
             tmp.textWrappingMode = TextWrappingModes.NoWrap;
-            tmp.fontSize = 28;
+            tmp.fontSize = UiTypography.Scale(28);
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 18;
-            tmp.fontSizeMax = 30;
+            tmp.fontSizeMin = UiTypography.Scale(18);
+            tmp.fontSizeMax = UiTypography.Scale(30);
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
             tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
             tmp.characterSpacing = 0.35f;
@@ -654,7 +654,7 @@ public class LevelManager : MonoBehaviour
                 var tmp = textGo.AddComponent<TextMeshProUGUI>();
                 tmp.richText = true;
                 tmp.textWrappingMode = TextWrappingModes.Normal;
-                tmp.fontSize = 24;
+                tmp.fontSize = UiTypography.Scale(24);
                 tmp.alignment = TextAlignmentOptions.Midline;
                 tmp.color = new Color(0.82f, 0.85f, 0.92f, 0.92f);
                 tmp.characterSpacing = 0.25f;
@@ -710,7 +710,7 @@ public class LevelManager : MonoBehaviour
 
         var tmp = textGo.AddComponent<TextMeshProUGUI>();
         tmp.text = LocalizationManager.Get("ui.math_concepts", "Math concepts");
-        tmp.fontSize = tablet ? 24 : 21;
+        tmp.fontSize = UiTypography.Scale(tablet ? 24 : 21);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = new Color(0.92f, 0.97f, 1f, 1f);
         tmp.raycastTarget = false;
@@ -740,7 +740,7 @@ public class LevelManager : MonoBehaviour
         ftmp.text = SceneCreditsFooter.BuildCompactRichText();
         ftmp.richText = true;
         ftmp.textWrappingMode = TextWrappingModes.Normal;
-        ftmp.fontSize = tabletUi ? 16 : 14;
+        ftmp.fontSize = UiTypography.Scale(tabletUi ? 16 : 14);
         ftmp.alignment = TextAlignmentOptions.Bottom;
         ftmp.color = new Color(0.88f, 0.89f, 0.92f, 0.9f);
         ftmp.raycastTarget = false;

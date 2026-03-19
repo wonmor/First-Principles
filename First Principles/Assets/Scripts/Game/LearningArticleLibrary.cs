@@ -30,6 +30,40 @@ Everything below is a <b>topic glossary</b> you can skim between deaths or after
 <b><size=110%>1. Derivatives = slope & rate</size></b>
 The derivative \(f'(x)\) measures how steeply \(f(x)\) rises or falls. In physics it is often a <i>rate</i>: how fast position changes (velocity), how fast temperature changes along a bar, etc. In this game, the derivative helps decide where the ground exists.
 
+<b><size=120%>──────── Differentiation rules — your skill tree ────────</size></b>
+<size=92%>These are the <b>combo moves</b> for turning \(f(x)\) into \(f'(x)\) without rebuilding from the limit every time. Read them like <b>perks</b> that change how your <b>main curve</b> and <b>derivative HUD</b> stay in sync.</size>
+
+<b><size=110%>Power rule — “exponent is the multiplier”</size></b>
+If \(y = x^n\) (on domains where it’s defined), \(\displaystyle \frac{d}{dx}x^n = n x^{\,n-1}\). <i>Game feel:</i> your <b>stage power</b> isn’t just decoration — it says how fast tilt <b>ramps</b> as you leave the origin; the derivative plot drops the exponent by one like a <b>nerf patch</b> that still keeps the same story arc.
+
+<b><size=110%>Constant multiple — “global buff”</size></b>
+\(\displaystyle \frac{d}{dx}[k\,f(x)] = k\,f'(x)\). Stretch the graph vertically and <b>every slope</b> scales the same — like one upgrade tile that multiplies jump <i>and</i> hazard steepness together.
+
+<b><size=110%>Sum / difference — “stacked modifiers”</size></b>
+\(\displaystyle \frac{d}{dx}[f(x) \pm g(x)] = f'(x) \pm g'(x)\). Two effects glued into one run: read each piece’s slope, then <b>add or subtract</b> — same vibe as summing two platform scripts in a mash-up stage.
+
+<b><size=110%>Product rule — “dual meters both matter”</size></b>
+\(\displaystyle \frac{d}{dx}[u(x)\,v(x)] = u'(x)\,v(x) + u(x)\,v'(x)\). Neither factor can “AFK”: when one is flat the other still carries signal. Think <b>two HUD bars</b> cross-charging — you get \(\,u'v\,\) <i>plus</i> \(\,uv'\,\).
+
+<b><size=110%>Quotient rule — “top lane vs bottom lane”</size></b>
+\(\displaystyle \frac{d}{dx}\frac{u(x)}{v(x)} = \frac{u'(x)\,v(x) - u(x)\,v'(x)}{[v(x)]^2}\) (where \(v(x)\neq 0\)). Numerator is a <b>race tape</b>: leading push \(u'v\) minus catch-up \(uv'\); denominator \(v^2\) is the <b>shield</b> squaring the bottom track. Zeros or blows in \(v\) = <b>boss phase change</b> — rule off, asymptotes/poles ahead.
+
+<b><size=110%>Chain rule — “nested stages”</size></b>
+If \(y = f(g(x))\), then \(\displaystyle \frac{dy}{dx} = f'(g(x))\cdot g'(x)\). <i>Outer sensitivity × inner sensitivity.</i> Same energy as \(u = k(x-D)\): nudge \(x\), the <b>inner</b> \(u\) wiggles, then the <b>outer</b> \(f\) reacts. If the inner slope is tiny, the whole combo “fizzles” — that missing factor is why chain-rule mistakes feel like <b>input lag</b>.
+
+<size=92%>The game still draws \(f'\) with a <b>numeric sampler</b> on wild stages, but these identities explain <i>why</i> textbook curves snap into clean forms — and what AP / TMUA expects you to simplify before you sketch. Longer write-up: <b>docs/derivative-rules.md</b>.</size>
+
+<b><size=120%>──────── Integrals: definite vs indefinite — score vs loadout ────────</size></b>
+<size=92%><b>Indefinite</b> \(\displaystyle \int f(x)\,dx\) asks for an <b>antiderivative</b> — a whole <i>family</i> \(F(x)+C\) whose derivative is \(f\). Think <b>loadout class</b>: many valid builds differ by +\(C\) (same gameplay up to vertical shift in \(F\)). <b>Definite</b> \(\displaystyle \int_a^b f(x)\,dx\) is a single <b>number</b> (signed area from \(a\) to \(b\)) — like a <b>run score</b> for one fixed segment. No “+\(C\)” in the answer: endpoints pin it down.</size>
+
+<b><size=110%>FTC bridge — “endgame check”</size></b>
+If \(F' = f\), then \(\displaystyle \int_a^b f(x)\,dx = F(b)-F(a)\) (usual hypotheses). You grind the <b>indefinite recipe</b> once, then subtract boundary values — boss HP bars at \(x=b\) minus \(x=a\).
+
+<b><size=110%>Riemann stages — “pixel buckets”</size></b>
+Rectangles (left / right / midpoint) estimate the <b>definite</b> score before you take \(\Delta x \to 0\). Wider columns = chunky pixels; refine = smoother total — same loop as §8 below.
+
+<size=92%>More detail: <b>docs/definite-indefinite-integrals.md</b>. (Graphing calculator / FTC proofs — see course notes; this is the game glossary.)</size>
+
 <b><size=110%>2. Parabola (power / quadratic)</size></b>
 A quadratic \(y = a(x-h)^2+k\) is the shape of projectile motion in ideal textbook setups and many optimization problems (min/max). One smooth hump; the slope switches sign at the vertex.
 

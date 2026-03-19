@@ -83,7 +83,7 @@ public static class MathArticlesOverlay
         closeTxtRt.offsetMax = Vector2.zero;
         closeButtonTmp = closeTxtGo.AddComponent<TextMeshProUGUI>();
         closeButtonTmp.text = LocalizationManager.Get("ui.close", "Close");
-        closeButtonTmp.fontSize = tablet ? 26 : 22;
+        closeButtonTmp.fontSize = UiTypography.Scale(tablet ? 26 : 22);
         closeButtonTmp.alignment = TextAlignmentOptions.Center;
         closeButtonTmp.color = Color.white;
         CopyFont(closeButtonTmp);
@@ -145,7 +145,7 @@ public static class MathArticlesOverlay
 
         var body = tmpGo.AddComponent<TextMeshProUGUI>();
         body.text = LearningArticleLibrary.GetLevelSelectArticleRichText();
-        body.fontSize = tablet ? 27 : (Screen.height <= 950 ? 22 : 25);
+        body.fontSize = UiTypography.Scale(tablet ? 27 : (Screen.height <= 950 ? 22 : 25));
         body.lineSpacing = 4f;
         body.alignment = TextAlignmentOptions.TopLeft;
         body.color = new Color(0.92f, 0.93f, 0.96f, 1f);

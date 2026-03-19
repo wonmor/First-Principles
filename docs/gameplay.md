@@ -30,7 +30,7 @@ Titles are built at runtime from **`GameLevelCatalog.DisplayNames`** (order matc
 | Physics C | Exponential decay (τ / RC), projectile parabola, angular momentum / L = Iω (SHM framing) |
 | **Aerospace** | Lift \(C_L(\alpha)\) + stall, drag polar, isothermal \(\rho(h)\), phugoid/damped mode, Newtonian \(\sin^{2}\alpha\), Strouhal sine, re-entry decay envelope |
 
-Open **Math tips & snippets** on the level-select screen for **short article text** plus blocks for **first principles thinking (business)** — see **[First principles thinking & business]({% link first-principles-business.md %})** — and **AMC 10/12**, **competition math**, **TMUA**, **MAT**, **AP Calculus BC**, and **AP Physics C**. Longer notes: **`docs/math-concepts.md`**, **`docs/engineering-math.md`**, **`docs/amc-10-12.md`**, **`docs/competition-math.md`**, **`docs/tmua-calculus.md`**, **`docs/mat-calculus.md`**, **`docs/ap-calculus-bc.md`**, **`docs/ap-physics-c.md`**.
+Open **Math tips & snippets** on the level-select screen for **short article text** (including **differentiation rules** and **definite vs indefinite integrals** — game-style) plus blocks for **first principles thinking (business)** — see **[First principles thinking & business]({% link first-principles-business.md %})** — and **AMC 10/12**, **competition math**, **TMUA**, **MAT**, **AP Calculus BC**, and **AP Physics C**. Longer notes: **`docs/math-concepts.md`**, **`docs/derivative-rules.md`**, **`docs/definite-indefinite-integrals.md`**, **`docs/engineering-math.md`**, **`docs/amc-10-12.md`**, **`docs/competition-math.md`**, **`docs/tmua-calculus.md`**, **`docs/mat-calculus.md`**, **`docs/ap-calculus-bc.md`**, **`docs/ap-physics-c.md`**.
 
 Special levels can **tint the grid** and adjust how long story text stays on screen.
 
@@ -76,6 +76,6 @@ The generator picks a **spawn column** among the “safe start” columns where 
 ## UI polish
 
 - **Story** text appears at the top with the **level name** and fades (TMP).
-- **Math concepts** (top-right during play) opens the same scrollable **LearningArticleLibrary** reader as Level select’s *Math tips & snippets* — including an on-device explanation of how the main graph, derivative, platforms, Riemann strips, and stages map to calculus.
+- **Math concepts** (top-right during play) opens the same scrollable **LearningArticleLibrary** reader as Level select’s *Math tips & snippets* — including how the main graph, derivative, platforms, Riemann strips, and stages map to calculus, plus the **differentiation rules** skill-tree block.
 - **Controls** hint bar at the bottom shows move / jump hints.
 - **Stage** panel uses a dark “glass” backing and accent strip consistent with the Limbo-like aesthetic.

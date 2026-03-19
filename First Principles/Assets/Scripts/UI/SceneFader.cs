@@ -144,7 +144,7 @@ public class SceneFader : MonoBehaviour
 
         var tmp = go.AddComponent<TextMeshProUGUI>();
         tmp.text = LocalizationManager.Get("ui.loading", "Loading…");
-        tmp.fontSize = 36;
+        tmp.fontSize = UiTypography.Scale(36);
         tmp.alignment = TextAlignmentOptions.Bottom;
         tmp.color = new Color(0.92f, 0.94f, 0.98f, 0.95f);
         tmp.textWrappingMode = TextWrappingModes.NoWrap;
@@ -249,7 +249,7 @@ public class SceneFader : MonoBehaviour
         graphicCalculatorMenuButtonText = textGo.AddComponent<TextMeshProUGUI>();
         bool tablet = DeviceLayout.IsTabletLike();
         graphicCalculatorMenuButtonText.text = LocalizationManager.Get("ui.graphing_calculator_mode", "Graphing calculator");
-        graphicCalculatorMenuButtonText.fontSize = tablet ? 30 : 26;
+        graphicCalculatorMenuButtonText.fontSize = UiTypography.Scale(tablet ? 30 : 26);
         graphicCalculatorMenuButtonText.alignment = TextAlignmentOptions.Center;
         graphicCalculatorMenuButtonText.color = new Color(0.92f, 0.98f, 1f, 1f);
         graphicCalculatorMenuButtonText.textWrappingMode = TextWrappingModes.Normal;
@@ -312,7 +312,7 @@ public class SceneFader : MonoBehaviour
         trt.offsetMax = new Vector2(-10f, -4f);
 
         menuLanguageButtonLabel = textGo.AddComponent<TextMeshProUGUI>();
-        menuLanguageButtonLabel.fontSize = tablet ? 22 : 19;
+        menuLanguageButtonLabel.fontSize = UiTypography.Scale(tablet ? 22 : 19);
         menuLanguageButtonLabel.alignment = TextAlignmentOptions.Center;
         menuLanguageButtonLabel.color = new Color(0.93f, 0.96f, 1f, 1f);
         menuLanguageButtonLabel.textWrappingMode = TextWrappingModes.Normal;

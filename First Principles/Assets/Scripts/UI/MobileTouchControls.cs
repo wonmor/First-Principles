@@ -151,7 +151,7 @@ public class MobileTouchControls : MonoBehaviour
         trt.offsetMax = Vector2.zero;
         var tmp = tr.AddComponent<TextMeshProUGUI>();
         tmp.text = label == "Left" ? "\u25C0" : "\u25B6";
-        tmp.fontSize = tablet ? 54f : 48f;
+        tmp.fontSize = UiTypography.Scale(tablet ? 54f : 48f);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = new Color(1f, 0.88f, 0.48f, 1f);
         CopyTmpFont(tmp);
@@ -184,7 +184,7 @@ public class MobileTouchControls : MonoBehaviour
         trt.offsetMax = Vector2.zero;
         jumpLabelTmp = tr.AddComponent<TextMeshProUGUI>();
         jumpLabelTmp.text = LocalizationManager.Get("ui.jump", "Jump");
-        jumpLabelTmp.fontSize = tablet ? 34f : 30f;
+        jumpLabelTmp.fontSize = UiTypography.Scale(tablet ? 34f : 30f);
         jumpLabelTmp.fontStyle = FontStyles.Bold;
         jumpLabelTmp.alignment = TextAlignmentOptions.Center;
         jumpLabelTmp.color = new Color(0.98f, 1f, 1f, 1f);

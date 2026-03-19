@@ -56,7 +56,7 @@ public static class GraphCalculatorEquationPanel
         lrt.sizeDelta = new Vector2(220f, 28f);
         var label = labelGo.AddComponent<TextMeshProUGUI>();
         label.text = LocalizationManager.Get("graph.label_fu", "f(u) =");
-        label.fontSize = tablet ? 26 : 24;
+        label.fontSize = UiTypography.Scale(tablet ? 26 : 24);
         label.alignment = TextAlignmentOptions.MidlineLeft;
         label.color = new Color(0.85f, 0.88f, 0.95f, 0.9f);
         CopyFont(label, typographyReference);
@@ -90,7 +90,7 @@ public static class GraphCalculatorEquationPanel
         textRt.offsetMax = Vector2.zero;
         var textMesh = textGo.AddComponent<TextMeshProUGUI>();
         textMesh.text = plotter.customExpression;
-        textMesh.fontSize = tablet ? 24 : 21;
+        textMesh.fontSize = UiTypography.Scale(tablet ? 24 : 21);
         textMesh.color = Color.white;
         textMesh.alignment = TextAlignmentOptions.MidlineLeft;
         CopyFont(textMesh, typographyReference);
@@ -104,7 +104,7 @@ public static class GraphCalculatorEquationPanel
         phRt.offsetMax = Vector2.zero;
         var ph = phGo.AddComponent<TextMeshProUGUI>();
         ph.text = LocalizationManager.Get("graph.placeholder", "x^2 + sin(x) · ln(x) for x>0 · min(x,3)...");
-        ph.fontSize = tablet ? 24 : 21;
+        ph.fontSize = UiTypography.Scale(tablet ? 24 : 21);
         ph.color = new Color(1f, 1f, 1f, 0.32f);
         ph.fontStyle = FontStyles.Italic;
         ph.alignment = TextAlignmentOptions.MidlineLeft;
@@ -127,7 +127,7 @@ public static class GraphCalculatorEquationPanel
         srt.anchoredPosition = new Vector2(0f, 4f);
         srt.sizeDelta = new Vector2(-24f, 22f);
         var status = statusGo.AddComponent<TextMeshProUGUI>();
-        status.fontSize = tablet ? 16 : 14;
+        status.fontSize = UiTypography.Scale(tablet ? 16 : 14);
         status.alignment = TextAlignmentOptions.Midline;
         status.color = new Color(0.75f, 0.92f, 0.8f, 0.95f);
         status.richText = true;

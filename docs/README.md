@@ -35,6 +35,8 @@ Open `http://127.0.0.1:4000/First-Principles/` (adjust for your `baseurl`).
 | `setup.md` | Unity setup & clean restore |
 | `gameplay.md` | Controls, stages, flow |
 | `math-concepts.md` | Game math notes + index to exam prep |
+| `derivative-rules.md` | Power / product / quotient / chain — matches in-app “skill tree” |
+| `definite-indefinite-integrals.md` | Definite vs indefinite + FTC + Riemann mood (matches in-app block) |
 | `competition-math.md` | Contest-style lens (AMC/AIME mood, \(\ln\) / concavity); in-game stage |
 | `amc-10-12.md` | Unofficial AMC 10 & 12 topic map + tie-in to graph practice |
 | `tmua-calculus.md` / `mat-calculus.md` | Unofficial UK admissions calculus prep |

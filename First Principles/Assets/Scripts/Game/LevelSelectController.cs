@@ -108,7 +108,7 @@ public class LevelSelectController : MonoBehaviour
 
         titleTmp = titleGo.AddComponent<TextMeshProUGUI>();
         titleTmp.text = LocalizationManager.Get("ui.choose_stage", "Choose a graph stage");
-        titleTmp.fontSize = tablet ? 52 : 46;
+        titleTmp.fontSize = UiTypography.Scale(tablet ? 52 : 46);
         titleTmp.alignment = TextAlignmentOptions.Center;
         titleTmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(titleTmp);
@@ -255,7 +255,7 @@ public class LevelSelectController : MonoBehaviour
 
         mathTipsTmp = textGo.AddComponent<TextMeshProUGUI>();
         mathTipsTmp.text = LocalizationManager.Get("ui.math_tips", "Math tips & snippets");
-        mathTipsTmp.fontSize = tablet ? 32 : 28;
+        mathTipsTmp.fontSize = UiTypography.Scale(tablet ? 32 : 28);
         mathTipsTmp.alignment = TextAlignmentOptions.Center;
         mathTipsTmp.color = new Color(0.9f, 0.96f, 1f, 1f);
         mathTipsTmp.textWrappingMode = TextWrappingModes.Normal;
@@ -301,7 +301,7 @@ public class LevelSelectController : MonoBehaviour
         trt.offsetMax = new Vector2(-8f, -4f);
 
         levelSelectLangTmp = textGo.AddComponent<TextMeshProUGUI>();
-        levelSelectLangTmp.fontSize = tablet ? 20 : 18;
+        levelSelectLangTmp.fontSize = UiTypography.Scale(tablet ? 20 : 18);
         levelSelectLangTmp.alignment = TextAlignmentOptions.Center;
         levelSelectLangTmp.color = new Color(0.93f, 0.96f, 1f, 1f);
         levelSelectLangTmp.textWrappingMode = TextWrappingModes.Normal;
@@ -351,7 +351,7 @@ public class LevelSelectController : MonoBehaviour
 
         var tmp = textGo.AddComponent<TextMeshProUGUI>();
         tmp.text = label;
-        tmp.fontSize = tablet ? 32 : 30;
+        tmp.fontSize = UiTypography.Scale(tablet ? 32 : 30);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(tmp);
@@ -395,7 +395,7 @@ public class LevelSelectController : MonoBehaviour
 
         backTmp = textGo.AddComponent<TextMeshProUGUI>();
         backTmp.text = LocalizationManager.Get("ui.back_menu", "Back to Menu");
-        backTmp.fontSize = tablet ? 23 : 21;
+        backTmp.fontSize = UiTypography.Scale(tablet ? 23 : 21);
         backTmp.alignment = TextAlignmentOptions.Center;
         backTmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(backTmp);

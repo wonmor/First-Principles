@@ -28,6 +28,8 @@ title: Home
 | [Gameplay]({% link gameplay.md %}) | Controls, stages, level select, how the graph affects the world |
 | [First principles thinking & business]({% link first-principles-business.md %}) | Elon Musk–style “reason from bedrock”; maps game metaphors (f, f′, stages) to running a business |
 | [Math concepts & snippets]({% link math-concepts.md %}) | Plain-language notes for every curriculum theme in the game |
+| [Differentiation rules — playbook]({% link derivative-rules.md %}) | Power / product / quotient / chain — game-style + mnemonics (matches in-app “skill tree”) |
+| [Definite vs indefinite integrals]({% link definite-indefinite-integrals.md %}) | Antiderivative + \(C\) vs bounded score; FTC bridge; matches in-app “score vs loadout” |
 | [Competition math]({% link competition-math.md %}) | Contest-style bounds, concavity & \(\ln\) — maps to the in-game competition stage |
 | [AMC 10 & 12 — prep]({% link amc-10-12.md %}) | Unofficial MAA contest map; algebra/geo/NT + how graph skills tie in |
 | [Engineering math]({% link engineering-math.md %}) | Damped motion, catenary, AC rectification, phasors/transforms (intro) |

@@ -79,7 +79,7 @@ public sealed class SceneTransitionHost : MonoBehaviour
 
         var tmp = labelGo.AddComponent<TextMeshProUGUI>();
         tmp.text = LocalizationManager.Get("ui.loading", "Loading…");
-        tmp.fontSize = 40;
+        tmp.fontSize = UiTypography.Scale(40);
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = new Color(0.94f, 0.96f, 1f, 0.96f);
         tmp.textWrappingMode = TextWrappingModes.NoWrap;
