@@ -85,8 +85,8 @@ public class GraphObstacleGenerator : MonoBehaviour
         float finishWidth = 1f;
         world.finish = new GridRect(width - finishWidth, width, 0f, gridSize.y);
 
-        int spawnCol = Mathf.Clamp(def.forcePlatformsAtStartColumns, 1, gridSize.x) - 1;
-        float spawnYTop = 0f;
+        int spawnCol = 0;
+        float spawnYTop = float.PositiveInfinity;
         bool spawnChosen = false;
 
         // Generate columns.
@@ -123,7 +123,8 @@ public class GraphObstacleGenerator : MonoBehaviour
             world.platforms.Add(platform);
             CreateRectVisual($"Platform_{col}", platform, def.curveColor);
 
-            if (!spawnChosen && forcedSafeStart)
+            // Pick the lowest platform among the starting columns so the player doesn't spawn at the top of the graph.
+            if (forcedSafeStart && safe && (!spawnChosen || platformTop < spawnYTop))
             {
                 spawnCol = col;
                 spawnYTop = platformTop;
@@ -142,6 +143,8 @@ public class GraphObstacleGenerator : MonoBehaviour
             world.spawnXGrid = spawnCol + 0.5f;
         }
 
+        if (float.IsPositiveInfinity(spawnYTop) && world.platforms.Count > 0)
+            spawnYTop = world.platforms[0].yMax;
         world.spawnYTopGrid = spawnYTop;
         return world;
     }

@@ -100,11 +100,24 @@ public class PlayerControllerUI2D : MonoBehaviour
 
         float dt = Time.deltaTime;
 
-        // Input -> velocity.
-        float inputX = Input.GetAxisRaw("Horizontal");
+        // Movement: arrow keys / WASD (preferred for keyboard), then legacy Input axes (gamepad, etc.).
+        float inputX = 0f;
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+            inputX -= 1f;
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+            inputX += 1f;
+        if (Mathf.Approximately(inputX, 0f))
+            inputX = Input.GetAxisRaw("Horizontal");
+
         velGrid.x = inputX * moveSpeedGridPerSec;
 
-        if (grounded && Input.GetButtonDown("Jump"))
+        bool jumpPressed =
+            Input.GetKeyDown(KeyCode.Space) ||
+            Input.GetKeyDown(KeyCode.W) ||
+            Input.GetKeyDown(KeyCode.UpArrow) ||
+            Input.GetButtonDown("Jump");
+
+        if (grounded && jumpPressed)
         {
             velGrid.y = jumpVelocityGridPerSec;
             grounded = false;

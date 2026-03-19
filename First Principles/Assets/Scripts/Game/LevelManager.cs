@@ -28,6 +28,10 @@ public class LevelManager : MonoBehaviour
     private RectTransform obstaclesRoot;
 
     private TextMeshProUGUI storyText;
+    private TextMeshProUGUI stageHudText;
+    private TextMeshProUGUI controlsHintText;
+    private int lastStageHudKey = int.MinValue;
+    private Sprite cachedHudPanelSprite;
 
     private readonly List<LevelDefinition> levels = new List<LevelDefinition>();
     private int currentLevelIndex;
@@ -87,6 +91,8 @@ public class LevelManager : MonoBehaviour
         CreateObstaclesRootIfNeeded();
         CreatePlayerIfNeeded();
         CreateStoryTextIfNeeded();
+        CreateGameplayHudIfNeeded();
+        HideLegacyGraphTuningButtons();
 
         // Wire callbacks.
         playerController.SetDeathCallback(RestartCurrentLevel);
@@ -147,9 +153,6 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        // Copy font from an existing scene TMP before we add StoryText (so the new label is not the one we sample).
-        var fontSource = FindAnyObjectByType<TextMeshProUGUI>();
-
         var storyGo = new GameObject("StoryText");
         storyGo.transform.SetParent(canvas.transform, false);
 
@@ -158,16 +161,7 @@ public class LevelManager : MonoBehaviour
         tmp.fontSize = 32;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.richText = true;
-
-        if (fontSource != null)
-        {
-            tmp.font = fontSource.font;
-            if (fontSource.fontSharedMaterial != null)
-                tmp.fontSharedMaterial = fontSource.fontSharedMaterial;
-        }
-
-        if (tmp.font == null && TMP_Settings.defaultFontAsset != null)
-            tmp.font = TMP_Settings.defaultFontAsset;
+        ApplyPrimaryUiTypography(tmp, FindPrimaryEquationTmp(), outlineWidth: 0.06f, outlineAlpha: 0.35f);
 
         var rt = tmp.rectTransform;
         rt.anchorMin = new Vector2(0.5f, 1f);
@@ -179,6 +173,204 @@ public class LevelManager : MonoBehaviour
         tmp.color = new Color(1f, 1f, 1f, 0f);
 
         storyText = tmp;
+    }
+
+    /// <summary>Hides old graph "Trans" / "Scale" tuning buttons so levels control parameters; gameplay uses arrows + jump.</summary>
+    private static void HideLegacyGraphTuningButtons()
+    {
+        foreach (var name in new[] { "TransButton", "ScaleButton" })
+        {
+            var go = GameObject.Find(name);
+            if (go != null)
+                go.SetActive(false);
+        }
+    }
+
+    private void CreateGameplayHudIfNeeded()
+    {
+        var canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+            return;
+
+        var equationStyle = FindPrimaryEquationTmp();
+        var panelSprite = GetHudPanelSprite();
+
+        if (stageHudText == null)
+        {
+            var panelGo = new GameObject("StageHudPanel");
+            var panelRt = panelGo.AddComponent<RectTransform>();
+            panelRt.SetParent(canvas.transform, false);
+            panelRt.anchorMin = new Vector2(0f, 1f);
+            panelRt.anchorMax = new Vector2(0f, 1f);
+            panelRt.pivot = new Vector2(0f, 1f);
+            panelRt.anchoredPosition = new Vector2(22f, -20f);
+            panelRt.sizeDelta = new Vector2(340f, 76f);
+
+            var panelBg = panelGo.AddComponent<Image>();
+            panelBg.sprite = panelSprite;
+            panelBg.color = new Color(0.06f, 0.07f, 0.11f, 0.88f);
+            panelBg.raycastTarget = false;
+            panelBg.type = Image.Type.Sliced;
+            // If sprite isn't 9-slice, Simple still works for a soft tile look.
+            if (panelSprite != null && panelSprite.border.sqrMagnitude < 0.001f)
+                panelBg.type = Image.Type.Simple;
+
+            var accentGo = new GameObject("StageHudAccent");
+            var accentRt = accentGo.AddComponent<RectTransform>();
+            accentRt.SetParent(panelGo.transform, false);
+            accentRt.anchorMin = new Vector2(0f, 1f);
+            accentRt.anchorMax = new Vector2(1f, 1f);
+            accentRt.pivot = new Vector2(0.5f, 1f);
+            accentRt.anchoredPosition = Vector2.zero;
+            accentRt.sizeDelta = new Vector2(0f, 3f);
+            var accentImg = accentGo.AddComponent<Image>();
+            accentImg.sprite = panelSprite;
+            accentImg.color = new Color(0.95f, 0.72f, 0.25f, 0.95f);
+            accentImg.raycastTarget = false;
+
+            var textGo = new GameObject("StageHud");
+            var textRt = textGo.AddComponent<RectTransform>();
+            textRt.SetParent(panelGo.transform, false);
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = new Vector2(18f, 12f);
+            textRt.offsetMax = new Vector2(-16f, -14f);
+
+            var tmp = textGo.AddComponent<TextMeshProUGUI>();
+            tmp.richText = true;
+            tmp.enableWordWrapping = false;
+            tmp.fontSize = 30;
+            tmp.alignment = TextAlignmentOptions.MidlineLeft;
+            tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
+            tmp.characterSpacing = 0.35f;
+            tmp.lineSpacing = -4f;
+            ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.16f, outlineAlpha: 0.55f);
+            tmp.text = FormatStageHudLine(1, 1);
+
+            stageHudText = tmp;
+        }
+
+        if (controlsHintText == null)
+        {
+            var barGo = new GameObject("ControlsHintPanel");
+            var barRt = barGo.AddComponent<RectTransform>();
+            barRt.SetParent(canvas.transform, false);
+            barRt.anchorMin = new Vector2(0.5f, 0f);
+            barRt.anchorMax = new Vector2(0.5f, 0f);
+            barRt.pivot = new Vector2(0.5f, 0f);
+            barRt.anchoredPosition = new Vector2(0f, 18f);
+            barRt.sizeDelta = new Vector2(620f, 54f);
+
+            var barBg = barGo.AddComponent<Image>();
+            barBg.sprite = panelSprite;
+            barBg.color = new Color(0.06f, 0.07f, 0.11f, 0.82f);
+            barBg.raycastTarget = false;
+            barBg.type = panelSprite != null && panelSprite.border.sqrMagnitude > 0.001f ? Image.Type.Sliced : Image.Type.Simple;
+
+            var textGo = new GameObject("ControlsHint");
+            var textRt = textGo.AddComponent<RectTransform>();
+            textRt.SetParent(barGo.transform, false);
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = new Vector2(20f, 8f);
+            textRt.offsetMax = new Vector2(-20f, -8f);
+
+            var tmp = textGo.AddComponent<TextMeshProUGUI>();
+            tmp.richText = true;
+            tmp.enableWordWrapping = false;
+            tmp.fontSize = 22;
+            tmp.alignment = TextAlignmentOptions.Midline;
+            tmp.color = new Color(0.82f, 0.85f, 0.92f, 0.92f);
+            tmp.characterSpacing = 0.25f;
+            ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.5f);
+            tmp.text =
+                "<color=#7a8399>Move</color>  " +
+                "<b><color=#ffd978>\u2190</color></b>  <b><color=#ffd978>\u2192</color></b>  " +
+                "<color=#5c6577>·</color>  " +
+                "<color=#7a8399>Jump</color>  " +
+                "<b><color=#ffd978>Space</color></b>";
+
+            controlsHintText = tmp;
+        }
+    }
+
+    /// <summary>The big equation label in <c>Game</c> — used as the typography reference for all gameplay HUD copy.</summary>
+    private static TextMeshProUGUI FindPrimaryEquationTmp()
+    {
+        var go = GameObject.Find("Equation");
+        if (go != null)
+        {
+            var t = go.GetComponent<TextMeshProUGUI>();
+            if (t != null && t.font != null)
+                return t;
+        }
+
+        foreach (var t in FindObjectsByType<TextMeshProUGUI>())
+        {
+            if (t != null && t.font != null && t.gameObject.CompareTag("EquationText"))
+                return t;
+        }
+
+        return null;
+    }
+
+    private static void ApplyPrimaryUiTypography(TextMeshProUGUI target, TextMeshProUGUI reference, float outlineWidth = 0.14f, float outlineAlpha = 0.5f)
+    {
+        if (reference != null)
+        {
+            target.font = reference.font;
+            if (reference.fontSharedMaterial != null)
+                target.fontSharedMaterial = reference.fontSharedMaterial;
+            target.fontStyle = reference.fontStyle;
+        }
+        else if (TMP_Settings.defaultFontAsset != null)
+            target.font = TMP_Settings.defaultFontAsset;
+
+        target.outlineWidth = outlineWidth;
+        target.outlineColor = new Color(0f, 0f, 0f, outlineAlpha);
+    }
+
+    private static string FormatStageHudLine(int stage, int total)
+    {
+        return
+            "<color=#9aa3b8><size=78%>STAGE</size></color>\n" +
+            $"<b><color=#f2f4ff>{stage}</color></b><color=#5c6578> / </color><b><color=#e8ebf7>{total}</color></b>";
+    }
+
+    private void RefreshStageHud()
+    {
+        if (stageHudText == null || stageTriggerXGrid == null)
+            return;
+
+        int total = Mathf.Max(1, stageTriggerXGrid.Count + 1);
+        int stage = Mathf.Clamp(nextStageIndex + 1, 1, total);
+        int key = stage | (total << 16);
+        if (key == lastStageHudKey)
+            return;
+        lastStageHudKey = key;
+        stageHudText.text = FormatStageHudLine(stage, total);
+    }
+
+    /// <summary>Square / UI sprite for flat panels (falls back to a tiny white sprite so Image always draws).</summary>
+    private Sprite GetHudPanelSprite()
+    {
+        if (cachedHudPanelSprite != null)
+            return cachedHudPanelSprite;
+
+        var fromScene = TryGetSquareSprite();
+        if (fromScene != null)
+        {
+            cachedHudPanelSprite = fromScene;
+            return cachedHudPanelSprite;
+        }
+
+        var tex = Texture2D.whiteTexture;
+        cachedHudPanelSprite = Sprite.Create(
+            tex,
+            new Rect(0f, 0f, tex.width, tex.height),
+            new Vector2(0.5f, 0.5f),
+            100f);
+        return cachedHudPanelSprite;
     }
 
     private Sprite TryGetSquareSprite()
@@ -323,10 +515,12 @@ public class LevelManager : MonoBehaviour
 
         currentLevelIndex = Mathf.Clamp(index, 0, levels.Count - 1);
         nextStageIndex = 0;
+        lastStageHudKey = int.MinValue;
         isRestarting = false;
 
         var def = levels[currentLevelIndex];
         ApplyLevelTheme(def);
+        RefreshStageHud();
         StartCoroutine(LoadWorldAfterThemeChange(def));
     }
 
@@ -432,6 +626,8 @@ public class LevelManager : MonoBehaviour
     {
         if (playerController == null || stageTriggerXGrid == null)
             return;
+
+        RefreshStageHud();
 
         // Trigger derivative "pops" at stage boundaries.
         while (nextStageIndex < stageTriggerXGrid.Count)
