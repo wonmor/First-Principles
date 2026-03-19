@@ -175,9 +175,8 @@ public class SceneFader : MonoBehaviour
 
         if (menuLanguageButtonLabel != null)
         {
-            menuLanguageButtonLabel.text =
-                $"{LocalizationManager.Get("ui.language", "Language")}: {LocalizationManager.GetLanguagePickerLabel(LocalizationManager.CurrentLanguage)}";
-            LocalizationManager.ApplyTextDirection(menuLanguageButtonLabel);
+            menuLanguageButtonLabel.text = LocalizationManager.GetLanguageChipDisplayText();
+            LocalizationManager.ApplyLanguagePickerTextDirection(menuLanguageButtonLabel);
         }
 
         if (string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))

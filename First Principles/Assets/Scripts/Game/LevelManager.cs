@@ -178,6 +178,16 @@ public class LevelManager : MonoBehaviour
 
         string title = LocalizationManager.GetWithFallback($"level.{currentLevelIndex}", def.levelName);
         string story = LocalizationManager.GetWithFallback($"story.{currentLevelIndex}", def.storyText);
+        if (GameLevelCatalog.IsAerospaceLevel(currentLevelIndex))
+        {
+            string dragPreamble = LocalizationManager.Get("aerospace.story_drag_polar_preamble",
+                "<b><color=#c4b5fd>Drag polar refresher</color></b> (every <b>Aerospace</b> stage)\n" +
+                "<size=92%><b>Parasitic (zero-lift) drag</b> — skin friction, form drag, interference lumped as <b>C<sub>D0</sub></b> in the parabolic model (roughly <i>not</i> the part that grows with lift).\n" +
+                "<b>Induced drag</b> — the cost of making lift: trailing vortices add ~ <b>K C<sub>L</sub>²</b> (higher C<sub>L</sub> / tighter turns → more induced).\n" +
+                "<b>Overall drag polar</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: an upward-opening parabola in C<sub>L</sub>; min-drag <b>C<sub>L</sub></b> sits between “too slow / high α” and “too fast / low α” for real missions.</size>");
+            story = $"{dragPreamble}\n\n{story}";
+        }
+
         storyText.text = TmpLatex.Process($"<b>{title}</b>\n{story}");
         // Long level copy is often mixed Latin/math; keep LTR unless you add full `story.N` translations in RTL locales.
         storyText.isRightToLeftText = false;

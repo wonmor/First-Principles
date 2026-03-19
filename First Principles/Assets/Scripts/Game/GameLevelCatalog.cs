@@ -64,6 +64,16 @@ public static class GameLevelCatalog
 
     public static int LevelCount => DisplayNames.Length;
 
+    /// <summary>First index of the contiguous <b>Aerospace:</b> block (must match <see cref="LevelManager"/> sample levels).</summary>
+    public const int AerospaceLevelsBeginIndex = 34;
+
+    /// <summary>Inclusive last index of the Aerospace block (re-entry stage).</summary>
+    public const int AerospaceLevelsEndIndex = 40;
+
+    /// <summary>True for levels whose titles start with <c>Aerospace:</c> in the catalog.</summary>
+    public static bool IsAerospaceLevel(int index) =>
+        index >= AerospaceLevelsBeginIndex && index <= AerospaceLevelsEndIndex;
+
     /// <summary>Localized title for level <paramref name="index"/>; falls back to <see cref="DisplayNames"/>.</summary>
     public static string GetLocalizedDisplayName(int index)
     {

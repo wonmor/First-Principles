@@ -7,7 +7,7 @@ using UnityEngine;
 // -----------------------------------------------------------------------------
 // LocalizationManager — key=value tables under Resources/Localization/{code}.txt
 // -----------------------------------------------------------------------------
-// PlayerPrefs key: fp_language. Codes: en, ar, fr, zh, ko, ja, de, es
+// PlayerPrefs key: fp_language. Codes: en, hi, ar, fr, zh, ko, ja, de, es
 // -----------------------------------------------------------------------------
 
 /// <summary>Loads string tables and notifies listeners when the active language changes.</summary>
@@ -16,7 +16,7 @@ public static class LocalizationManager
     public const string PlayerPrefsKey = "fp_language";
 
     /// <summary>Ordered list used by the menu language control and <see cref="CycleNext"/>.</summary>
-    public static readonly string[] LanguageCodes = { "en", "ar", "fr", "zh", "ko", "ja", "de", "es" };
+    public static readonly string[] LanguageCodes = { "en", "hi", "ar", "fr", "zh", "ko", "ja", "de", "es" };
 
     private static readonly Dictionary<string, string> Table = new Dictionary<string, string>(StringComparer.Ordinal);
     private static string _current = "en";
@@ -42,6 +42,7 @@ public static class LocalizationManager
         switch (code)
         {
             case "en": return "English";
+            case "hi": return "हिन्दी";
             case "ar": return "العربية";
             case "fr": return "Français";
             case "zh": return "简体中文";
@@ -159,5 +160,25 @@ public static class LocalizationManager
         if (tmp == null)
             return;
         tmp.isRightToLeftText = IsRightToLeft;
+    }
+
+    /// <summary>
+    /// Text for the compact language chip (<c>Language: …</c>). Uses a left-to-right embed so the first tap after
+    /// English (Arabic, Hindi, etc.) lays out reliably in TextMesh Pro; full UI still uses <see cref="ApplyTextDirection"/>.
+    /// </summary>
+    public static string GetLanguageChipDisplayText()
+    {
+        string langWord = Get("ui.language", "Language");
+        string name = GetLanguagePickerLabel(_current);
+        // U+200E LEFT-TO-RIGHT MARK — keeps “label: native name” readable when the active locale is RTL or mixed scripts.
+        return "\u200e" + langWord + ": " + name;
+    }
+
+    /// <summary>Forces LTR on the language-cycle control so mixed Latin + Arabic / Devanagari renders correctly.</summary>
+    public static void ApplyLanguagePickerTextDirection(TextMeshProUGUI tmp)
+    {
+        if (tmp == null)
+            return;
+        tmp.isRightToLeftText = false;
     }
 }

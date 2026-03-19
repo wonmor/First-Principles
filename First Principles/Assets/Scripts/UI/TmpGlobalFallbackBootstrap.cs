@@ -29,9 +29,10 @@ public static class TmpGlobalFallbackBootstrap
             return;
         _installed = true;
 
-        // Order: Arabic / Latin extensions first, then region-specific CJK fonts.
+        // Order: Latin+extensions, Devanagari (Hindi), then region-specific CJK fonts.
         var extras = new List<TMP_FontAsset>();
         TryAddFont("Fonts/NotoSans-Regular", extras);
+        TryAddFont("Fonts/NotoSansDevanagari-Regular", extras);
         TryAddFont("Fonts/NotoSansSC-Regular", extras);
         TryAddFont("Fonts/NotoSansKR-Regular", extras);
         TryAddFont("Fonts/NotoSansJP-Regular", extras);

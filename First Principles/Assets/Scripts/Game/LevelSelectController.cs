@@ -69,9 +69,8 @@ public class LevelSelectController : MonoBehaviour
     {
         if (levelSelectLangTmp == null)
             return;
-        levelSelectLangTmp.text =
-            $"{LocalizationManager.Get("ui.language", "Language")}: {LocalizationManager.GetLanguagePickerLabel(LocalizationManager.CurrentLanguage)}";
-        LocalizationManager.ApplyTextDirection(levelSelectLangTmp);
+        levelSelectLangTmp.text = LocalizationManager.GetLanguageChipDisplayText();
+        LocalizationManager.ApplyLanguagePickerTextDirection(levelSelectLangTmp);
     }
 
     private void Start()
