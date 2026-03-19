@@ -114,8 +114,9 @@ public static class MathArticlesOverlay
         viewportRt.offsetMax = Vector2.zero;
         var vImg = viewportGo.AddComponent<Image>();
         vImg.color = new Color(0f, 0f, 0f, 0f);
-        var mask = viewportGo.AddComponent<Mask>();
-        mask.showMaskGraphic = false;
+        // RectMask2D + raycastable Image avoids Mask+transparent-Image issues that clip all scroll content.
+        vImg.raycastTarget = true;
+        viewportGo.AddComponent<RectMask2D>();
         scroll.viewport = viewportRt;
 
         var contentGo = new GameObject("Content");
@@ -128,6 +129,10 @@ public static class MathArticlesOverlay
         contentRt.sizeDelta = new Vector2(0f, 0f);
 
         scroll.content = contentRt;
+
+        var contentSize = contentGo.AddComponent<ContentSizeFitter>();
+        contentSize.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        contentSize.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         var tmpGo = new GameObject("ArticleText");
         var tmpRt = tmpGo.AddComponent<RectTransform>();
@@ -155,6 +160,11 @@ public static class MathArticlesOverlay
 
         var le = tmpGo.AddComponent<LayoutElement>();
         le.minWidth = 1f;
+
+        body.ForceMeshUpdate(true);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
+        Canvas.ForceUpdateCanvases();
+        scroll.verticalNormalizedPosition = 1f;
 
         root.transform.SetAsLastSibling();
     }
