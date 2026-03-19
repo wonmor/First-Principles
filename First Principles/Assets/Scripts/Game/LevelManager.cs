@@ -72,6 +72,9 @@ public class LevelManager : MonoBehaviour
     private bool isRestarting;
     private Coroutine storyFadeRoutine;
 
+    /// <summary>Faxas Instruments–style free plot: transforms, scale zoom, pinch — no platformer.</summary>
+    private bool graphCalculatorMode;
+
     private void Awake()
     {
         // Keep things single-scene: if another instance somehow appears, destroy it.
@@ -84,7 +87,14 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
+        graphCalculatorMode = GraphCalculatorSession.ConsumeEnterRequest();
         SetupReferences();
+        if (graphCalculatorMode)
+        {
+            EnterGraphCalculatorMode();
+            return;
+        }
+
         BuildSampleLevels();
         // LevelSelect sets LevelSelection; opening Game directly falls back to index 0.
         int startIndex = LevelSelection.ConsumeSelectedLevel(levels.Count);
@@ -125,15 +135,191 @@ public class LevelManager : MonoBehaviour
         CreatePlayerIfNeeded();
         CreateStoryTextIfNeeded();
         CreateGameplayHudIfNeeded();
-        HideLegacyGraphTuningButtons();
+        if (!graphCalculatorMode)
+            HideLegacyGraphTuningButtons();
         EnsureRiemannRenderer();
         var mainCanvas = FindAnyObjectByType<Canvas>();
-        if (mainCanvas != null)
+        if (mainCanvas != null && !graphCalculatorMode)
             MobileTouchControls.EnsureForGameCanvas(mainCanvas.transform);
 
         // Wire callbacks.
         playerController.SetDeathCallback(RestartCurrentLevel);
         playerController.SetFinishCallback(AdvanceLevel);
+    }
+
+    /// <summary>
+    /// Free graphing workspace (inspired by classroom graphing calculators from <b>Faxas Instruments</b>—not affiliated).
+    /// Legacy <c>TransButton</c> / <c>ScaleButton</c> are shown; pinch zoom applies on the graph window.
+    /// </summary>
+    private void EnterGraphCalculatorMode()
+    {
+        levels.Clear();
+        currentLevelIndex = 0;
+        stageTriggerXGrid = new List<float>();
+        stagePopColors = new List<Color>();
+        nextStageIndex = 0;
+
+        if (obstaclesRoot != null)
+            obstaclesRoot.gameObject.SetActive(false);
+
+        if (playerController != null)
+            playerController.gameObject.SetActive(false);
+
+        if (gridRenderer != null && !gridThemeBaselineCaptured)
+        {
+            savedGridCenterLine = gridRenderer.centerLine;
+            savedGridOutsideLine = gridRenderer.outsideLine;
+            gridThemeBaselineCaptured = true;
+        }
+
+        if (gridRenderer != null)
+        {
+            gridRenderer.centerLine = savedGridCenterLine;
+            gridRenderer.outsideLine = savedGridOutsideLine;
+            gridRenderer.enabled = false;
+            gridRenderer.enabled = true;
+        }
+
+        if (storyFadeRoutine != null)
+        {
+            StopCoroutine(storyFadeRoutine);
+            storyFadeRoutine = null;
+        }
+
+        if (storyText != null)
+        {
+            storyText.gameObject.SetActive(true);
+            storyText.text = TmpLatex.Process(
+                "<b>Faxas Instruments-style graphing</b>\n" +
+                "<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> &amp; <b>pinch</b> zoom the window. Not affiliated with any hardware brand.</size>");
+            storyText.color = new Color(1f, 1f, 1f, 0.94f);
+        }
+
+        if (stageHudText != null && stageHudText.transform.parent != null)
+            stageHudText.transform.parent.gameObject.SetActive(false);
+
+        functionPlotter.functionType = FunctionType.Power;
+        functionPlotter.transA = 1f;
+        functionPlotter.transK = 0.35f;
+        functionPlotter.transC = 0f;
+        functionPlotter.transD = 0f;
+        functionPlotter.power = 2;
+        functionPlotter.baseN = 2;
+        functionPlotter.differentiate = false;
+        functionPlotter.xStart = -12f;
+        functionPlotter.xEnd = 12f;
+        functionPlotter.step = 0.06f;
+        functionPlotter.SetEquationExtraSuffix("");
+
+        if (curveRenderer != null)
+        {
+            curveRenderer.color = new Color(0.95f, 0.8f, 0.38f, 1f);
+            curveRenderer.enabled = false;
+            curveRenderer.enabled = true;
+        }
+
+        if (derivRenderer != null)
+        {
+            derivRenderer.color = new Color(0.55f, 0.78f, 1f, 1f);
+            derivRenderer.enabled = false;
+        }
+
+        if (riemannRenderer != null)
+            riemannRenderer.ClearStrips();
+
+        var transGo = GameObject.Find("TransButton");
+        var scaleGo = GameObject.Find("ScaleButton");
+        LayoutCalculatorToolButtons(transGo, scaleGo);
+
+        var canvas = FindAnyObjectByType<Canvas>();
+        var safe = canvas != null ? MobileUiRoots.GetSafeContentParent(canvas.transform) as RectTransform : null;
+        var hintParent = safe != null ? safe : canvas?.transform as RectTransform;
+        TextMeshProUGUI paramHint = null;
+        if (hintParent != null && GameObject.Find("FaxasGraphParamHint") == null)
+        {
+            var hintGo = new GameObject("FaxasGraphParamHint");
+            var hrt = hintGo.AddComponent<RectTransform>();
+            hrt.SetParent(hintParent, false);
+            hrt.anchorMin = new Vector2(0.5f, 0f);
+            hrt.anchorMax = new Vector2(0.5f, 0f);
+            hrt.pivot = new Vector2(0.5f, 0f);
+            bool tablet = DeviceLayout.IsTabletLike();
+            float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset + 200f : 210f;
+            hrt.anchoredPosition = new Vector2(0f, up);
+            hrt.sizeDelta = new Vector2(tablet ? 960f : 860f, tablet ? 118f : 108f);
+
+            paramHint = hintGo.AddComponent<TextMeshProUGUI>();
+            paramHint.richText = true;
+            paramHint.enableWordWrapping = true;
+            paramHint.fontSize = tablet ? 22 : 19;
+            paramHint.alignment = TextAlignmentOptions.Top;
+            paramHint.color = new Color(0.9f, 0.93f, 0.98f, 0.96f);
+            ApplyPrimaryUiTypography(paramHint, FindPrimaryEquationTmp(), outlineWidth: 0.12f, outlineAlpha: 0.45f);
+        }
+        else if (GameObject.Find("FaxasGraphParamHint") != null)
+            paramHint = GameObject.Find("FaxasGraphParamHint").GetComponent<TextMeshProUGUI>();
+
+        foreach (var oldT in GetComponents<GraphCalculatorToolbar>())
+            Destroy(oldT);
+        foreach (var oldP in GetComponents<GraphPinchZoom>())
+            Destroy(oldP);
+
+        var toolbar = gameObject.AddComponent<GraphCalculatorToolbar>();
+        toolbar.Configure(functionPlotter,
+            transGo != null ? transGo.GetComponent<Button>() : null,
+            scaleGo != null ? scaleGo.GetComponent<Button>() : null,
+            paramHint);
+
+        var pinch = gameObject.AddComponent<GraphPinchZoom>();
+        pinch.Setup(functionPlotter);
+
+        if (controlsHintText != null)
+        {
+            controlsHintText.text =
+                "<color=#7a8399>Faxas-style graph</color>  <b>Trans</b> <color=#5c6577>transforms</color>  ·  " +
+                "<b>Scale</b> <color=#5c6577>zoom ±</color>  ·  <b>Pinch</b>  ·  <b>Back</b> menu";
+        }
+    }
+
+    private static void LayoutCalculatorToolButtons(GameObject transGo, GameObject scaleGo)
+    {
+        var canvas = UnityEngine.Object.FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+            return;
+
+        var safe = MobileUiRoots.GetSafeContentParent(canvas.transform) as RectTransform;
+        var parent = safe != null ? safe : canvas.transform as RectTransform;
+        if (parent == null)
+            return;
+
+        bool tablet = DeviceLayout.IsTabletLike();
+        float bottom = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset + 74f : 108f;
+        float w = tablet ? 210f : 198f;
+        float h = tablet ? 100f : 92f;
+
+        if (transGo != null)
+        {
+            transGo.SetActive(true);
+            var rt = transGo.GetComponent<RectTransform>();
+            rt.SetParent(parent, false);
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(0f, 0f);
+            rt.pivot = new Vector2(0f, 0f);
+            rt.sizeDelta = new Vector2(w, h);
+            rt.anchoredPosition = new Vector2(tablet ? 20f : 14f, bottom);
+        }
+
+        if (scaleGo != null)
+        {
+            scaleGo.SetActive(true);
+            var rt = scaleGo.GetComponent<RectTransform>();
+            rt.SetParent(parent, false);
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(0f, 0f);
+            rt.pivot = new Vector2(0f, 0f);
+            rt.sizeDelta = new Vector2(w, h);
+            rt.anchoredPosition = new Vector2(tablet ? 20f + w + 14f : 14f + w + 10f, bottom);
+        }
     }
 
     private void CreateObstaclesRootIfNeeded()
@@ -595,7 +781,8 @@ public class LevelManager : MonoBehaviour
             story:
                 "<color=#c4b5fd><b>Derivative</b></color> = slope of the tangent — how fast <b>f(x)</b> rises or falls at each step.\n\n" +
                 "<color=#fde047>Gold light</color> traces your path; <color=#7dd3fc>ice-blue</color> is f'(x) sculpting <i>where the floor exists</i>.\n\n" +
-                "<size=92%><color=#a8b2d1>Where f'(x) clears the rule, platforms hold; where it falls short, the void opens. Each bright <b>pop</b> is another act in the analysis you're walking through.</color></size>",
+                "<size=92%><color=#a8b2d1>Where f'(x) clears the rule, platforms hold; where it falls short, the void opens. Each bright <b>pop</b> is another act in the analysis you're walking through.</color></size>\n\n" +
+                "<size=88%><color=#94a3b8><b>First principles (business habit):</b> like builders at Tesla / SpaceX-style talks — peel analogy until you hit bedrock facts, then reason upward. Here, <b>f(x)</b> is your outcome model; <b>f'(x)</b> is where small input changes move the outcome fastest. Open <b>Math tips & snippets → First principles thinking</b> or <b>docs/first-principles-business.md</b> for the map.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.55f, 0.45f, 0.92f, 0.4f),
@@ -1539,6 +1726,7 @@ public class LevelManager : MonoBehaviour
             storyPauseSecondsOverride: 2.65f
         ));
 
+        // Competition math (41) + Mandelbrot boss (42) — keep order aligned with GameLevelCatalog.
         levels.Add(MakeLevel(
             GameLevelCatalog.DisplayNames[41],
             FunctionType.NaturalLog,
@@ -1853,6 +2041,9 @@ public class LevelManager : MonoBehaviour
     /// <summary>HUD refresh + derivative “pop” triggers based on player X in grid space.</summary>
     private void Update()
     {
+        if (graphCalculatorMode)
+            return;
+
         if (playerController == null || stageTriggerXGrid == null)
             return;
 

@@ -6,16 +6,19 @@ permalink: /gameplay/
 
 # Gameplay
 
+The product **First Principles** is named in part after **Elon Musk**’s comments on a **first-principles approach** to **business** and **problem-solving in life and work**; see **[First principles thinking & business]({% link first-principles-business.md %})** for how that lines up with the graph and derivative gameplay.
+
 ## Modes
 
 1. **Graphing calculator** — Functions are plotted on the Cartesian plane; numeric derivatives can be shown as a second curve (`FunctionPlotter`, `LineRendererUI`, `DerivRendererUI`).
 2. **Derivative platformer** — On **Game** scene, a small character runs on **platforms** generated from the curve; **gaps / hazards** follow rules based on the **derivative** (`GraphObstacleGenerator`, `PlayerControllerUI2D`).
+3. **Faxas Instruments–style free graphing** — From the **main menu** (green **Faxas-style graphing** button) or the **first row** on **Level select**, loads **Game** with **no platformer**: historic **Trans** (**transformations**: cycle \(A\), \(k\), \(C\), \(D\); double-tap nudges **+**, hold **−**) and **Scale** (**zoom** in on tap, zoom out on hold). **Two-finger pinch** on the graph changes the visible \(x\)-window. Framed as a classroom **Faxas Instruments** handheld–style workflow — **not** affiliated with any real brand.
 
-Level parameters (colors, function type, transformation coefficients, story text) are defined in code via **`LevelManager`** sample levels / **`LevelDefinition`**.
+Level parameters (colors, function type, transformation coefficients, story text) are defined in code via **`LevelManager`** sample levels / **`LevelDefinition`** (except this free-graph mode, which uses a fixed starter parabola).
 
 ### Sample level lineup (`GameLevelCatalog`)
 
-Titles are built at runtime from **`GameLevelCatalog.DisplayNames`** (order matches **`LevelManager`** sample levels). Expect **40+** named stages spanning primer → integrals → engineering → **AP Calculus BC** motifs → **polar** plots → **Physics C** hooks → **aerospace** teaching curves → a **final Mandelbrot escape-slice boss**, including:
+Titles are built at runtime from **`GameLevelCatalog.DisplayNames`** (order matches **`LevelManager`** sample levels). Expect **40+** named stages spanning primer → integrals → engineering → **AP Calculus BC** motifs → **polar** plots → **Physics C** hooks → **aerospace** teaching curves → **competition math** (\(\ln\), concavity mood) → a **final Mandelbrot escape-slice boss**, including:
 
 | Block | Examples |
 |--------|-----------|
@@ -27,7 +30,7 @@ Titles are built at runtime from **`GameLevelCatalog.DisplayNames`** (order matc
 | Physics C | Exponential decay (τ / RC), projectile parabola, angular momentum / L = Iω (SHM framing) |
 | **Aerospace** | Lift \(C_L(\alpha)\) + stall, drag polar, isothermal \(\rho(h)\), phugoid/damped mode, Newtonian \(\sin^{2}\alpha\), Strouhal sine, re-entry decay envelope |
 
-Open **Math tips & snippets** on the level-select screen for **short article text** plus **separate** blocks for **TMUA**, **MAT**, **AP Calculus BC**, and **AP Physics C**. Longer notes: **`docs/math-concepts.md`**, **`docs/engineering-math.md`**, **`docs/tmua-calculus.md`**, **`docs/mat-calculus.md`**, **`docs/ap-calculus-bc.md`**, **`docs/ap-physics-c.md`**.
+Open **Math tips & snippets** on the level-select screen for **short article text** plus blocks for **first principles thinking (business)** — see **[First principles thinking & business]({% link first-principles-business.md %})** — and **AMC 10/12**, **competition math**, **TMUA**, **MAT**, **AP Calculus BC**, and **AP Physics C**. Longer notes: **`docs/math-concepts.md`**, **`docs/engineering-math.md`**, **`docs/amc-10-12.md`**, **`docs/competition-math.md`**, **`docs/tmua-calculus.md`**, **`docs/mat-calculus.md`**, **`docs/ap-calculus-bc.md`**, **`docs/ap-physics-c.md`**.
 
 Special levels can **tint the grid** and adjust how long story text stays on screen.
 

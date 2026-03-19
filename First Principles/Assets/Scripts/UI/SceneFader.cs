@@ -1,7 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Collections;
 
 // -----------------------------------------------------------------------------
 // SceneFader — full-screen Image alpha fade between Menu / LevelSelect / Game
@@ -43,6 +43,7 @@ public class SceneFader : MonoBehaviour
 			fadeOutUIImage2.gameObject.SetActive(false);
 
 			ZoomIn();
+			StartCoroutine(SpawnFaxasMenuButtonNextFrame());
 
 			// FindObjectOfType<AudioManager>().PlayMusic("RainMusic");
 		}
@@ -107,6 +108,84 @@ public class SceneFader : MonoBehaviour
 
     private void ZoomIn() => Debug.Log("Zoomed In");
 
+    private IEnumerator SpawnFaxasMenuButtonNextFrame()
+    {
+        yield return null;
+        TrySpawnFaxasGraphingMenuButton();
+    }
+
+    /// <summary>Runtime entry for free graphing mode (no extra scene objects required).</summary>
+    private void TrySpawnFaxasGraphingMenuButton()
+    {
+        if (!string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))
+            return;
+        if (GameObject.Find("FaxasGraphingEntryButton") != null)
+            return;
+
+        var play = GameObject.FindGameObjectWithTag("PlayButton");
+        if (play == null)
+            return;
+
+        var playRt = play.GetComponent<RectTransform>();
+        if (playRt == null)
+            return;
+
+        var go = new GameObject("FaxasGraphingEntryButton");
+        var rt = go.AddComponent<RectTransform>();
+        rt.SetParent(playRt.parent, false);
+        rt.localScale = Vector3.one;
+        rt.anchorMin = playRt.anchorMin;
+        rt.anchorMax = playRt.anchorMax;
+        rt.pivot = playRt.pivot;
+        rt.sizeDelta = playRt.sizeDelta;
+        rt.anchoredPosition = playRt.anchoredPosition + new Vector2(0f, 168f);
+
+        var playImg = play.GetComponent<Image>();
+        var img = go.AddComponent<Image>();
+        if (playImg != null && playImg.sprite != null)
+        {
+            img.sprite = playImg.sprite;
+            img.type = playImg.type;
+        }
+
+        RuntimeUiPolish.UseRoundedSliced(img);
+        img.color = new Color(0.16f, 0.48f, 0.40f, 0.98f);
+
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color,
+            Color.Lerp(img.color, Color.white, 0.2f),
+            Color.Lerp(img.color, Color.black, 0.18f));
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.28f);
+        btn.onClick.AddListener(LoadGraphCalculator);
+
+        var textGo = new GameObject("Text");
+        var trt = textGo.AddComponent<RectTransform>();
+        trt.SetParent(go.transform, false);
+        trt.anchorMin = Vector2.zero;
+        trt.anchorMax = Vector2.one;
+        trt.offsetMin = new Vector2(10f, 6f);
+        trt.offsetMax = new Vector2(-10f, -6f);
+
+        var tmp = textGo.AddComponent<TMPro.TextMeshProUGUI>();
+        bool tablet = DeviceLayout.IsTabletLike();
+        tmp.text = "Faxas-style graphing";
+        tmp.fontSize = tablet ? 26 : 22;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.color = new Color(0.92f, 0.98f, 1f, 1f);
+        tmp.enableWordWrapping = true;
+        tmp.richText = true;
+        var refTmp = play.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+        if (refTmp != null && refTmp.font != null)
+        {
+            tmp.font = refTmp.font;
+            if (refTmp.fontSharedMaterial != null)
+                tmp.fontSharedMaterial = refTmp.fontSharedMaterial;
+        }
+        else if (TMPro.TMP_Settings.defaultFontAsset != null)
+            tmp.font = TMPro.TMP_Settings.defaultFontAsset;
+    }
+
     public void LoadGame()
     {
 		fadeOutUIImage.gameObject.SetActive(false);
@@ -124,6 +203,16 @@ public class SceneFader : MonoBehaviour
 		fadeOutUIImage.gameObject.SetActive(true);
 
 		StartCoroutine(FadeAndLoadScene(FadeDirection.In, "LevelSelect"));
+	}
+
+	/// <summary>Faxas Instruments–style free graph (same <c>Game</c> scene, platformer off).</summary>
+	public void LoadGraphCalculator()
+	{
+		GraphCalculatorSession.RequestEnterFromMenu();
+		fadeOutUIImage.gameObject.SetActive(false);
+		fadeOutUIImage = fadeOutUIImage2;
+		fadeOutUIImage.gameObject.SetActive(true);
+		StartCoroutine(FadeAndLoadScene(FadeDirection.In, "Game"));
 	}
 
 	public void LoadMenu()

@@ -39,6 +39,7 @@ The **derivative-driven platform rule** in the game is unchanged: where the samp
 |----------|------|
 | **[Math concepts]({% link math-concepts.md %})** | Broad in-game curriculum index |
 | **[AP Calculus BC — prep]({% link ap-calculus-bc.md %})** | Syllabus-shaped BC map (includes \(\ln\), concavity, series) |
+| **[AMC 10 & 12 — prep]({% link amc-10-12.md %})** | **MAA** AMC multiple-choice map (unofficial); algebra/geo/NT + graph bridges |
 | **[TMUA — calculus]({% link tmua-calculus.md %})** / **[MAT — calculus]({% link mat-calculus.md %})** | UK admissions multiple-choice / reasoning pace |
 | **This page** | Contest **style**: bounds, concavity, \(\ln\) as a hub |
 

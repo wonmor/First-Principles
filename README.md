@@ -1,7 +1,7 @@
 # First Principles: An Interactive Module
 
-A **graphing calculator** and **derivative-driven platformer** built in **Unity 6**.  
-Credits: **GAME GENESIS** ([Rayan Kaissi](https://github.com/rkaissi/)) × **ORCH AEROSPACE** ([John Wonmo Seong](https://github.com/wonmor)). **Proprietary** — see [`LICENSE`](LICENSE) and [`CREDITS.md`](CREDITS.md) for terms, App Store–style attribution, and third-party notices.
+A **graphing calculator** and **derivative-driven platformer** built in **Unity 6**. The **name** nods to **Elon Musk**’s comments on a **first-principles approach** to **business** and to **problem-solving in life and work**—paired here with **calculus** on the graph as the literal teaching layer ([`docs/first-principles-business.md`](docs/first-principles-business.md)).  
+Credits: **GAME GENESIS** ([Rayan Kaissi](https://github.com/rkaissi/)) × **ORCH AEROSPACE** ([John Wonmo Seong](https://github.com/wonmor) · **[orchaerospace.com](https://orchaerospace.com)**). **Proprietary** — see [`LICENSE`](LICENSE) and [`CREDITS.md`](CREDITS.md) for terms, App Store–style attribution, and third-party notices. **Orch Avionic 1 EFB** (promo): [`docs/orch-avionic-efb.md`](docs/orch-avionic-efb.md).
 
 ---
 
@@ -24,7 +24,7 @@ Comprehensive docs for setup, gameplay, architecture, and troubleshooting live i
 | **Browse in repo** | [`docs/index.md`](docs/index.md) |
 | **Published site** | After you enable **Settings → Pages → `/docs`**: `https://<user>.github.io/First-Principles/` (set `url` / `baseurl` in [`docs/_config.yml`](docs/_config.yml)) |
 
-Topics covered: **Unity 6000.4.0f1** project path (`First Principles/`), **Menu → Level select → Game**, **Math tips & snippets** overlay on level select, controls (**arrows / WASD**, **Space** jump), **stages HUD**, package restore script, TextMeshPro, **LaTeX-style math** (MathJax on GitHub Pages docs; `TmpLatex` → TMP in-game), and Pages **404** fixes. Runtime UI uses procedural **rounded sprites** (`RuntimeUiPolish`); optional Asset Store art: [`docs/optional-unity-assets.md`](docs/optional-unity-assets.md). Learning writeups: [`docs/math-concepts.md`](docs/math-concepts.md), [`docs/engineering-math.md`](docs/engineering-math.md), and **separate** unofficial prep: [`docs/tmua-calculus.md`](docs/tmua-calculus.md), [`docs/mat-calculus.md`](docs/mat-calculus.md), [`docs/ap-calculus-bc.md`](docs/ap-calculus-bc.md), [`docs/ap-physics-c.md`](docs/ap-physics-c.md).
+Topics covered: **Unity 6000.4.0f1** project path (`First Principles/`), **Menu → Level select → Game**, **Math tips & snippets** overlay on level select, controls (**arrows / WASD**, **Space** jump), **stages HUD**, package restore script, TextMeshPro, **LaTeX-style math** (MathJax on GitHub Pages docs; `TmpLatex` → TMP in-game), and Pages **404** fixes. Runtime UI uses procedural **rounded sprites** (`RuntimeUiPolish`); optional Asset Store art: [`docs/optional-unity-assets.md`](docs/optional-unity-assets.md). Learning writeups: [`docs/math-concepts.md`](docs/math-concepts.md), [`docs/first-principles-business.md`](docs/first-principles-business.md) (first principles thinking ↔ game metaphors), [`docs/competition-math.md`](docs/competition-math.md), [`docs/amc-10-12.md`](docs/amc-10-12.md), [`docs/engineering-math.md`](docs/engineering-math.md), and **separate** unofficial prep: [`docs/tmua-calculus.md`](docs/tmua-calculus.md), [`docs/mat-calculus.md`](docs/mat-calculus.md), [`docs/ap-calculus-bc.md`](docs/ap-calculus-bc.md), [`docs/ap-physics-c.md`](docs/ap-physics-c.md).
 
 ---
 

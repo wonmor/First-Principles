@@ -9,6 +9,7 @@ public static class LearningArticleLibrary
     public static string GetLevelSelectArticleRichText()
     {
         return TmpLatex.Process(@"<b><size=120%>Math concepts — in-game reader</size></b>
+<size=90%>The game <b>First Principles</b> takes its name from public remarks by <b>Elon Musk</b> on a <b>first-principles approach</b> to <b>business</b> and to <b>solving problems in life and work</b>—then teaches <b>calculus-first</b> ideas on the graph as a matching metaphor.</size>
 <size=90%>Use <b>Math concepts</b> while playing, or <b>Math tips & snippets</b> on Level select — same scrollable notes. Tap the dark backdrop or <b>Close</b> to dismiss.</size>
 
 <b><size=115%>How this game teaches calculus (read the graph while you play)</size></b>
@@ -21,9 +22,9 @@ public static class LearningArticleLibrary
 
 • <b>Riemann sums / area</b> — some levels shade rectangles or build <i>stair</i> platforms from left-, right-, or midpoint-rule samples. That pictures \(\displaystyle \int_a^b f(x)\,dx\) as the limit of \(\sum f(x^\ast)\,\Delta x\).
 
-• <b>Story text</b> — the banner at the top ties each level to the math (series, polar, physics metaphors, etc.). Pause and read; it fades so the run stays readable.
+• <b>Story text</b> — the banner at the top ties each level to the math (series, polar, physics metaphors, etc.). Pause and read; it fades so the run stays readable. The <b>First Principles Primer</b> also nudges <b>first-principles business</b> thinking (reason from fundamentals vs analogy).
 
-Everything below is a <b>topic glossary</b> you can skim between deaths or after finishing a graph.
+Everything below is a <b>topic glossary</b> you can skim between deaths or after finishing a graph — plus a <b>First principles thinking (business)</b> section before exam prep.
 </size>
 
 <b><size=110%>1. Derivatives = slope & rate</size></b>
@@ -76,7 +77,24 @@ A circle is usually written implicitly. Solving for \(y\) gives two branches (\(
 
 <b><size=90%>See docs/engineering-math.md § Aerospace for a longer map.</size></b>
 
+<b><size=120%>──────── First principles thinking (business) ────────</size></b>
+<size=92%>Startup culture often cites <b>Elon Musk</b> for reviving <b>first principles</b> at places like <b>Tesla / SpaceX</b>: stop trusting “the market always prices it this way,” and instead <b>unpack assumptions</b> until you hit bedrock facts (materials, energy, physics, true unit costs), then <b>reason upward</b> into a new design. The idea is older than any one founder — but the <i>habit</i> matches this game’s visuals.</size>
+
+<b><size=118%>Map the metaphor</size></b>
+• <b>Your mental “business curve”</b> is like <b>f(x)</b> — the story you tell about how output moves with a lever (price, latency, quality, throughput).
+• <b>Where it breaks or soars</b> is like <b>f'(x)</b> — <i>sensitivity</i>. Same as here: derivative magnitude decides whether the “floor” (your plan) actually holds.
+• <b>Stages & pops</b> — slice the bet into acts; each reveal is a new hypothesis. <b>Riemann / area levels</b> — many small choices sum; refine the grid before you scale spend.
+• <b>Multivariable slices</b> — fix hidden variables on purpose; one clear 1D walk beats a fuzzy 4D slide deck.
+
+<b><size=92%>This is <i>not</i> legal, tax, or investing advice — a thinking drill you can pair with real advisors and data. Full write-up:</size></b> <b>docs/first-principles-business.md</b> on GitHub Pages.
+
 <b><size=120%>──────── Exam prep (separate tracks) ────────</size></b>
+
+<b><size=118%>Competition mathematics (contest lens)</size></b>
+Problems from contests like <b>AMC / AIME</b> often reward <b>bounding</b>, <b>symmetry</b>, and knowing when a function is <b>concave or convex</b>. Natural log is a classic hub: \(\ln\) is <i>concave</i> on its domain — tangents/secants give linear estimates used in inequalities. In-game stage: <b>Competition math: ln, concavity & bound tricks</b> (before the Mandelbrot boss). <size=90%>Not affiliated with MAA or any contest body.</size> → <b>docs/competition-math.md</b>
+
+<b><size=118%>AMC 10 &amp; AMC 12 (MAA, US)</size></b>
+Both are middle/early high-school <b>multiple-choice</b> sprints; <b>calculus is not required</b>. Load-bearing ideas: smart algebra, functions (including logs), coordinate geometry, counting &amp; probability, modular arithmetic. Graph fluency from this game helps with <b>shape intuition</b>, <b>domains</b> (e.g. \(\ln\), \(\sqrt{\cdot}\)), and reading options even when you solve by algebra. <size=90%>Not affiliated with MAA — use official AMC materials for real problems.</size> → <b>docs/amc-10-12.md</b>
 
 <b><size=118%>TMUA — Test of Mathematics for University Admission (UK)</size></b>
 Two-paper <b>multiple choice</b>. Calculus shows up as fast <b>chain/product/quotient</b> fluency, sketch reasoning from \(f'\) and \(f''\), \(\int\) as signed area / FTC mood, <b>domains</b> of \(\ln\) & \(\sqrt{\cdot}\), exp/log inequalities, limits & asymptotes. Typical traps: \(|x|\) kinks, endpoint maxima, “exactly one option is true” elimination. <size=90%>No reproduced questions—use official TMUA materials.</size> → <b>docs/tmua-calculus.md</b>
@@ -91,7 +109,7 @@ BC stacks <b>series & Taylor</b>, <b>parametric / polar / vector-valued</b> moti
 <b>Calculus-first</b> mechanics & E&amp;M: \(v = dr/dt\), \(a = dv/dt\), work integrals, \(\tau = dL/dt\), \(L = I\omega\) on a fixed axis, angular momentum conservation when \(\tau_{\mathrm{ext}} = 0\); E&amp;M uses flux / line-integral setups. Game motifs: <i>exponential decay \((\tau)\)</i>, <i>projectile parabola</i>, <i>rotation / SHM</i>—visual hooks only. → <b>docs/ap-physics-c.md</b>
 
 <b><size=110%>Where to read more</size></b>
-<b>docs/math-concepts.md</b> (index), <b>docs/engineering-math.md</b> (applied circuits/oscillations), and the four prep files above on GitHub Pages.
+<b>docs/math-concepts.md</b> (index), <b>docs/first-principles-business.md</b> (Musk-popularized builder lens ↔ game), <b>docs/competition-math.md</b> &amp; <b>docs/amc-10-12.md</b> (contest / MAA map), <b>docs/engineering-math.md</b> (applied circuits/oscillations), and the exam-prep files above on GitHub Pages.
 
 — © 2022-2026 · GAME GENESIS × ORCH AEROSPACE · First Principles
 ");

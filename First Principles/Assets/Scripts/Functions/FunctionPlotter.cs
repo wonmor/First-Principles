@@ -37,6 +37,10 @@ public class FunctionPlotter : MonoBehaviour
 
     public int baseN = 2;
 
+    /// <summary>When <see cref="functionType"/> is <see cref="FunctionType.CustomExpression"/>, evaluates this as <c>f(u)</c> with <c>u = transK·(x−transD)</c>; plotted <c>y = transA·f(u)+transC</c>.</summary>
+    [TextArea(1, 3)]
+    public string customExpression = "x^2";
+
     public bool differentiate = false;
 
     // Local points list
@@ -107,6 +111,13 @@ public class FunctionPlotter : MonoBehaviour
     public void SetEquationExtraSuffix(string suffix)
     {
         equationExtraSuffix = suffix ?? "";
+    }
+
+    /// <summary>Switches to typed expression mode (Faxas graphing).</summary>
+    public void SetCustomExpression(string expression)
+    {
+        customExpression = string.IsNullOrWhiteSpace(expression) ? "0" : expression.Trim();
+        functionType = FunctionType.CustomExpression;
     }
 
     private void PlotFunction(FunctionType type)
@@ -181,6 +192,9 @@ public class FunctionPlotter : MonoBehaviour
 
         return type switch
         {
+            FunctionType.CustomExpression =>
+                EvaluateCustomExpression(transA, transC, u),
+
             FunctionType.Power => transA * (Mathf.Pow(u, power) + transC),
             FunctionType.Absolute => transA * (Mathf.Abs(u) + transC),
             FunctionType.Exponential => transA * (Mathf.Pow(baseN, u) + transC),
@@ -230,6 +244,13 @@ public class FunctionPlotter : MonoBehaviour
 
             _ => 0f
         };
+    }
+
+    private float EvaluateCustomExpression(float transA, float transC, float u)
+    {
+        if (MathExpressionEvaluator.TryEvaluate(customExpression, u, out float fy, out _))
+            return transA * fy + transC;
+        return float.NaN;
     }
 
     /// <summary>
@@ -379,6 +400,13 @@ public class FunctionPlotter : MonoBehaviour
 
     private static bool IsFinite(float f) => !(float.IsNaN(f) || float.IsInfinity(f));
 
+    private static string EscapeTmpRichText(string raw)
+    {
+        if (string.IsNullOrEmpty(raw))
+            return "";
+        return raw.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
+    }
+
     private void UpdateEquationText(FunctionType type, float transA, float transK, float transC, float transD, int power, int baseN)
     {
         // Keep equation text simple and consistent; domain errors (e.g. log/sqrt of non-positive) are handled by skipping non-finite points.
@@ -481,6 +509,17 @@ public class FunctionPlotter : MonoBehaviour
                 equationText.text =
                     $@"<b>\(\text{{Mandelbrot slice}}\)</b> \(h\propto\text{{escape-time}},\; c=({a})+\mathrm{{i}}u,\; u={k}(x-{d}),\; N={power}\)";
                 break;
+            case FunctionType.CustomExpression:
+            {
+                string esc = EscapeTmpRichText(customExpression);
+                equationText.text =
+                    $"<b>Typed f(u)</b>\n" +
+                    $"<size=94%><color=#f2f4ff>{esc}</color></size>\n" +
+                    $"<size=78%><color=#94a3b8>Plotted: <b>y = A·f(u)+C</b>, u = k·(x−D). Edit below. Use sin, cos, tan, sqrt, ln, log, exp, ^, pi, e …</color></size>";
+                if (!string.IsNullOrEmpty(equationExtraSuffix))
+                    equationText.text += $"\n<size=85%><color=#a8b2d1>{equationExtraSuffix}</color></size>";
+                return;
+            }
             default:
                 equationText.text = @"\(f(x)\)";
                 break;
@@ -539,7 +578,10 @@ public enum FunctionType
     AeroNewtonianSinSquared,
 
     /// <summary>Escape iteration count vs Im(c) with fixed Re(c) = transA (boss slice); uses |Im| in iteration for conjugate symmetry.</summary>
-    MandelbrotEscapeImSlice
+    MandelbrotEscapeImSlice,
+
+    /// <summary>User-typed <c>f(u)</c> via <see cref="FunctionPlotter.customExpression"/> (Faxas graphing).</summary>
+    CustomExpression
 }
 
 /* 

@@ -6,7 +6,9 @@ permalink: /math-concepts/
 
 # Math concepts & snippets
 
-Friendly **article-style** notes that match what you see in the **First Principles** game and graph. For a dedicated **engineering** lens, see [**Engineering math**]({% link engineering-math.md %}) — including [**§ Aerospace / aerodynamics**]({% link engineering-math.md %}#6-aerospace-engineering--aerodynamics-game-map) and matching in-game **Aerospace:** levels.
+Friendly **article-style** notes that match what you see in the **First Principles** game and graph. For **[first principles thinking & business]({% link first-principles-business.md %})** (reasoning from fundamentals vs analogy — often associated with **Elon Musk**’s public builder rhetoric, tied to this game’s curve / derivative metaphors), see that standalone page and the **Math tips & snippets** reader in-app.
+
+For a dedicated **engineering** lens, see [**Engineering math**]({% link engineering-math.md %}) — including [**§ Aerospace / aerodynamics**]({% link engineering-math.md %}#6-aerospace-engineering--aerodynamics-game-map) and matching in-game **Aerospace:** levels.
 
 ---
 
@@ -102,12 +104,13 @@ More rectangles → usually **closer** to the true integral.
 
 ## 9. Exam preparation — separate guides
 
-These are **four standalone** pages (plus **competition** and **engineering** below). Each uses **official exam materials** for real questions; the repo only provides **unofficial topic maps** and **game cross-links**.
+These are **standalone** prep pages (plus **competition**, **AMC 10/12**, and **engineering** below). Each uses **official exam materials** for real questions; the repo only provides **unofficial topic maps** and **game cross-links**.
 
 | Guide | Audience |
 |--------|-----------|
 | **[Competition math]({% link competition-math.md %})** | **Contest lens** — AMC/AIME-style bounding, **concavity**, \(\ln\) tricks (not affiliated with MAA) |
-| **[TMUA — calculus]({% link tmua-calculus.md %})** | UK **TMUA** — two-player **multiple choice**; calculus fluency & elimination |
+| **[AMC 10 & 12 — prep]({% link amc-10-12.md %})** | **MAA** AMC multiple-choice map (unofficial); calculus **not required**; algebra/geo/NT focus |
+| **[TMUA — calculus]({% link tmua-calculus.md %})** | UK **TMUA** — two-paper **multiple choice**; calculus fluency & elimination |
 | **[MAT — calculus & reasoning]({% link mat-calculus.md %})** | UK **MAT** (Oxford, etc.) — careful reasoning & multi-step work |
 | **[AP Calculus BC — prep]({% link ap-calculus-bc.md %})** | US **AP BC** — series, polar/parametric/vector, DEs, FRQ/MC pairing |
 | **[AP Physics C — prep]({% link ap-physics-c.md %})** | US **Physics C** — calculus-first mechanics & E&M hooks |
@@ -150,11 +153,11 @@ This is a **teaching** view (moderate iteration cap, wide sample step), not a de
 
 | Where | What |
 |--------|------|
-| **Level select → Math tips & snippets** | Short TMP article + **four separated prep blocks** (TMUA, MAT, AP BC, AP Physics C). |
-| **This site (`math-concepts.md`)** | Game concepts + index to exam prep + **[competition math]({% link competition-math.md %})**. |
-| **`tmua-calculus.md`**, **`mat-calculus.md`**, **`ap-calculus-bc.md`**, **`ap-physics-c.md`** | Unofficial **standalone** prep notes (not past papers). |
+| **Level select → Math tips & snippets** | Short TMP article + **[first principles thinking & business]({% link first-principles-business.md %})** + prep blocks (AMC, competition, TMUA, MAT, AP BC, AP Physics C). |
+| **This site (`math-concepts.md`)** | Game concepts + index to exam prep + **[first principles thinking & business]({% link first-principles-business.md %})** + **[competition math]({% link competition-math.md %})** + **[AMC 10 & 12 — prep]({% link amc-10-12.md %})**. |
+| **`amc-10-12.md`**, **`tmua-calculus.md`**, **`mat-calculus.md`**, **`ap-calculus-bc.md`**, **`ap-physics-c.md`** | Unofficial **standalone** prep notes (not past papers). |
 | **`engineering-math.md`** | Damped motion, phasors, transforms, linear algebra hooks. |
 
 ---
 
-*Aligned with the **First Principles** curriculum: primer through integrals, engineering stages, and **separate** unofficial prep tracks for **TMUA**, **MAT**, **AP Calculus BC**, and **AP Physics C**.*
+*Aligned with the **First Principles** curriculum: primer through integrals, engineering stages, optional **[first principles business]({% link first-principles-business.md %})** lens, and **separate** unofficial prep tracks for **AMC 10/12**, **TMUA**, **MAT**, **AP Calculus BC**, and **AP Physics C**.*

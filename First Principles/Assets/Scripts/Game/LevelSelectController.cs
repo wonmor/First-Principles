@@ -113,6 +113,8 @@ public class LevelSelectController : MonoBehaviour
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
+        CreateLevelButton(contentRt, "Faxas Instruments-style graphing (free plot)", LaunchGraphCalculator);
+
         for (int i = 0; i < GameLevelCatalog.LevelCount; i++)
         {
             int idx = i;
@@ -194,6 +196,12 @@ public class LevelSelectController : MonoBehaviour
             target.font = any.font;
         if (target.font == null && TMP_Settings.defaultFontAsset != null)
             target.font = TMP_Settings.defaultFontAsset;
+    }
+
+    private static void LaunchGraphCalculator()
+    {
+        GraphCalculatorSession.RequestEnterFromMenu();
+        SceneManager.LoadScene("Game");
     }
 
     private void CreateLevelButton(Transform parent, string label, UnityAction onClick)

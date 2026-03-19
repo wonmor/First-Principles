@@ -23,8 +23,10 @@ header_pages:
   - index.md
   - setup.md
   - gameplay.md
+  - first-principles-business.md
   - math-concepts.md
   - competition-math.md
+  - amc-10-12.md
   - engineering-math.md
   - architecture.md
   - ci.md

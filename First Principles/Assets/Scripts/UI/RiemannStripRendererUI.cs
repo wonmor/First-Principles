@@ -49,6 +49,13 @@ public class RiemannStripRendererUI : Graphic
         }
     }
 
+    /// <summary>Clears rectangles (e.g. switching to free graphing mode).</summary>
+    public void ClearStrips()
+    {
+        strips.Clear();
+        SetVerticesDirty();
+    }
+
     /// <summary>Rebuild strip geometry from level + plotter.</summary>
     public void Rebuild(LevelDefinition def, FunctionPlotter plotter)
     {

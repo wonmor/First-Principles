@@ -70,6 +70,8 @@ Look for titles prefixed **BC:**, **Polar:**, and **Circle** in level select, e.
 
 ## Related repo docs
 
+- **[Competition math]({% link competition-math.md %})** — contest-style bounding / \(\ln\) / concavity lens (in-game stage).
+- **[AMC 10 & 12 — prep]({% link amc-10-12.md %})** — unofficial MAA topic map (calculus not required); pairs with graph practice.
 - **[AP Physics C — prep]({% link ap-physics-c.md %})** — calculus-first physics companion.
 - **[Math concepts & snippets]({% link math-concepts.md %})** — broader in-game curriculum notes.
 - **[TMUA — calculus]({% link tmua-calculus.md %})**, **[MAT — calculus]({% link mat-calculus.md %})** — UK admissions angle.
