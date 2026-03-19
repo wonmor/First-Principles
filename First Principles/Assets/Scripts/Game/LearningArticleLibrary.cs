@@ -65,6 +65,17 @@ Full-wave rectification flips negative lobes upward — a first step in turning 
 <b><size=110%>13. Circle (x−h)² + (y−k)² = R²</size></b>
 A circle is usually written implicitly. Solving for y gives two branches (±√). The game’s circle stage uses the <i>upper</i> semicircle so the path stays a function y(x) over one sweep. Implicit differentiation yields dy/dx = −(x−h)/(y−k); at the ends of the diameter the tangent is vertical (slope blows up).
 
+<b><size=120%>──────── Aerospace engineering & aerodynamics ────────</size></b>
+<size=92%>Levels prefixed <b>Aerospace:</b> turn textbook flight‑vehicle math into paths you run. They are <i>toy models</i> for pedagogy — not CFD, flight test, or ITAR‑grade simulations.</size>
+
+<b><size=118%>Lift, drag, atmosphere</size></b>
+<b>C_L(α)</b> grows ~linearly before <b>stall</b> (flow separation), then drops — slopes & breakpoints drive your platforms. <b>Drag polar</b> C_D = C_{D0} + K C_L² is a parabola in C_L: min‑drag sweet spots matter for glide & endurance. <b>Isothermal atmosphere</b> uses ρ(h) ∝ e^{−h/H} (scale height H): density drives q = ½ρV², Reynolds, thrust lapse.
+
+<b><size=118%>Stability, unsteady aero, entry</size></b>
+<b>Phugoid / short‑period</b> moods use damped sinusoids from linearized dynamics (eigenvalues in state space). <b>Strouhal</b> shedding ties frequency to U/D with sine‑like traces. <b>Newtonian sin²α</b> sketches hypersonic windward pressure teaching curves. <b>Re‑entry decay</b> uses an exponential envelope mood for “how fast heating threat relaxes” in simplified stories.
+
+<b><size=90%>See docs/engineering-math.md § Aerospace for a longer map.</size></b>
+
 <b><size=120%>──────── Exam prep (separate tracks) ────────</size></b>
 
 <b><size=118%>TMUA — Test of Mathematics for University Admission (UK)</size></b>
@@ -82,7 +93,7 @@ BC stacks <b>series & Taylor</b>, <b>parametric / polar / vector-valued</b> moti
 <b><size=110%>Where to read more</size></b>
 <b>docs/math-concepts.md</b> (index), <b>docs/engineering-math.md</b> (applied circuits/oscillations), and the four prep files above on GitHub Pages.
 
-— GAME GENESIS × ORCH AEROSPACE · College Math For Toddlers
+— © 2022-2026 · GAME GENESIS × ORCH AEROSPACE · First Principles
 ";
     }
 }

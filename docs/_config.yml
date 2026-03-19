@@ -22,6 +22,7 @@ header_pages:
   - math-concepts.md
   - engineering-math.md
   - architecture.md
+  - ci.md
   - troubleshooting.md
 
 # Minima skin (optional): dark, classic, solarized, solarized-dark

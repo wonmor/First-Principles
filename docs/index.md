@@ -9,7 +9,7 @@ title: Home
 
 **First Principles** is a **Unity 6** project (proprietary; see [`LICENSE`](../LICENSE)) that combines a **graphing calculator** (functions and numeric derivatives on a grid) with a **Limbo-inspired 2D platformer**: platforms and hazards are driven by the curve and its derivative, with **staged progression** and per-level themes (including primer, series, multivariable slices, **integral / Riemann-sum** stages, and **engineering math** graphs). **Readable article snippets** live in **`docs/math-concepts.md`**, **`docs/engineering-math.md`**, and **four separated exam-prep notes** — **`docs/tmua-calculus.md`**, **`docs/mat-calculus.md`**, **`docs/ap-calculus-bc.md`**, **`docs/ap-physics-c.md`** (all unofficial; not past papers)—plus in-app **Level select → Math tips & snippets** with matching **TMUA / MAT / AP BC / AP Physics C** blocks.
 
-Credits: **GAME GENESIS** ([Rayan Kaissi](https://github.com/GameGenesis)) × **ORCH AEROSPACE** ([John Wonmo Seong](https://github.com/wonmor)), as part of *College Math For Toddlers*. **Proprietary** — [`LICENSE`](../LICENSE). Full attribution: [`CREDITS.md`](../CREDITS.md).
+Credits: **GAME GENESIS** ([Rayan Kaissi](https://github.com/rkaissi/)) × **ORCH AEROSPACE** ([John Wonmo Seong](https://github.com/wonmor)). **Proprietary** — [`LICENSE`](../LICENSE). Full attribution: [`CREDITS.md`](../CREDITS.md).
 
 ## Quick links
 
@@ -24,6 +24,8 @@ Credits: **GAME GENESIS** ([Rayan Kaissi](https://github.com/GameGenesis)) × **
 | [AP Calculus BC — prep]({% link ap-calculus-bc.md %}) | US AP BC — syllabus topics & in-game map (unofficial) |
 | [AP Physics C — prep]({% link ap-physics-c.md %}) | US AP Physics C — calculus-first mechanics/E&M hooks (unofficial) |
 | [Architecture]({% link architecture.md %}) | Scenes, scripts, data flow |
+| [CI — GitHub Actions]({% link ci.md %}) | Docs build + Unity (GameCI) workflow; `UNITY_LICENSE` setup |
+| [Optional Unity assets]({% link optional-unity-assets.md %}) | Free UI / art packs you can import (project also uses procedural `RuntimeUiPolish`) |
 | [Troubleshooting]({% link troubleshooting.md %}) | Package cache, TextMeshPro, GitHub Pages / `baseurl` |
 
 ## Repository layout

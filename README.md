@@ -1,13 +1,13 @@
 # First Principles: An Interactive Module
 
 A **graphing calculator** and **derivative-driven platformer** built in **Unity 6**.  
-Credits: **GAME GENESIS** ([Rayan Kaissi](https://github.com/GameGenesis)) × **ORCH AEROSPACE** ([John Wonmo Seong](https://github.com/wonmor)). Part of the not-for-profit **College Math For Toddlers** initiative. **Proprietary** — see [`LICENSE`](LICENSE) and [`CREDITS.md`](CREDITS.md) for terms, App Store–style attribution, and third-party notices.
+Credits: **GAME GENESIS** ([Rayan Kaissi](https://github.com/rkaissi/)) × **ORCH AEROSPACE** ([John Wonmo Seong](https://github.com/wonmor)). **Proprietary** — see [`LICENSE`](LICENSE) and [`CREDITS.md`](CREDITS.md) for terms, App Store–style attribution, and third-party notices.
 
 ---
 
 ## Beta build 1.0
 
-The project pairs a **Cartesian graph UI** (functions + numeric derivatives) with **Limbo-style** gameplay: **platforms** follow the curve and **gaps / hazards** follow derivative rules, with **staged progression** (HUD), **level select**, primer plus **Taylor / Maclaurin / series / multivar** levels, **area-under-the-curve / Riemann sum** stages (left, right, midpoint rectangles + optional stair platforms), an **AP Calculus BC** extension (polar rose/cardioid, logistic, inverse trig, transcendental-tooling levels), and **AP Physics C** hooks (decay, projectile, angular momentum / rotation stories), and typography matched to the main equation label. **Mobile / touch:** portrait-oriented scaler, **safe-area** UI, **scrollable** level list, and **on-screen move/jump** controls on handheld / touch builds.
+The project pairs a **Cartesian graph UI** (functions + numeric derivatives) with **Limbo-style** gameplay: **platforms** follow the curve and **gaps / hazards** follow derivative rules, with **staged progression** (HUD), **level select**, primer plus **Taylor / Maclaurin / series / multivar** levels, **area-under-the-curve / Riemann sum** stages (left, right, midpoint rectangles + optional stair platforms), an **AP Calculus BC** extension (polar rose/cardioid, logistic, inverse trig, transcendental-tooling levels), **AP Physics C** hooks (decay, projectile, angular momentum / rotation stories), and **aerospace / aerodynamics** stages (lift vs α & stall, drag polar, atmosphere ρ(h), phugoid mood, Newtonian sin²α, Strouhal shedding, re-entry decay envelope), with typography matched to the main equation label. **Mobile / touch:** portrait-oriented scaler, **safe-area** UI, **scrollable** level list, and **on-screen move/jump** controls on handheld / touch builds.
 
 **Player build version** (Unity **Project Settings → Player**): **1.0** (`bundleVersion`).
 
@@ -24,7 +24,7 @@ Comprehensive docs for setup, gameplay, architecture, and troubleshooting live i
 | **Browse in repo** | [`docs/index.md`](docs/index.md) |
 | **Published site** | After you enable **Settings → Pages → `/docs`**: `https://<user>.github.io/First-Principles/` (set `url` / `baseurl` in [`docs/_config.yml`](docs/_config.yml)) |
 
-Topics covered: **Unity 6000.4.0f1** project path (`First Principles/`), **Menu → Level select → Game**, **Math tips & snippets** overlay on level select, controls (**arrows / WASD**, **Space** jump), **stages HUD**, package restore script, TextMeshPro, and Pages **404** fixes. Learning writeups: [`docs/math-concepts.md`](docs/math-concepts.md), [`docs/engineering-math.md`](docs/engineering-math.md), and **separate** unofficial prep: [`docs/tmua-calculus.md`](docs/tmua-calculus.md), [`docs/mat-calculus.md`](docs/mat-calculus.md), [`docs/ap-calculus-bc.md`](docs/ap-calculus-bc.md), [`docs/ap-physics-c.md`](docs/ap-physics-c.md).
+Topics covered: **Unity 6000.4.0f1** project path (`First Principles/`), **Menu → Level select → Game**, **Math tips & snippets** overlay on level select, controls (**arrows / WASD**, **Space** jump), **stages HUD**, package restore script, TextMeshPro, and Pages **404** fixes. Runtime UI uses procedural **rounded sprites** (`RuntimeUiPolish`); optional Asset Store art: [`docs/optional-unity-assets.md`](docs/optional-unity-assets.md). Learning writeups: [`docs/math-concepts.md`](docs/math-concepts.md), [`docs/engineering-math.md`](docs/engineering-math.md), and **separate** unofficial prep: [`docs/tmua-calculus.md`](docs/tmua-calculus.md), [`docs/mat-calculus.md`](docs/mat-calculus.md), [`docs/ap-calculus-bc.md`](docs/ap-calculus-bc.md), [`docs/ap-physics-c.md`](docs/ap-physics-c.md).
 
 ---
 
@@ -35,6 +35,7 @@ Topics covered: **Unity 6000.4.0f1** project path (`First Principles/`), **Menu 
 | **`First Principles/`** | **Unity project root** — open this folder in Unity Hub (`Assets`, `ProjectSettings`, `Packages`). |
 | **`docs/`** | GitHub Pages documentation (Jekyll). |
 | **`clean-unity-library.sh`** | Deletes `First Principles/Library` and stray `Packages/com.unity.*` embeds; use when packages are corrupt. |
+| **`.github/workflows/`** | CI: Jekyll **docs** build; **Unity** Edit Mode tests via [GameCI](https://game.ci/) (needs `UNITY_LICENSE` secret — see [`docs/ci.md`](docs/ci.md)). |
 | **`README.md`** | This file. |
 | **`CREDITS.md`** | Attribution & third-party summary (App Store / support pages). |
 
@@ -92,4 +93,4 @@ Topics covered: **Unity 6000.4.0f1** project path (`First Principles/`), **Menu 
 
 ---
 
-**Proprietary** · **First Principles** · *College Math For Toddlers*
+**© 2022-2026** · **Proprietary** · **First Principles**

@@ -6,7 +6,7 @@ permalink: /math-concepts/
 
 # Math concepts & snippets
 
-Friendly **article-style** notes that match what you see in the **First Principles** game and graph. For a dedicated **engineering** lens, see [**Engineering math**]({% link engineering-math.md %}).
+Friendly **article-style** notes that match what you see in the **First Principles** game and graph. For a dedicated **engineering** lens, see [**Engineering math**]({% link engineering-math.md %}) — including [**§ Aerospace / aerodynamics**]({% link engineering-math.md %}#6-aerospace-engineering--aerodynamics-game-map) and matching in-game **Aerospace:** levels.
 
 ---
 

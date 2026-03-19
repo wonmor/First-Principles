@@ -33,7 +33,7 @@ public static class MathArticlesOverlay
         rootRt.offsetMax = Vector2.zero;
 
         var dim = root.AddComponent<Image>();
-        dim.color = new Color(0.02f, 0.02f, 0.05f, 0.92f);
+        dim.color = new Color(0.04f, 0.05f, 0.11f, 0.93f);
         dim.raycastTarget = true;
 
         void Close() => UnityEngine.Object.Destroy(root);
@@ -49,7 +49,9 @@ public static class MathArticlesOverlay
         ApplySafeAreaToPanel(panelRt, outerMargin: tablet ? 14f : 10f);
 
         var panelBg = panel.AddComponent<Image>();
-        panelBg.color = new Color(0.14f, 0.15f, 0.18f, 1f);
+        RuntimeUiPolish.UseRoundedSliced(panelBg);
+        panelBg.color = RuntimeUiPolish.PanelMid;
+        RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(3f, -5f), 0.34f);
 
         var closeBtnGo = new GameObject("CloseButton");
         var closeRt = closeBtnGo.AddComponent<RectTransform>();
@@ -61,10 +63,14 @@ public static class MathArticlesOverlay
         closeRt.anchoredPosition = Vector2.zero;
 
         var closeImg = closeBtnGo.AddComponent<Image>();
-        closeImg.color = new Color(0.28f, 0.28f, 0.32f, 1f);
+        RuntimeUiPolish.UseRoundedSliced(closeImg);
+        closeImg.color = RuntimeUiPolish.ButtonNeutral;
         var closeBtn = closeBtnGo.AddComponent<Button>();
         closeBtn.targetGraphic = closeImg;
+        RuntimeUiPolish.ApplyButtonTransitions(closeBtn, RuntimeUiPolish.ButtonNeutral,
+            RuntimeUiPolish.ButtonNeutralHover, RuntimeUiPolish.PanelDeep);
         closeBtn.onClick.AddListener(Close);
+        RuntimeUiPolish.ApplyDropShadow(closeRt, new Vector2(1.5f, -2f), 0.22f);
 
         var closeTxtGo = new GameObject("Text");
         var closeTxtRt = closeTxtGo.AddComponent<RectTransform>();

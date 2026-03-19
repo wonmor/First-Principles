@@ -4,13 +4,22 @@ Use this file for **in-app parity**, **App Store Connect** (description / promot
 
 ## Developers
 
-**GAME GENESIS** (Rayan Kaissi) × **ORCH AEROSPACE** (John Wonmo Seong)
+**GAME GENESIS** ([Rayan Kaissi](https://github.com/rkaissi/)) × **ORCH AEROSPACE** ([John Wonmo Seong](https://github.com/wonmor))
+
+**Proud graduates of Garth Webb Secondary School, Oakville.**
+
+**Copyright © 2022-2026** Game Genesis (Rayan Kaissi), Orch Aerospace (John Wonmo Seong). All rights reserved.
+
+## Development & support
+
+**First Principles** has been built over **about four years** of design, engineering, and iteration. If the project matters to you, **please support** the team however you can — purchasing or wishlisting on your platform, sharing the game, or following updates — so we can keep improving it. **Thank you.**
+
+*(Use your real App Store / Steam / itch.io / support links on store pages and in promotional copy; they are not duplicated here to avoid stale URLs.)*
 
 ## Project
 
 - **Name:** First Principles  
 - **License:** [Proprietary](LICENSE) — all rights reserved.  
-- **Initiative:** *College Math For Toddlers* (not-for-profit)
 
 ## Third-party software (summary)
 

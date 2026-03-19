@@ -64,13 +64,31 @@ You don’t need complex numbers to enjoy this repo—but if you keep studying *
 
 ---
 
-## 6. Transforms and signals (concept only)
+## 6. Aerospace engineering & aerodynamics (game map)
+
+**First Principles** adds **Aerospace:** stages — calculus-shaped **teaching curves**, not a wind-tunnel or Navier–Stokes solver.
+
+| Idea | Typical model / graph | Game stage |
+|------|----------------------|------------|
+| **Lift vs α** | \(C_L\) ~ linear before **stall**, then loss of lift | *Aerospace: lift C_L(α) linear + stall* |
+| **Drag polar** | \(C_D = C_{D0} + K C_L^2\) | *Aerospace: parabolic drag polar* |
+| **Atmosphere** | \(\rho(h) \propto e^{-h/H}\) (isothermal cartoon) | *Aerospace: isothermal atmosphere ρ(h)* |
+| **Longitudinal modes** | Damped oscillation (phugoid / short-period mood) | *Aerospace: phugoid / damped pitch–heave mood* |
+| **Hypersonic teaching** | \(C_p \propto \sin^2\alpha\) (Newtonian impact) | *Aerospace: Newtonian Cp ∝ sin²α* |
+| **Unsteady shedding** | Strouhal \(f \sim \mathrm{St}\, U/D\) → periodic trace | *Aerospace: Strouhal / vortex shedding tone* |
+| **Entry / heating mood** | Exponential decay envelope for simplified threat histories | *Aerospace: re-entry decay envelope* |
+
+**Fine print:** Real vehicles couple **Mach**, **Re**, **elasticity**, **controls**, **propulsion**, and mission constraints. Use these graphs to **practice reading slopes, areas, and nonlinear breaks** — then carry the habits to J. D. Anderson, Etkin & Reid, or your department’s aero courses.
+
+---
+
+## 7. Transforms and signals (concept only)
 
 **Fourier** ideas: build signals from **sines and cosines** of many frequencies. **Laplace** ideas: turn **time** problems into **algebra** to study **transients and stability**. Both are “engineering math heavy hitters,” both show up **after** you’re comfortable with derivatives, integrals, and exponentials.
 
 ---
 
-## 7. Linear algebra (why it matters)
+## 8. Linear algebra (why it matters)
 
 **Vectors**, **matrices**, and **linear systems** describe:
 
@@ -91,9 +109,10 @@ The **multivariable slice** levels in First Principles are a **tiny step** towar
 | Multivar slices | Saddle, paraboloid |
 | Integrals / Riemann | Area, left/right/mid |
 | Damped motion, cosh, rectified AC | Engineering levels |
+| Aerodynamics & flight textbook curves | **Aerospace:** … stages (see §6) |
 
 For the **full bite-sized list** (including non-engineering topics), see [**Math concepts & snippets →**]({% link math-concepts.md %}).
 
 ---
 
-*Part of First Principles / College Math For Toddlers (proprietary).*
+*Part of First Principles (proprietary).*

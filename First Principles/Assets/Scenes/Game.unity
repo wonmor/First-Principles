@@ -283,7 +283,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: f(x) = (0.4(x - 2))^3 + (-2)
+  m_text: f(x) = 0.38*((0.42*(x - 0))^2 + (-1.85))
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 79fe93baac0634b6a88831eb18f73b04, type: 2}
   m_sharedMaterial: {fileID: -5611889265188688309, guid: 79fe93baac0634b6a88831eb18f73b04, type: 2}
@@ -2424,11 +2424,11 @@ MonoBehaviour:
   xStart: -20
   xEnd: 20
   step: 0.1
-  transA: 1
-  transK: 0.4
-  transC: -2
-  transD: 2
-  power: 3
+  transA: 0.38
+  transK: 0.42
+  transC: -1.85
+  transD: 0
+  power: 2
   functionType: 0
   baseN: 2
   differentiate: 1

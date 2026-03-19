@@ -166,8 +166,10 @@ public class LevelManager : MonoBehaviour
         rect.pivot = new Vector2(0, 0);
 
         var img = playerGo.AddComponent<Image>();
-        img.sprite = TryGetSquareSprite();
-        img.color = new Color(1f, 1f, 1f, 1f);
+        img.sprite = RuntimeUiPolish.SoftCharacterBlob != null ? RuntimeUiPolish.SoftCharacterBlob : TryGetSquareSprite();
+        img.color = RuntimeUiPolish.PlayerBody;
+        img.type = Image.Type.Simple;
+        RuntimeUiPolish.ApplyDropShadow(rect, new Vector2(1f, -2f), 0.35f);
 
         playerController = playerGo.AddComponent<PlayerControllerUI2D>();
         playerController.BindVisual(rect, img);
@@ -249,10 +251,11 @@ public class LevelManager : MonoBehaviour
             float topPad = DeviceLayout.PreferOnScreenGameControls ? 12f : 20f;
             panelRt.anchoredPosition = new Vector2(18f, -topPad);
             panelRt.sizeDelta = new Vector2(380f, 80f);
+            RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(2f, -3f), 0.26f);
 
             var panelBg = panelGo.AddComponent<Image>();
             panelBg.sprite = panelSprite;
-            panelBg.color = new Color(0.06f, 0.07f, 0.11f, 0.88f);
+            panelBg.color = new Color(0.08f, 0.09f, 0.13f, 0.91f);
             panelBg.raycastTarget = false;
             panelBg.type = Image.Type.Sliced;
             // If sprite isn't 9-slice, Simple still works for a soft tile look.
@@ -269,7 +272,7 @@ public class LevelManager : MonoBehaviour
             accentRt.sizeDelta = new Vector2(0f, 3f);
             var accentImg = accentGo.AddComponent<Image>();
             accentImg.sprite = panelSprite;
-            accentImg.color = new Color(0.95f, 0.72f, 0.25f, 0.95f);
+            accentImg.color = new Color(0.92f, 0.55f, 0.42f, 0.95f);
             accentImg.raycastTarget = false;
 
             var textGo = new GameObject("StageHud");
@@ -315,7 +318,7 @@ public class LevelManager : MonoBehaviour
 
             var barBg = barGo.AddComponent<Image>();
             barBg.sprite = panelSprite;
-            barBg.color = new Color(0.06f, 0.07f, 0.11f, 0.82f);
+            barBg.color = new Color(0.08f, 0.09f, 0.13f, 0.85f);
             barBg.raycastTarget = false;
             barBg.type = panelSprite != null && panelSprite.border.sqrMagnitude > 0.001f ? Image.Type.Sliced : Image.Type.Simple;
 
@@ -371,11 +374,16 @@ public class LevelManager : MonoBehaviour
         rt.sizeDelta = new Vector2(tablet ? 248f : 220f, tablet ? 52f : 48f);
 
         var img = go.AddComponent<Image>();
-        img.color = new Color(0.16f, 0.35f, 0.42f, 0.95f);
+        RuntimeUiPolish.UseRoundedSliced(img);
+        img.color = RuntimeUiPolish.AccentTeal;
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
+        RuntimeUiPolish.ApplyButtonTransitions(btn, RuntimeUiPolish.AccentTeal,
+            Color.Lerp(RuntimeUiPolish.AccentTeal, Color.white, 0.18f),
+            Color.Lerp(RuntimeUiPolish.AccentTeal, Color.black, 0.25f));
         btn.onClick.AddListener(() => MathArticlesOverlay.Open(canvas.transform));
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.3f);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -485,6 +493,12 @@ public class LevelManager : MonoBehaviour
     {
         if (cachedHudPanelSprite != null)
             return cachedHudPanelSprite;
+
+        if (RuntimeUiPolish.Rounded9Slice != null)
+        {
+            cachedHudPanelSprite = RuntimeUiPolish.Rounded9Slice;
+            return cachedHudPanelSprite;
+        }
 
         var fromScene = TryGetSquareSprite();
         if (fromScene != null)
@@ -1358,6 +1372,170 @@ public class LevelManager : MonoBehaviour
             applyGridTheming: true,
             gridCenter: new Color(0.22f, 0.36f, 0.52f, 0.36f),
             gridOutside: new Color(0.16f, 0.26f, 0.38f, 0.1f),
+            storyPauseSecondsOverride: 2.65f
+        ));
+
+        // ---- Aerospace engineering & aerodynamics (indices 34–40) -----------------------------
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[34],
+            FunctionType.AeroLiftVsAlpha,
+            curveColor: new Color(0.35f, 0.72f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.58f, 0.3f, 1f),
+            transA: 0.82f,
+            transK: 0.38f,
+            transC: -2.05f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Lift vs angle of attack</b> — on a wing, <color=#38bdf8>coefficient C_L</color> grows roughly linearly with α in the attached‑flow regime (thin‑airfoil / small‑angle mood).\n\n" +
+                "Past the <b>stall</b> angle the boundary layer separates; lift drops sharply — a nonlinear break your feet feel as the graph stops climbing.\n\n" +
+                "<size=92%><color=#a8b2d1>Real design couples Mach, Reynolds, sweep, twist; this graph is a calculus “shape class” for slope & saturation.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.16f, 0.32f, 0.48f, 0.37f),
+            gridOutside: new Color(0.12f, 0.22f, 0.34f, 0.11f),
+            storyPauseSecondsOverride: 2.65f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[35],
+            FunctionType.Power,
+            curveColor: new Color(0.75f, 0.55f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.72f, 0.35f, 1f),
+            transA: 0.072f,
+            transK: 0.42f,
+            transC: -2.02f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Drag polar</b> — aircraft guys write <color=#c4b5fd>C_D = C_{D0} + K C_L²</color> (parabolic drag polar) to mash profile + induced drag into one quadratic in lift coefficient.\n\n" +
+                "Min drag at a certain C_L sets best glide / L/D intuition; integrating under such curves feeds range & endurance estimates (Breguet‑style reasoning in the big books).\n\n" +
+                "<size=92%><color=#a8b2d1>Here u plays the role of C_L on the horizontal axis — walk the bowl of extra drag as you leave the sweet spot.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.35f, 0.25f, 0.5f, 0.36f),
+            gridOutside: new Color(0.25f, 0.18f, 0.36f, 0.1f),
+            storyPauseSecondsOverride: 2.55f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[36],
+            FunctionType.AeroIsothermalDensity,
+            curveColor: new Color(0.45f, 0.88f, 0.72f, 1f),
+            derivativeColor: new Color(0.95f, 0.45f, 0.5f, 1f),
+            transA: 1.05f,
+            transK: 0.32f,
+            transC: -2.28f,
+            transD: -6f,
+            power: 2,
+            baseN: 4,
+            story:
+                "<b>Atmosphere (isothermal cartoon)</b> — pressure and density drop roughly <color=#86efac>exponentially</color> with altitude: p, ρ ∝ e^{−h/H} with <b>scale height</b> H (temperature & mean molar mass set the mood in the real ISA).\n\n" +
+                "Aero engineers live in these curves: thrust, Reynolds, Mach, dynamic pressure q = ½ρV² all track ρ(h).\n\n" +
+                "<size=92%><color=#a8b2d1>Plot uses h ≥ 0 on the transformed axis; negative side clips—like launching from sea level only.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.18f, 0.42f, 0.34f, 0.36f),
+            gridOutside: new Color(0.13f, 0.3f, 0.24f, 0.1f),
+            storyPauseSecondsOverride: 2.6f
+        ));
+
+        var aeroPhugColors = new[]
+        {
+            new Color(0.5f, 0.78f, 1f, 1f),
+            new Color(1f, 0.55f, 0.4f, 1f),
+            new Color(0.75f, 0.55f, 1f, 1f)
+        };
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[37],
+            FunctionType.DampedOscillator,
+            curveColor: new Color(0.4f, 0.85f, 0.95f, 1f),
+            derivativeColor: new Color(1f, 0.52f, 0.28f, 1f),
+            transA: 0.48f,
+            transK: 0.44f,
+            transC: -1.98f,
+            transD: 0f,
+            power: 4,
+            baseN: 2,
+            story:
+                "<b>Longitudinal dynamics</b> — a rigid aircraft has <color=#7dd3fc>short‑period</color> (quick pitch / heave) and <b>phugoid</b> (slow exchange of altitude & speed) modes.\n\n" +
+                "Linearized state‑space models are eigenvalues & eigenvectors; cartooned here as a <b>damped oscillation</b> — exponential envelope × sine — the same mathematics as mass–spring–damper labs.\n\n" +
+                "<size=92%><color=#a8b2d1>Flight control & autopilot designers tame these modes with feedback; feel the derivative change at crests and troughs.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.14f, 0.35f, 0.48f, 0.36f),
+            gridOutside: new Color(0.1f, 0.25f, 0.34f, 0.1f),
+            levelStageColors: aeroPhugColors,
+            storyPauseSecondsOverride: 2.75f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[38],
+            FunctionType.AeroNewtonianSinSquared,
+            curveColor: new Color(1f, 0.45f, 0.42f, 1f),
+            derivativeColor: new Color(0.5f, 0.82f, 1f, 1f),
+            transA: 0.92f,
+            transK: 0.5f,
+            transC: -2.05f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Newtonian / impact theory mood</b> — in hypersonic teaching models, surface <color=#fca5a5>pressure coefficient</color> scales like sin²α for windward facets (turning momentum of molecules).\n\n" +
+                "Not a replacement for CFD or shock‑expansion — but the right <i>calculus vocabulary</i>: nonlinear trig powering heat‑shield and entry corridor conversations.\n\n" +
+                "<size=92%><color=#a8b2d1>Horizontal axis plays local slope angle; only α ≥ 0 is meaningful on this branch.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.48f, 0.22f, 0.2f, 0.35f),
+            gridOutside: new Color(0.34f, 0.15f, 0.14f, 0.1f),
+            storyPauseSecondsOverride: 2.55f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[39],
+            FunctionType.Sine,
+            curveColor: new Color(0.55f, 0.65f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.48f, 0.72f, 1f),
+            transA: 0.42f,
+            transK: 0.55f,
+            transC: -1.95f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Strouhal number</b> — bluff bodies shed vortices at a characteristic frequency <color=#93c5fd>f ≈ St · U / D</color> (St ≈ 0.2 for cylinders in the textbook band).\n\n" +
+                "That periodicity drives vibrations, noise, and fatigue loading on antennas, cables, and control surfaces in wake turbulence.\n\n" +
+                "<size=92%><color=#a8b2d1>Sine waves are the fingerprint of linearized unsteady aero & flutter thinking — walk the cycle as if reading a hot‑wire trace.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.22f, 0.28f, 0.52f, 0.36f),
+            gridOutside: new Color(0.16f, 0.2f, 0.38f, 0.1f),
+            storyPauseSecondsOverride: 2.45f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[40],
+            FunctionType.ExponentialDecay,
+            curveColor: new Color(1f, 0.72f, 0.38f, 1f),
+            derivativeColor: new Color(0.45f, 0.78f, 1f, 1f),
+            transA: 1.05f,
+            transK: 0.072f,
+            transC: -2.22f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Re‑entry & hypersonic heating mood</b> — heat flux scales with <color=#fde047>dynamic pressure × velocity</color> roughly like ρ V³ in many order‑of‑magnitude chats (models vary!), so as altitude climbs (ρ↓) and speed bleeds off, the <i>threat curve</i> relaxes exponentially in time in simplified histories.\n\n" +
+                "Thermal protection, trajectory shaping, and bank angle modulation all serve to keep material beneath limits — calculus is the language of those trade curves.\n\n" +
+                "<size=92%><color=#a8b2d1>Use this stage as a qualitative decay envelope, not a quantitative SpaceX memo.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.42f, 0.3f, 0.18f, 0.35f),
+            gridOutside: new Color(0.3f, 0.22f, 0.12f, 0.1f),
             storyPauseSecondsOverride: 2.65f
         ));
     }

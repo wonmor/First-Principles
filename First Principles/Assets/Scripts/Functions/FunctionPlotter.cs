@@ -220,8 +220,40 @@ public class FunctionPlotter : MonoBehaviour
             // Upper half of (u)² + (y−k)² = R² with u = transK·(x−h), R = |transA|, k = transC, h = transD.
             FunctionType.CircleUpper => CircleUpperY(u, transA, transC),
 
+            // Aerospace / aerodynamics teaching curves (u = transK·(x−transD)).
+            FunctionType.AeroLiftVsAlpha => AeroLiftVsAlphaY(u, transA, transC),
+            FunctionType.AeroIsothermalDensity => AeroIsothermalDensityY(u, transA, transC, baseN),
+            FunctionType.AeroNewtonianSinSquared => AeroNewtonianSinSquaredY(u, transA, transC),
+
             _ => 0f
         };
+    }
+
+    /// <summary>Crude CL(α): linear to ±α_stall then exponential decay (stall).</summary>
+    private static float AeroLiftVsAlphaY(float u, float liftSlope, float c)
+    {
+        float stall = 0.58f;
+        if (Mathf.Abs(u) <= stall)
+            return liftSlope * u + c;
+        float sign = Mathf.Sign(u);
+        float peak = liftSlope * stall * sign;
+        return peak * Mathf.Exp(-(Mathf.Abs(u) - stall) * 1.12f) + c;
+    }
+
+    /// <summary>ρ/ρ₀ ∝ e^{−h/H} for h≥0; u as scaled altitude. baseN scales 1/H.</summary>
+    private static float AeroIsothermalDensityY(float u, float rhoScale, float c, int scaleHeightInv)
+    {
+        float h = Mathf.Max(0f, u);
+        float invH = 0.055f * Mathf.Max(1, scaleHeightInv > 0 ? scaleHeightInv : 1);
+        return rhoScale * Mathf.Exp(-invH * h) + c;
+    }
+
+    /// <summary>Newtonian impact theory mood: Cp ∝ sin²α for α∈[0,π/2].</summary>
+    private static float AeroNewtonianSinSquaredY(float u, float a, float c)
+    {
+        float rad = Mathf.Clamp(u, 0f, 1.48f);
+        float s = Mathf.Sin(rad);
+        return a * s * s + c;
     }
 
     /// <summary>y = k + √(R² − u²) for |u|≤R; outside domain uses k so samples stay finite (flat shoulder).</summary>
@@ -404,6 +436,15 @@ public class FunctionPlotter : MonoBehaviour
             case FunctionType.CircleUpper:
                 equationText.text = $"Upper arc: u² + (y−{c})² = {a}², u={k}(x−{d}), R=|{a}|";
                 break;
+            case FunctionType.AeroLiftVsAlpha:
+                equationText.text = $"Aero: C_L(α) linear+stall model, slope≈{a}, u={k}(x-{d})";
+                break;
+            case FunctionType.AeroIsothermalDensity:
+                equationText.text = $"Aero: ρ/ρ₀ ∝ e^(−h/H), u={k}(x-{d}), H⁻¹∝{baseN}";
+                break;
+            case FunctionType.AeroNewtonianSinSquared:
+                equationText.text = $"Aero: Cp ∝ sin²α, u={k}(x-{d}), scale {a}";
+                break;
             default:
                 equationText.text = "f(x)";
                 break;
@@ -451,7 +492,12 @@ public enum FunctionType
     PolarRose,
 
     // Upper semicircle: y = k + √(R²−u²), u = transK·(x−transD), R = |transA|, center (transD, transC) when transK = 1.
-    CircleUpper
+    CircleUpper,
+
+    // Aerospace / aerodynamics (toy models for instruction — not a CFD solver)
+    AeroLiftVsAlpha,
+    AeroIsothermalDensity,
+    AeroNewtonianSinSquared
 }
 
 /* 

@@ -60,7 +60,7 @@ public class GraphObstacleGenerator : MonoBehaviour
         this.unitWidth = unitWidth;
         this.unitHeight = unitHeight;
 
-        obstacleSprite = TryGetSquareSprite();
+        obstacleSprite = RuntimeUiPolish.Rounded9Slice != null ? RuntimeUiPolish.Rounded9Slice : TryGetSquareSprite();
     }
 
     /// <param name="functionPlotter">Required for Riemann stair mode; used to evaluate exact f at sample x.</param>
@@ -225,7 +225,14 @@ public class GraphObstacleGenerator : MonoBehaviour
 
         var img = go.AddComponent<Image>();
         img.sprite = obstacleSprite;
-        img.color = new Color(color.r, color.g, color.b, 0.9f);
+        bool isHazard = name.StartsWith("Hazard", System.StringComparison.OrdinalIgnoreCase);
+        var c = isHazard ? color : Color.Lerp(color, Color.white, 0.12f);
+        img.color = new Color(c.r, c.g, c.b, isHazard ? 0.88f : 0.93f);
+        if (obstacleSprite != null && obstacleSprite.border.sqrMagnitude > 0.001f &&
+            RuntimeUiPolish.ShouldUseSlicedForSize(pxW, pxH))
+            img.type = Image.Type.Sliced;
+        else
+            img.type = Image.Type.Simple;
         img.raycastTarget = false;
     }
 

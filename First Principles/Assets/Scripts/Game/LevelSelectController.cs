@@ -16,8 +16,9 @@ using TMPro;
 /// </summary>
 public class LevelSelectController : MonoBehaviour
 {
-    [SerializeField] private Color backgroundColor = new Color(0.12f, 0.12f, 0.12f, 1f);
-    [SerializeField] private Color buttonColor = new Color(0.22f, 0.22f, 0.22f, 1f);
+    [Tooltip("Full-screen panel tint (defaults match RuntimeUiPolish theme).")]
+    [SerializeField] private Color backgroundColor = new Color(0.09f, 0.10f, 0.14f, 0.97f);
+    [SerializeField] private Color buttonColor = new Color(0.20f, 0.23f, 0.30f, 0.95f);
 
     private void Start()
     {
@@ -55,7 +56,7 @@ public class LevelSelectController : MonoBehaviour
         titleTmp.text = "Choose a graph stage";
         titleTmp.fontSize = tablet ? 46 : 40;
         titleTmp.alignment = TextAlignmentOptions.Center;
-        titleTmp.color = Color.white;
+        titleTmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(titleTmp);
 
         CreateMathArticlesButton(panel.transform, canvas.transform);
@@ -140,7 +141,7 @@ public class LevelSelectController : MonoBehaviour
         tmp.enableWordWrapping = true;
         tmp.fontSize = tablet ? 17 : 15;
         tmp.alignment = TextAlignmentOptions.Bottom;
-        tmp.color = Color.white;
+        tmp.color = new Color(0.9f, 0.91f, 0.94f, 0.95f);
         tmp.raycastTarget = false;
         CopyFontFromAny(tmp);
     }
@@ -158,10 +159,15 @@ public class LevelSelectController : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
 
         var img = go.AddComponent<Image>();
-        img.color = new Color(0.18f, 0.34f, 0.42f, 1f);
+        RuntimeUiPolish.UseRoundedSliced(img);
+        img.color = RuntimeUiPolish.AccentTeal;
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
+        RuntimeUiPolish.ApplyButtonTransitions(btn, RuntimeUiPolish.AccentTeal,
+            Color.Lerp(RuntimeUiPolish.AccentTeal, Color.white, 0.2f),
+            Color.Lerp(RuntimeUiPolish.AccentTeal, Color.black, 0.22f));
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.28f);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -202,10 +208,15 @@ public class LevelSelectController : MonoBehaviour
         le.minHeight = tablet ? 80f : 72f;
 
         var img = go.AddComponent<Image>();
+        RuntimeUiPolish.UseRoundedSliced(img);
         img.color = buttonColor;
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
+        RuntimeUiPolish.ApplyButtonTransitions(btn, buttonColor,
+            RuntimeUiPolish.ButtonNeutralHover,
+            new Color(0.12f, 0.13f, 0.16f, 1f));
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(1.5f, -2.5f), 0.2f);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -219,7 +230,7 @@ public class LevelSelectController : MonoBehaviour
         tmp.text = label;
         tmp.fontSize = tablet ? 28 : 26;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        tmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(tmp);
 
         btn.onClick.AddListener(onClick);
@@ -238,10 +249,15 @@ public class LevelSelectController : MonoBehaviour
         rt.anchoredPosition = Vector2.zero;
 
         var img = go.AddComponent<Image>();
+        RuntimeUiPolish.UseRoundedSliced(img);
         img.color = buttonColor;
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
+        RuntimeUiPolish.ApplyButtonTransitions(btn, buttonColor,
+            RuntimeUiPolish.ButtonNeutralHover,
+            new Color(0.12f, 0.13f, 0.16f, 1f));
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(1.5f, -2.5f), 0.22f);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -255,7 +271,7 @@ public class LevelSelectController : MonoBehaviour
         tmp.text = "Back to Menu";
         tmp.fontSize = tablet ? 26 : 22;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        tmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(tmp);
 
         btn.onClick.AddListener(() => SceneManager.LoadScene("Menu"));

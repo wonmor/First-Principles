@@ -83,8 +83,8 @@ public class MobileTouchControls : MonoBehaviour
         if (tablet)
             AddLayoutSpacer(rowRt, flexibleWidth: 1f);
 
-        CreateHoldButton(rowRt, "Left", -1f, new Color(0.15f, 0.16f, 0.2f, 0.82f), tablet);
-        CreateHoldButton(rowRt, "Right", 1f, new Color(0.15f, 0.16f, 0.2f, 0.82f), tablet);
+        CreateHoldButton(rowRt, "Left", -1f, tablet);
+        CreateHoldButton(rowRt, "Right", 1f, tablet);
         CreateJumpButton(rowRt, tablet);
 
         if (tablet)
@@ -101,7 +101,7 @@ public class MobileTouchControls : MonoBehaviour
         le.preferredWidth = 0f;
     }
 
-    private static void CreateHoldButton(Transform parent, string label, float dir, Color bg, bool tablet)
+    private static void CreateHoldButton(Transform parent, string label, float dir, bool tablet)
     {
         var go = new GameObject($"Btn_{label}", typeof(RectTransform));
         var rt = go.GetComponent<RectTransform>();
@@ -115,10 +115,12 @@ public class MobileTouchControls : MonoBehaviour
             le.preferredHeight = 132f;
 
         var img = go.AddComponent<Image>();
-        img.color = bg;
+        RuntimeUiPolish.UseRoundedSliced(img);
+        img.color = RuntimeUiPolish.ButtonNeutral;
 
         var h = go.AddComponent<MobileHoldButton>();
         h.Init(dir);
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(1.5f, -2.5f), 0.24f);
 
         var tr = new GameObject("Text");
         var trt = tr.AddComponent<RectTransform>();
@@ -131,7 +133,7 @@ public class MobileTouchControls : MonoBehaviour
         tmp.text = label == "Left" ? "\u25C0" : "\u25B6";
         tmp.fontSize = tablet ? 54f : 48f;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(1f, 0.92f, 0.55f, 1f);
+        tmp.color = new Color(1f, 0.88f, 0.48f, 1f);
         CopyTmpFont(tmp);
     }
 
@@ -149,7 +151,9 @@ public class MobileTouchControls : MonoBehaviour
             le.preferredHeight = 132f;
 
         var img = go.AddComponent<Image>();
-        img.color = new Color(0.18f, 0.32f, 0.28f, 0.88f);
+        RuntimeUiPolish.UseRoundedSliced(img);
+        img.color = RuntimeUiPolish.AccentJump;
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.28f);
 
         var tr = new GameObject("Text");
         var trt = tr.AddComponent<RectTransform>();
@@ -163,7 +167,7 @@ public class MobileTouchControls : MonoBehaviour
         tmp.fontSize = tablet ? 34f : 30f;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        tmp.color = new Color(0.98f, 1f, 1f, 1f);
         CopyTmpFont(tmp);
 
         var ev = go.AddComponent<MobileJumpTouch>();

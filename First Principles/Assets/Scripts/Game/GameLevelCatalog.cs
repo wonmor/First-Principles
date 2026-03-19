@@ -49,7 +49,15 @@ public static class GameLevelCatalog
         "BC: phase & SHM (energy swaps)",
         "BC: cubic & inflection (sketching)",
         "BC: b^x & d/dx b^x",
-        "Circle: (x−h)² + (y−k)² = R²"
+        "Circle: (x−h)² + (y−k)² = R²",
+        // --- Aerospace engineering & aerodynamics (order must match LevelManager.BuildSampleLevels) ---
+        "Aerospace: lift C_L(α) linear + stall",
+        "Aerospace: parabolic drag polar C_D(C_L)",
+        "Aerospace: isothermal atmosphere ρ(h)",
+        "Aerospace: phugoid / damped pitch–heave mood",
+        "Aerospace: Newtonian Cp ∝ sin²α",
+        "Aerospace: Strouhal / vortex shedding tone",
+        "Aerospace: re-entry decay envelope (ρV heating mood)"
     };
 
     public static int LevelCount => DisplayNames.Length;
