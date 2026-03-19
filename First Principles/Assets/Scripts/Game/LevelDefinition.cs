@@ -61,6 +61,9 @@ public class LevelDefinition : ScriptableObject
     [Tooltip("Optional per-stage pop colors (if empty, derivativeColor will be used).")]
     public List<Color> stageDerivativePopColors = new List<Color>();
 
+    [Tooltip("For AeroDragPolarTriple: overlay colors [parasitic C_D,par line, induced C_D,ind curve]. Total uses curveColor.")]
+    public List<Color> dragPolarOverlayColors = new List<Color>();
+
     [Tooltip("X trigger positions (grid units, relative to left edge of the graph) where we pop the derivative.")]
     public List<float> stageTriggerX = new List<float>();
 

@@ -3,7 +3,7 @@ layout: default
 title: مفاهيم رياضية — مقدّمة
 permalink: /ar/math-concepts/
 lang: ar
-dir: rtl
+rtl: true
 ---
 
 # مفاهيم رياضية (عربي — مقدّمة)
@@ -22,6 +22,6 @@ dir: rtl
 
 ## التكامل المحدود وغير المحدود
 
-ملخص يطابق كتلة اللعبة عن **السحب الطفيلي/المُستحث** و**قطب السحب**: **`definition-indefinite-integrals.md`** (إنجليزي).
+ملخص يطابق كتلة اللعبة عن **السحب الطفيلي/المُستحث** و**قطب السحب**: **[`definite-indefinite-integrals.md` بالإنجليزية](../definite-indefinite-integrals.md)**.
 
 [← العودة للرئيسية العربية]({% link ar/index.md %})

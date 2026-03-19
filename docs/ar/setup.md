@@ -3,7 +3,7 @@ layout: default
 title: الإعداد
 permalink: /ar/setup/
 lang: ar
-dir: rtl
+rtl: true
 ---
 
 # إعداد المشروع (عربي — ملخص)

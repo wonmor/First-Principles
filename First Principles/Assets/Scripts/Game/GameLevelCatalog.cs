@@ -52,7 +52,7 @@ public static class GameLevelCatalog
         "Circle: (x−h)² + (y−k)² = R²",
         // --- Aerospace engineering & aerodynamics (order must match LevelManager.BuildSampleLevels) ---
         "Aerospace: lift C_L(α) linear + stall",
-        "Aerospace: parabolic drag polar C_D(C_L)",
+        "Aerospace: drag polar (parasitic, induced, total)",
         "Aerospace: isothermal atmosphere ρ(h)",
         "Aerospace: phugoid / damped pitch–heave mood",
         "Aerospace: Newtonian Cp ~ sin²α",

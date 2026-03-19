@@ -1,12 +1,30 @@
 // Written by Rayan Kaissi — uGUI Graphic: thick polyline for f(x) in grid coordinates.
 // FunctionPlotter fills `points`; OnPopulateMesh extrudes segments. Keep gridSize aligned with GridRendererUI.
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LineRendererUI : Graphic
 {
+    internal const string DragPolarOverlayNamePrefix = "DragPolar_";
+
+    /// <summary>
+    /// Main function curve (excludes drag-polar overlay clones named <c>DragPolar_*</c> from <c>FunctionPlotter</c>).
+    /// </summary>
+    public static LineRendererUI FindPrimaryCurve()
+    {
+        var all = UnityEngine.Object.FindObjectsByType<LineRendererUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var lr in all)
+        {
+            if (lr != null && lr.gameObject != null
+                          && !lr.gameObject.name.StartsWith(DragPolarOverlayNamePrefix, StringComparison.Ordinal))
+                return lr;
+        }
+
+        return all != null && all.Length > 0 ? all[0] : null;
+    }
     public Vector2Int gridSize;
 
     /// <summary>Polyline in grid space (x,y) matching FunctionPlotter’s sampled curve.</summary>

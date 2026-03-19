@@ -28,7 +28,8 @@ graph.param_k=k (horizontaler Maßstab)
 graph.param_c=C (vertikale Verschiebung)
 graph.param_d=D (horizontale Verschiebung)
 graph.calculator_intro=<b>Grafikrechner-Modus</b>\n<size=88%>Geben Sie fast beliebiges <b>f(u)</b> ein (Variable <b>x</b> in Ihrer Formel); <b>Trans</b> stellt A, k, C, D ein; <b>Maßstab</b> und <b>Pinch</b> zoomen das Fenster.</size>
-menu.home_footer=<b>First Principles</b> <color=#555555>(version 1.0)</color>\n\n<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
+menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.credits_line=<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
 level.0=Einstieg: Erste Prinzipien
 level.1=Steigung der Parabel
 level.2=Sinuswellen
@@ -64,7 +65,7 @@ level.31=BC: Kubik & Wendepunkt (Skizze)
 level.32=BC: b^x & d/dx b^x
 level.33=Kreis: (x−h)² + (y−k)² = R²
 level.34=Luftfahrt: Auftrieb C_L(α) linear + Strömungsabriss
-level.35=Luftfahrt: parabolische Widerstandspolare C_D(C_L)
+level.35=Luftfahrt: Widerstandspolare (profil-, induziert, gesamt)
 level.36=Luftfahrt: isotherme Atmosphäre ρ(h)
 level.37=Luftfahrt: Phugoid / gedämpfte Nick-Hubbewegung
 level.38=Luftfahrt: newtonsch Cp ~ sin²α

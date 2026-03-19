@@ -71,7 +71,7 @@ You don’t need complex numbers to enjoy this repo—but if you keep studying *
 | Idea | Typical model / graph | Game stage |
 |------|----------------------|------------|
 | **Lift vs α** | \(C_L\) ~ linear before **stall**, then loss of lift | *Aerospace: lift C_L(α) linear + stall* |
-| **Drag polar** | \(C_D = C_{D0} + K C_L^2\) | *Aerospace: parabolic drag polar* |
+| **Drag polar** | \(C_D = C_{D0} + K C_L^2\) | *Aerospace: drag polar (parasitic, induced, total — three traces)* |
 
 **Parasitic vs induced vs total (parabolic polar cartoon):**
 

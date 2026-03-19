@@ -140,6 +140,8 @@ public static class LocalizationManager
         if (!string.Equals(code, "en", StringComparison.Ordinal))
             ParseInto(Table, LoadTextAsset(code));
 
+        MergeLevelStories(code);
+
         if (raiseEvent)
             LanguageChanged?.Invoke();
     }
@@ -151,6 +153,18 @@ public static class LocalizationManager
     }
 
     private const string LocalizationResourceFolder = "Localization";
+    private const string LevelStoriesResourceFolder = "Localization/LevelStories";
+
+    /// <summary>Optional per-locale <c>story.N</c> entries (UTF-8 key=value). Missing keys still use embedded English in <see cref="LevelManager"/>.</summary>
+    private static void MergeLevelStories(string code)
+    {
+        if (string.IsNullOrEmpty(code))
+            return;
+        var ta = Resources.Load<TextAsset>($"{LevelStoriesResourceFolder}/{code}");
+        if (ta == null || string.IsNullOrWhiteSpace(ta.text))
+            return;
+        ParseInto(Table, ta.text);
+    }
 
     private static void ParseInto(Dictionary<string, string> sink, string text)
     {

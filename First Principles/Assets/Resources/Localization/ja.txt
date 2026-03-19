@@ -28,7 +28,8 @@ graph.param_k=k（横スケール）
 graph.param_c=C（縦シフト）
 graph.param_d=D（横シフト）
 graph.calculator_intro=<b>グラフ電卓モード</b>\n<size=88%>ほぼ任意の<b>f(u)</b>を入力（式の変数<b>x</b>）；<b>Trans</b>で A,k,C,D を調整；<b>Scale</b>と<b>ピンチ</b>でウィンドウをズーム。</size>
-menu.home_footer=<b>First Principles</b> <color=#555555>(version 1.0)</color>\n\n<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
+menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.credits_line=<size=34>ジョン・ソン（オーチ・エアロスペース）× ラヤン・カイシ（GameGenesis）</size>
 level.0=ファーストプリンシプル入門
 level.1=放物線の傾き
 level.2=サイン波
@@ -64,7 +65,7 @@ level.31=BC：三次関数と変曲点（スケッチ）
 level.32=BC：b^x と d/dx b^x
 level.33=円：(x−h)² + (y−k)² = R²
 level.34=航空：揚力C_L(α) 線形＋失速
-level.35=航空：放物型抗力極曲線 C_D(C_L)
+level.35=航空：抗力極曲線（プロファイル·誘導·合計）
 level.36=航空：等温大気 ρ(h)
 level.37=航空：フゴイド／減衰ピッチ・上下動
 level.38=航空：ニュートン流 Cp ~ sin²α

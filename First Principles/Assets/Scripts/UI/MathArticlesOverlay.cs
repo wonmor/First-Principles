@@ -163,6 +163,7 @@ public static class MathArticlesOverlay
         body.richText = true;
         body.margin = new Vector4(12f, 12f, 12f, 12f);
         CopyFont(body);
+        ApplyArticleReadingLayout(body);
 
         var fitter = tmpGo.AddComponent<ContentSizeFitter>();
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -226,6 +227,19 @@ public static class MathArticlesOverlay
         panelRt.anchorMax = new Vector2(pxMax / w, pyMax / h);
         panelRt.offsetMin = Vector2.zero;
         panelRt.offsetMax = Vector2.zero;
+    }
+
+    /// <summary>
+    /// Must run whenever the article body text changes. First open previously skipped RTL, so Arabic was LTR/invisible-looking.
+    /// </summary>
+    private static void ApplyArticleReadingLayout(TextMeshProUGUI tmp)
+    {
+        if (tmp == null)
+            return;
+        LocalizationManager.ApplyTextDirection(tmp);
+        tmp.alignment = LocalizationManager.IsRightToLeft
+            ? TextAlignmentOptions.TopRight
+            : TextAlignmentOptions.TopLeft;
     }
 
     private static void CopyFont(TextMeshProUGUI target)

@@ -28,7 +28,7 @@ Titles are built at runtime from **`GameLevelCatalog.DisplayNames`** (order matc
 | Engineering | Damped oscillation, catenary (cosh), full-wave rectified sine `|sin(x)|` |
 | AP BC + polar | Arctan, logistic, Maclaurin cos, ln & √x, tan window, e^{kx}, cubic sketching, b^x; polar cardioid & rose; **circle** (upper semicircle / implicit form) |
 | Physics C | Exponential decay (τ / RC), projectile parabola, angular momentum / L = Iω (SHM framing) |
-| **Aerospace** | Lift \(C_L(\alpha)\) + stall, drag polar, isothermal \(\rho(h)\), phugoid/damped mode, Newtonian \(\sin^{2}\alpha\), Strouhal sine, re-entry decay envelope |
+| **Aerospace** | Lift \(C_L(\alpha)\) + stall, drag polar **(three curves: parasitic, induced, total)**, isothermal \(\rho(h)\), phugoid/damped mode, Newtonian \(\sin^{2}\alpha\), Strouhal sine, re-entry decay envelope |
 
 Open **Math tips & snippets** on the level-select screen for **short article text** (including **differentiation rules** and **definite vs indefinite integrals** — game-style) plus blocks for **first principles thinking (business)** — see **[First principles thinking & business]({% link first-principles-business.md %})** — and **AMC 10/12**, **competition math**, **TMUA**, **MAT**, **AP Calculus BC**, and **AP Physics C**. Longer notes: **`docs/math-concepts.md`**, **`docs/derivative-rules.md`**, **`docs/definite-indefinite-integrals.md`**, **`docs/engineering-math.md`**, **`docs/amc-10-12.md`**, **`docs/competition-math.md`**, **`docs/tmua-calculus.md`**, **`docs/mat-calculus.md`**, **`docs/ap-calculus-bc.md`**, **`docs/ap-physics-c.md`**.
 
@@ -61,8 +61,8 @@ Legacy **Trans** / **Scale** tuning buttons on the Game UI are **disabled**; tun
 ## Level flow
 
 1. **Menu** — Entry and scene fade; footer shows **Credits** (GAME GENESIS × ORCH AEROSPACE), version, proprietary / initiative line, and **Unity** trademark notice ([`CREDITS.md`](../CREDITS.md) for full attribution).
-2. **LevelSelect** — `LevelSelectController` builds a **scrollable** list from **`GameLevelCatalog.DisplayNames`**, plus **Math tips & snippets** (`MathArticlesOverlay` / `LearningArticleLibrary`). Choosing a level calls **`LevelSelection.SetSelectedLevel`** and loads **Game**. A bottom **SceneCreditsFooter** matches Menu copy (`SceneCreditsFooter.cs`).
-3. **Game** — `LevelManager` reads **`LevelSelection.ConsumeSelectedLevel`**, applies the level theme to **`FunctionPlotter`**, regenerates obstacles, and spawns / resets the player. The same **SceneCreditsFooter** strip appears above the controls hint bar.
+2. **LevelSelect** — `LevelSelectController` builds a **scrollable** list from **`GameLevelCatalog.DisplayNames`**, plus **Math tips & snippets** (`MathArticlesOverlay` / `LearningArticleLibrary`). Choosing a level calls **`LevelSelection.SetSelectedLevel`** and loads **Game**.
+3. **Game** — `LevelManager` reads **`LevelSelection.ConsumeSelectedLevel`**, applies the level theme to **`FunctionPlotter`**, regenerates obstacles, and spawns / resets the player. The **Menu** scene shows title/version + credits (`MenuCreditsBlock` / `SceneCreditsFooter.BuildMenuFooterRichText()` → `menu.version_line` + `menu.credits_line`); gameplay HUD does not duplicate it above the controls hint. Per-level story banners use **`story.N`** from `Localization/LevelStories/{locale}.txt` when present (see `Localization/README.md`).
 
 ## Spawn position
 

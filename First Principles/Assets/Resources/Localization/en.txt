@@ -33,7 +33,8 @@ graph.param_d=D (horizontal shift)
 graph.calculator_intro=<b>Graphing calculator mode</b>\n<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> &amp; <b>pinch</b> zoom the window.</size>
 # Prepended to story text for every Aerospace stage (indices 34–40).
 aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>Drag polar refresher</color></b> (every <b>Aerospace</b> stage)\n<size=92%><b>Parasitic (zero-lift) drag</b> — skin friction, form drag, interference lumped as <b>C<sub>D0</sub></b> in the parabolic model (roughly <i>not</i> the part that grows with lift).\n<b>Induced drag</b> — the cost of making lift: trailing vortices add ~ <b>K C<sub>L</sub>²</b> (higher C<sub>L</sub> / tighter turns → more induced).\n<b>Overall drag polar</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: an upward-opening parabola in C<sub>L</sub>; min-drag <b>C<sub>L</sub></b> sits between “too slow / high α” and “too fast / low α” for real missions.</size>
-menu.home_footer=<b>First Principles</b> <color=#555555>(version 1.0)</color>\n\n<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
+menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.credits_line=<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
 level.0=First Principles Primer
 level.1=Slope of Parabola
 level.2=Waves of Sine
@@ -69,7 +70,7 @@ level.31=BC: cubic & inflection (sketching)
 level.32=BC: b^x & d/dx b^x
 level.33=Circle: (x−h)² + (y−k)² = R²
 level.34=Aerospace: lift C_L(α) linear + stall
-level.35=Aerospace: parabolic drag polar C_D(C_L)
+level.35=Aerospace: drag polar (parasitic, induced, total)
 level.36=Aerospace: isothermal atmosphere ρ(h)
 level.37=Aerospace: phugoid / damped pitch–heave mood
 level.38=Aerospace: Newtonian Cp ~ sin²α

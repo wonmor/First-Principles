@@ -459,9 +459,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>First Principles</b> <color=#555555>(version 1.0)</color>
+  m_text: '<align=center><b>First Principles</b> <color=#555555>(version 1.0)</color>
 
-    <size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>'
+    <size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size></align>'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 79fe93baac0634b6a88831eb18f73b04, type: 2}
   m_sharedMaterial: {fileID: -5611889265188688309, guid: 79fe93baac0634b6a88831eb18f73b04, type: 2}

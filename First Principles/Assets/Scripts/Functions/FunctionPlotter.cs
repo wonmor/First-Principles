@@ -55,6 +55,12 @@ public class FunctionPlotter : MonoBehaviour
     private LineRendererUI lineRenderer;
     private DerivRendererUI derivRenderer;
 
+    // AeroDragPolarTriple: extra polylines (cloned once from main LineRendererUI).
+    private LineRendererUI overlayParasitic;
+    private LineRendererUI overlayInduced;
+    private Color overlayDragPolarParasiticColor = new Color(0.55f, 0.66f, 0.85f, 1f);
+    private Color overlayDragPolarInducedColor = new Color(0.96f, 0.52f, 0.55f, 0.92f);
+
     private void Reset()
     {
         InitPlotFunction();
@@ -122,7 +128,7 @@ public class FunctionPlotter : MonoBehaviour
 
     private void PlotFunction(FunctionType type)
     {
-        lineRenderer = FindAnyObjectByType<LineRendererUI>();
+        lineRenderer = LineRendererUI.FindPrimaryCurve();
         derivRenderer = FindAnyObjectByType<DerivRendererUI>();
 
         if (lineRenderer != null)
@@ -132,6 +138,16 @@ public class FunctionPlotter : MonoBehaviour
 
             ComputeGraph(type, transA, transK, transC, transD, power, baseN);
             lineRenderer.points = points;
+
+            if (type == FunctionType.AeroDragPolarTriple)
+            {
+                EnsureDragPolarOverlayLines(lineRenderer);
+                PopulateDragPolarOverlayPoints(transA, transK, transC, transD, power);
+                overlayParasitic.gameObject.SetActive(true);
+                overlayInduced.gameObject.SetActive(true);
+            }
+            else
+                SetDragPolarOverlaysActive(false);
         }
 
         if (differentiate == true && lineRenderer != null)
@@ -244,6 +260,9 @@ public class FunctionPlotter : MonoBehaviour
             FunctionType.AeroLiftVsAlpha => AeroLiftVsAlphaY(u, transA, transC),
             FunctionType.AeroIsothermalDensity => AeroIsothermalDensityY(u, transA, transC, baseN),
             FunctionType.AeroNewtonianSinSquared => AeroNewtonianSinSquaredY(u, transA, transC),
+
+            // Drag polar total C_D,tot: same closed form as Power — A·(u^power + C); overlays plot C_D,par = A·C and C_D,ind = A·u^power.
+            FunctionType.AeroDragPolarTriple => transA * (Mathf.Pow(u, power) + transC),
 
             // Mandelbrot: escape-time vs Im(c) with Re(c)=transA; use |Im| inside iteration (same count as c̄) — cheap symmetry about the real axis.
             FunctionType.MandelbrotEscapeImSlice => MandelbrotEscapeImSliceY(u, transA, transC, power, baseN),
@@ -496,6 +515,13 @@ public class FunctionPlotter : MonoBehaviour
             case FunctionType.AeroNewtonianSinSquared:
                 equationText.text = $@"\(C_p \propto \sin^{{2}}\alpha,\; u={k}(x-{d})\)";
                 break;
+            case FunctionType.AeroDragPolarTriple:
+                equationText.text =
+                    $@"<b>\(\text{{Drag polar — three traces}}\)</b>\n" +
+                    $@"<size=92%><color=#a8b2d1><b>Parasitic</b> \(C_{{D,\text{{par}}}} \approx {a}\cdot({c})\) (flat) · " +
+                    $@"<b>Induced</b> \(C_{{D,\text{{ind}}}} = {a}\,u^{{{power}}}\) · " +
+                    $@"<b>Total</b> \(C_{{D,\text{{tot}}}} = {a}\,(u^{{{power}}}+{c})\), \(u={k}(x-{d})\).</color></size>";
+                break;
             case FunctionType.MandelbrotEscapeImSlice:
                 equationText.text =
                     $@"<b>\(\text{{Mandelbrot slice}}\)</b> \(h\propto\text{{escape-time}},\; c=({a})+\mathrm{{i}}u,\; u={k}(x-{d}),\; N={power}\)";
@@ -521,6 +547,79 @@ public class FunctionPlotter : MonoBehaviour
 
         if (equationText != null)
             equationText.text = TmpLatex.Process(equationText.text);
+    }
+
+    /// <summary>LevelManager sets tint for parasitic / induced overlay lines (total stays <c>curveRenderer.color</c>).</summary>
+    public void ConfigureDragPolarOverlayColors(Color parasitic, Color induced)
+    {
+        overlayDragPolarParasiticColor = parasitic;
+        overlayDragPolarInducedColor = induced;
+        if (overlayParasitic != null)
+            overlayParasitic.color = parasitic;
+        if (overlayInduced != null)
+            overlayInduced.color = induced;
+    }
+
+    void SetDragPolarOverlaysActive(bool on)
+    {
+        if (overlayParasitic != null)
+            overlayParasitic.gameObject.SetActive(on);
+        if (overlayInduced != null)
+            overlayInduced.gameObject.SetActive(on);
+    }
+
+    void EnsureDragPolarOverlayLines(LineRendererUI template)
+    {
+        if (template == null || overlayParasitic != null)
+            return;
+
+        overlayParasitic = CreateDragPolarOverlay(template, "Parasitic");
+        overlayInduced = CreateDragPolarOverlay(template, "Induced");
+        overlayParasitic.color = overlayDragPolarParasiticColor;
+        overlayInduced.color = overlayDragPolarInducedColor;
+        overlayParasitic.raycastTarget = false;
+        overlayInduced.raycastTarget = false;
+        float t = template.thickness;
+        overlayParasitic.thickness = t * 0.78f;
+        overlayInduced.thickness = t * 0.78f;
+    }
+
+    static LineRendererUI CreateDragPolarOverlay(LineRendererUI template, string objectName)
+    {
+        var parent = template.transform.parent;
+        int idx = template.transform.GetSiblingIndex();
+        var clone = Instantiate(template.gameObject, parent);
+        clone.name = LineRendererUI.DragPolarOverlayNamePrefix + objectName;
+        clone.transform.SetSiblingIndex(idx);
+        return clone.GetComponent<LineRendererUI>();
+    }
+
+    void PopulateDragPolarOverlayPoints(float transA, float transK, float transC, float transD, int pow)
+    {
+        if (overlayParasitic == null || overlayInduced == null || lineRenderer == null)
+            return;
+
+        Vector2Int gridOrigin = lineRenderer.gridSize / 2;
+        overlayParasitic.points.Clear();
+        overlayInduced.points.Clear();
+
+        for (float i = xStart; i <= xEnd; i += step)
+        {
+            float xValue = i;
+            float u = transK * (xValue - transD);
+            float yPar = transA * transC;
+            float yInd = transA * Mathf.Pow(u, pow);
+
+            if (IsFinite(yPar))
+                overlayParasitic.points.Add(new Vector2(xValue + gridOrigin.x, yPar + gridOrigin.y));
+            if (IsFinite(yInd))
+                overlayInduced.points.Add(new Vector2(xValue + gridOrigin.x, yInd + gridOrigin.y));
+        }
+
+        overlayParasitic.enabled = false;
+        overlayParasitic.enabled = true;
+        overlayInduced.enabled = false;
+        overlayInduced.enabled = true;
     }
 }
 
@@ -572,7 +671,13 @@ public enum FunctionType
     MandelbrotEscapeImSlice,
 
     /// <summary>User-typed <c>f(u)</c> via <see cref="FunctionPlotter.customExpression"/> (graphing calculator).</summary>
-    CustomExpression
+    CustomExpression,
+
+    /// <summary>
+    /// Parabolic drag polar with <b>three</b> rendered curves: \(C_{D,\mathrm{par}}\) (flat),
+    /// \(C_{D,\mathrm{ind}} \propto u^{\texttt{power}}\), and total \(C_{D,\mathrm{tot}}\) (same as <see cref="Power"/> with \(u=k(x-D)\)).
+    /// </summary>
+    AeroDragPolarTriple
 }
 
 /* 

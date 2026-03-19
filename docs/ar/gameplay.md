@@ -3,7 +3,7 @@ layout: default
 title: طريقة اللعب
 permalink: /ar/gameplay/
 lang: ar
-dir: rtl
+rtl: true
 ---
 
 # طريقة اللعب (عربي — ملخص)

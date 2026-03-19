@@ -109,7 +109,6 @@ public class LevelManager : MonoBehaviour
     {
         RefreshControlsHintLocalized();
         RefreshMathConceptsLabelLocalized();
-        RefreshSceneFooterLocalized();
         RefreshStageHudLocalizedForce();
 
         if (graphCalculatorMode)
@@ -151,18 +150,6 @@ public class LevelManager : MonoBehaviour
         if (tmp == null)
             return;
         tmp.text = LocalizationManager.Get("ui.math_concepts", "Math concepts");
-        LocalizationManager.ApplyTextDirection(tmp);
-    }
-
-    private void RefreshSceneFooterLocalized()
-    {
-        var go = GameObject.Find("SceneCreditsFooter");
-        if (go == null)
-            return;
-        var tmp = go.GetComponent<TextMeshProUGUI>();
-        if (tmp == null)
-            return;
-        tmp.text = SceneCreditsFooter.BuildCompactRichText();
         LocalizationManager.ApplyTextDirection(tmp);
     }
 
@@ -225,7 +212,7 @@ public class LevelManager : MonoBehaviour
     private void SetupReferences()
     {
         functionPlotter = FindAnyObjectByType<FunctionPlotter>();
-        curveRenderer = FindAnyObjectByType<LineRendererUI>();
+        curveRenderer = LineRendererUI.FindPrimaryCurve();
         derivRenderer = FindAnyObjectByType<DerivRendererUI>();
         gridRenderer = FindAnyObjectByType<GridRendererUI>();
 
@@ -689,8 +676,6 @@ public class LevelManager : MonoBehaviour
             }
 
             RefreshControlsHintLocalized();
-
-            CreateSceneCreditsFooterStrip(canvas, equationStyle);
         }
     }
 
@@ -742,36 +727,6 @@ public class LevelManager : MonoBehaviour
         tmp.raycastTarget = false;
         ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.48f);
         LocalizationManager.ApplyTextDirection(tmp);
-    }
-
-    private void CreateSceneCreditsFooterStrip(Canvas canvas, TextMeshProUGUI equationStyle)
-    {
-        if (canvas == null || GameObject.Find("SceneCreditsFooter") != null)
-            return;
-
-        bool tabletUi = DeviceLayout.IsTabletLike();
-        var footerGo = new GameObject("SceneCreditsFooter");
-        var footerRt = footerGo.AddComponent<RectTransform>();
-        var safe = MobileUiRoots.GetSafeContentParent(canvas.transform);
-        footerRt.SetParent(safe != null ? safe : canvas.transform, false);
-        footerRt.anchorMin = new Vector2(0.5f, 0f);
-        footerRt.anchorMax = new Vector2(0.5f, 0f);
-        footerRt.pivot = new Vector2(0.5f, 0f);
-        float controlsUp = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset : 22f;
-        float barH = tabletUi ? 60f : 56f;
-        footerRt.anchoredPosition = new Vector2(0f, controlsUp + barH + 12f);
-        footerRt.sizeDelta = new Vector2(tabletUi ? 960f : 880f, 74f);
-
-        var ftmp = footerGo.AddComponent<TextMeshProUGUI>();
-        ftmp.text = SceneCreditsFooter.BuildCompactRichText();
-        ftmp.richText = true;
-        ftmp.textWrappingMode = TextWrappingModes.Normal;
-        ftmp.fontSize = UiTypography.Scale(tabletUi ? 16 : 14);
-        ftmp.alignment = TextAlignmentOptions.Bottom;
-        ftmp.color = new Color(0.88f, 0.89f, 0.92f, 0.9f);
-        ftmp.raycastTarget = false;
-        ApplyPrimaryUiTypography(ftmp, equationStyle, outlineWidth: 0.1f, outlineAlpha: 0.45f);
-        LocalizationManager.ApplyTextDirection(ftmp);
     }
 
     /// <summary>The big equation label in <c>Game</c> — used as the typography reference for all gameplay HUD copy.</summary>
@@ -1745,9 +1700,15 @@ public class LevelManager : MonoBehaviour
             storyPauseSecondsOverride: 2.65f
         ));
 
+        var dragPolarOverlays = new[]
+        {
+            new Color(0.55f, 0.68f, 0.9f, 0.95f),
+            new Color(0.98f, 0.5f, 0.55f, 0.9f)
+        };
+
         levels.Add(MakeLevel(
             GameLevelCatalog.DisplayNames[35],
-            FunctionType.Power,
+            FunctionType.AeroDragPolarTriple,
             curveColor: new Color(0.75f, 0.55f, 1f, 1f),
             derivativeColor: new Color(1f, 0.72f, 0.35f, 1f),
             transA: 0.072f,
@@ -1757,14 +1718,15 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Drag polar</b> — aircraft guys write <color=#c4b5fd>C_D = C_{D0} + K C_L²</color> (parabolic drag polar) to mash profile + induced drag into one quadratic in lift coefficient.\n\n" +
-                "Min drag at a certain C_L sets best glide / L/D intuition; integrating under such curves feeds range & endurance estimates (Breguet‑style reasoning in the big books).\n\n" +
-                "<size=92%><color=#a8b2d1>Here u plays the role of C_L on the horizontal axis — walk the bowl of extra drag as you leave the sweet spot.</color></size>",
+                "<b>Drag polar — three traces at once</b> — the graph shows <color=#93c5fd><b>parasitic (zero‑lift / profile) drag</b></color> as a flat baseline, <color=#fb7185><b>induced drag</b></color> as the bowl that grows with |C_L|, and <color=#c4b5fd><b>total C_D</b></color> as their sum (walk the thick total — same parabola as before).\n\n" +
+                "Classic identity: <color=#c4b5fd>C_D = C_{D0} + K C_L²</color>; min‑drag C_L is where the marginal induced penalty balances mission speed/α choices.\n\n" +
+                "<size=92%><color=#a8b2d1>Horizontal axis: u ~ C_L. Purple = C_D,tot (platforms); blue = C_D,par; coral = C_D,ind alone (from zero lift).</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.35f, 0.25f, 0.5f, 0.36f),
             gridOutside: new Color(0.25f, 0.18f, 0.36f, 0.1f),
-            storyPauseSecondsOverride: 2.55f
+            storyPauseSecondsOverride: 2.65f,
+            dragPolarOverlayColors: dragPolarOverlays
         ));
 
         levels.Add(MakeLevel(
@@ -1963,7 +1925,8 @@ public class LevelManager : MonoBehaviour
         Color? riemannFillColor = null,
         float graphStep = 0f,
         float? levelXStart = null,
-        float? levelXEnd = null)
+        float? levelXEnd = null,
+        Color[] dragPolarOverlayColors = null)
     {
         var def = ScriptableObject.CreateInstance<LevelDefinition>();
         def.levelName = name;
@@ -2024,6 +1987,15 @@ public class LevelManager : MonoBehaviour
         if (riemannFillColor.HasValue)
             def.riemannFillColor = riemannFillColor.Value;
 
+        if (dragPolarOverlayColors != null && dragPolarOverlayColors.Length >= 2)
+        {
+            def.dragPolarOverlayColors = new List<Color>
+            {
+                dragPolarOverlayColors[0],
+                dragPolarOverlayColors[1]
+            };
+        }
+
         return def;
     }
 
@@ -2081,6 +2053,19 @@ public class LevelManager : MonoBehaviour
 
         curveRenderer.color = def.curveColor;
         derivRenderer.color = def.derivativeColor;
+
+        if (def.functionType == FunctionType.AeroDragPolarTriple)
+        {
+            Color oc0 = new Color(0.55f, 0.68f, 0.9f, 0.95f);
+            Color oc1 = new Color(0.98f, 0.5f, 0.55f, 0.9f);
+            if (def.dragPolarOverlayColors != null && def.dragPolarOverlayColors.Count >= 2)
+            {
+                oc0 = def.dragPolarOverlayColors[0];
+                oc1 = def.dragPolarOverlayColors[1];
+            }
+
+            functionPlotter.ConfigureDragPolarOverlayColors(oc0, oc1);
+        }
 
         int popN = def.derivativePopTriggerCount > 0 ? def.derivativePopTriggerCount : defaultStageCount;
         var fromDef = def.stageDerivativePopColors;

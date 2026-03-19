@@ -25,11 +25,19 @@ Open `http://127.0.0.1:4000/First-Principles/` (adjust for your `baseurl`).
 
 **Math:** Markdown pages may use LaTeX in `\(...\)` / `\[...\]`; see [`setup.md#latex-math-on-the-doc-site`](setup.md#latex-math-on-the-doc-site).
 
+## Multiple languages
+
+- **Arabic (RTL):** [`ar/index.md`](ar/index.md), [`ar/setup.md`](ar/setup.md), [`ar/gameplay.md`](ar/gameplay.md), [`ar/math-concepts.md`](ar/math-concepts.md) — use front matter `rtl: true` and `lang: ar` (do **not** set YAML `dir:`; it overwrites Jekyll’s built-in `page.dir`). [`_includes/custom-head.html`](_includes/custom-head.html) loads **Noto Naskh Arabic** and RTL layout for those pages.
+- **French (stub):** [`fr/index.md`](fr/index.md).
+- Add more locales the same way: copy an existing page, set `permalink`, `lang`, and optional `rtl`.
+
 ## Contents
 
 | File | Purpose |
 |------|---------|
 | `index.md` | Documentation home |
+| `ar/*.md` | Arabic (RTL) summaries — see «Multiple languages» |
+| `fr/index.md` | French stub home |
 | `first-principles-business.md` | First principles (Musk-popularized builder lens) ↔ game metaphors; not business advice |
 | `orch-avionic-efb.md` | [ORCH Aerospace](https://orchaerospace.com) — Orch Avionic 1 EFB (promo / disclosures) |
 | `setup.md` | Unity setup & clean restore |

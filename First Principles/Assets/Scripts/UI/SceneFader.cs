@@ -185,7 +185,7 @@ public class SceneFader : MonoBehaviour
             var creditsTmp = creditsGo != null ? creditsGo.GetComponent<TextMeshProUGUI>() : null;
             if (creditsTmp != null)
             {
-                creditsTmp.text = LocalizationManager.Get("menu.home_footer", SceneCreditsFooter.HomeFooterDefault);
+                creditsTmp.text = SceneCreditsFooter.BuildMenuFooterRichText();
                 LocalizationManager.ApplyTextDirection(creditsTmp);
             }
         }

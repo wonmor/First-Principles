@@ -30,7 +30,8 @@ graph.param_c=C (लंबवत खिसकाव)
 graph.param_d=D (क्षैतिज खिसकाव)
 graph.calculator_intro=<b>ग्राफ़िंग कैलकुलेटर मोड</b>\n<size=88%>लगभग कोई भी <b>f(u)</b> फ़ील्ड में लिखें (सूत्र में चर <b>x</b>); <b>Trans</b> से A, k, C, D; <b>Scale</b> व <b>पिंच</b> से खिड़की ज़ूम।</size>
 aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>ड्रैग पोलर संक्षिप्त</color></b> (हर <b>एयरोस्पेस</b> चरण)\n<size=92%><b>पैरासिटिक (शून्य-लिफ़्ट) ड्रैग</b> — घर्षण, रूप ड्रैग, हस्तक्षेप को पैराबोलिक मॉडल में <b>C<sub>D0</sub></b> में समेटा जाता है (लिफ़्ट के साथ बढ़ने वाला हिस्सा नहीं)।\n<b>प्रेरित (इंड्यूस्ड) ड्रैग</b> — लिफ़्ट बनाने का खर्च: पिछले वॉर्टेक्स ~ <b>K C<sub>L</sub>²</b> (ऊँचा C<sub>L</sub> / तेज़ मोड़ → ज़्यादा इंड्यूस्ड)।\n<b>कुल ड्रैग पोलर</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: C<sub>L</sub> में ऊपर खुलने वाला पैराबोला; न्यूनतम-ड्रैग C<sub>L</sub> वास्तविक मिशनों में “बहुत धीमा / ऊँचा α” और “बहुत तेज़” के बीच।</size>
-menu.home_footer=<b>First Principles</b> <color=#555555>(version 1.0)</color>\n\n<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
+menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.credits_line=<size=34>जॉन सेओंग (ऑर्च एयरोस्पेस) × रयान कैसी (GameGenesis)</size>
 level.0=प्रथम सिद्धांत: प्रस्तावना
 level.1=पराबोला की ढाल
 level.2=ज्या की लहरें
@@ -66,7 +67,7 @@ level.31=BC: घन व प्रगाढ़ता (रेखाचित्र
 level.32=BC: b^x व d/dx b^x
 level.33=वृत्त: (x−h)² + (y−k)² = R²
 level.34=एयरोस्पेस: लिफ़्ट C_L(α) रैखिक + स्टॉल
-level.35=एयरोस्पेस: पैराबोलिक ड्रैग पोलर C_D(C_L)
+level.35=एयरोस्पेस: ड्रैग पोलर (पैरासिटिक, प्रेरित, कुल)
 level.36=एयरोस्पेस: समतापमान वायुमंडल ρ(h)
 level.37=एयरोस्पेस: फ्यूगॉइड / डैम्प्ड पिच-हीव
 level.38=एयरोस्पेस: न्यूटोनियन Cp ~ sin²α

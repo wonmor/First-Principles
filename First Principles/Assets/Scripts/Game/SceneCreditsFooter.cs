@@ -1,37 +1,26 @@
-using TMPro;
-using UnityEngine;
-
 // -----------------------------------------------------------------------------
-// SceneCreditsFooter — keep in sync with Menu.unity <c>MenuCreditsBlock</c> (two lines).
+// Menu footer copy — title + optional credits (localized separately).
 // -----------------------------------------------------------------------------
-// Level select + Game HUD use <see cref="BuildCompactRichText"/>; Menu uses the same
-// strings via <c>menu.home_footer</c> in <see cref="LocalizationManager"/>.
+// <c>menu.version_line</c> + <c>menu.credits_line</c> in each <c>Localization/{code}.txt</c>.
 // -----------------------------------------------------------------------------
 
-/// <summary>Short home / footer copy (two lines). Overridden by <c>menu.home_footer</c>.</summary>
+/// <summary>Composes menu footer rich text for TextMesh Pro.</summary>
 public static class SceneCreditsFooter
 {
-    /// <summary>Rich text: title + version, then collaboration line (matches main menu intent).</summary>
+    /// <summary>Title + version line only (fallback if credits key empty).</summary>
     public const string HomeFooterDefault =
-        "<b>First Principles</b> <color=#555555>(version 1.0)</color>\n\n" +
+        "<b>First Principles</b> <color=#555555>(version 1.0)</color>";
+
+    public const string CreditsLineDefaultEn =
         "<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>";
 
-    /// <summary>Compact block for bottom strips (level select, in-game).</summary>
-    public static string BuildCompactRichText()
+    /// <summary>Centered block: version line, then credits when <c>menu.credits_line</c> is non-empty.</summary>
+    public static string BuildMenuFooterRichText()
     {
-        string body = LocalizationManager.Get("menu.home_footer", HomeFooterDefault);
-        return "<align=center>" + body + "</align>";
-    }
-
-    public static void CopyFontIfPossible(TextMeshProUGUI target)
-    {
-        if (target == null)
-            return;
-
-        var any = Object.FindAnyObjectByType<TextMeshProUGUI>();
-        if (any != null && any != target && any.font != null)
-            target.font = any.font;
-        else if (TMP_Settings.defaultFontAsset != null)
-            target.font = TMP_Settings.defaultFontAsset;
+        string ver = LocalizationManager.Get("menu.version_line", HomeFooterDefault);
+        string cred = LocalizationManager.Get("menu.credits_line", CreditsLineDefaultEn);
+        if (string.IsNullOrWhiteSpace(cred))
+            return "<align=center>" + ver + "</align>";
+        return "<align=center>" + ver + "\n\n" + cred + "</align>";
     }
 }
