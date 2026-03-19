@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 /// <summary>
 /// Two-finger pinch zoom on the math window (<see cref="FunctionPlotter.xStart"/> / <c>xEnd</c>).
@@ -21,11 +23,11 @@ public class GraphPinchZoom : MonoBehaviour
         if (plot == null)
             return;
 
-        if (Input.touchCount == 2)
+        if (Touch.activeTouches.Count == 2)
         {
-            var t0 = Input.GetTouch(0);
-            var t1 = Input.GetTouch(1);
-            float d = Vector2.Distance(t0.position, t1.position);
+            var t0 = Touch.activeTouches[0];
+            var t1 = Touch.activeTouches[1];
+            float d = Vector2.Distance(t0.screenPosition, t1.screenPosition);
             if (pinching && lastDist > 2f)
             {
                 // Fingers closer => smaller d => ratio < 1 => narrower half-width => zoom in.

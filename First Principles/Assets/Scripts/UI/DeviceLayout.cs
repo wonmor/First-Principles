@@ -17,7 +17,7 @@ public static class DeviceLayout
     public static bool PreferOnScreenGameControls =>
         Application.isMobilePlatform ||
         SystemInfo.deviceType == DeviceType.Handheld ||
-        Input.touchSupported;
+        SystemInfo.touchSupported;
 
     /// <summary>
     /// iPad-class devices: shortest side in approximate dp (avoids mislabeling phones by pixel count alone).

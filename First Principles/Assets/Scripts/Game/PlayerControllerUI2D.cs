@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // =============================================================================
@@ -111,24 +112,14 @@ public class PlayerControllerUI2D : MonoBehaviour
 
         float dt = Time.deltaTime;
 
-        // Movement: arrow keys / WASD (preferred for keyboard), then legacy Input axes (gamepad, etc.).
-        float inputX = 0f;
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
-            inputX -= 1f;
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
-            inputX += 1f;
-        if (Mathf.Approximately(inputX, 0f))
-            inputX = Input.GetAxisRaw("Horizontal");
+        // Movement: keyboard (arrows / WASD), gamepad stick, then on-screen touch bridge.
+        float inputX = ReadHorizontalInput();
         if (Mathf.Approximately(inputX, 0f))
             inputX = MobileInputBridge.TouchHorizontal;
 
         velGrid.x = inputX * moveSpeedGridPerSec;
 
-        bool jumpPressed =
-            Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.W) ||
-            Input.GetKeyDown(KeyCode.UpArrow) ||
-            Input.GetButtonDown("Jump");
+        bool jumpPressed = ReadJumpPressed();
         if (!jumpPressed)
             jumpPressed = MobileInputBridge.ConsumeJump();
 
@@ -172,6 +163,52 @@ public class PlayerControllerUI2D : MonoBehaviour
 
         posGrid = nextPos;
         ApplyVisualPosition();
+    }
+
+    private static float ReadHorizontalInput()
+    {
+        float inputX = 0f;
+        var kb = Keyboard.current;
+        if (kb != null)
+        {
+            if (kb.leftArrowKey.isPressed || kb.aKey.isPressed)
+                inputX -= 1f;
+            if (kb.rightArrowKey.isPressed || kb.dKey.isPressed)
+                inputX += 1f;
+        }
+
+        if (Mathf.Approximately(inputX, 0f))
+        {
+            var gp = Gamepad.current;
+            if (gp != null)
+            {
+                float lx = gp.leftStick.x.ReadValue();
+                if (Mathf.Abs(lx) > 0.5f)
+                    inputX = Mathf.Sign(lx);
+                else if (Mathf.Abs(lx) > 0.12f)
+                    inputX = lx;
+            }
+        }
+
+        return inputX;
+    }
+
+    private static bool ReadJumpPressed()
+    {
+        var kb = Keyboard.current;
+        if (kb != null)
+        {
+            if (kb.spaceKey.wasPressedThisFrame ||
+                kb.wKey.wasPressedThisFrame ||
+                kb.upArrowKey.wasPressedThisFrame)
+                return true;
+        }
+
+        var gp = Gamepad.current;
+        if (gp != null && gp.buttonSouth.wasPressedThisFrame)
+            return true;
+
+        return false;
     }
 
     private void ResolveHorizontalPlatforms(ref Vector2 pos)

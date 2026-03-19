@@ -47,6 +47,12 @@ After changing `_config.yml`, wait for the **Pages build** to finish (Actions ta
 
 The root `.gitignore` ignores **`**/Library/`**, **`**/UserSettings/`**, etc., so the Unity project under **`First Principles/`** is covered. Do not commit `Library/` — teammates regenerate it locally.
 
-## Input Manager deprecation warning
+## Input System (new)
 
-Unity may warn that the **Input Manager** is legacy. The platformer uses **`Input.GetKey`** for keyboard and axes for other devices. Migrating to the **Input System** package is optional and not required for current controls.
+The project uses the **[Input System](https://docs.unity3d.com/Packages/com.unity.inputsystem@latest)** package with **Active Input Handling** set to **Input System Package** (`Project Settings → Player → Other Settings`). Keyboard, gamepad, touch pinch, and UI go through the new stack.
+
+- **Gameplay** (`PlayerControllerUI2D`): `Keyboard` + `Gamepad` via `UnityEngine.InputSystem`.
+- **Faxas pinch zoom** (`GraphPinchZoom`): **Enhanced Touch** (`Touch.activeTouches`).
+- **uGUI**: `EventSystemInputModuleBootstrap` replaces any scene **`StandaloneInputModule`** with **`InputSystemUIInputModule`** on load (defaults are assigned automatically).
+
+If **Package Manager** fails to resolve `com.unity.inputsystem`, match the version to your Unity editor (try **Window → Package Manager** → Input System).

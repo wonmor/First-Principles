@@ -40,7 +40,7 @@ Special levels can **tint the grid** and adjust how long story text stays on scr
 |--------|--------|
 | **← / →** or **A / D** | Move |
 | **Space**, **W**, or **↑** | Jump |
-| **Jump** axis / gamepad | Still supported via Unity **Input Manager** |
+| **Gamepad** (left stick + south face button) | Supported via **[Input System](https://docs.unity3d.com/Packages/com.unity.inputsystem@latest)** |
 | **Touch** (phones / tablets) | **On-screen ◀ ▶ and Jump** when the build is mobile/touch-capable; safe-area layout keeps them above the home indicator. Keyboard still works on devices that have one. |
 
 ### Mobile-friendly UI

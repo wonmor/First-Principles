@@ -11,6 +11,7 @@ permalink: /setup/
 | Requirement | Notes |
 |-------------|--------|
 | **Unity Editor** | **6000.4.0f1** (Unity 6) — see `First Principles/ProjectSettings/ProjectVersion.txt` |
+| **Input** | **[Input System](https://docs.unity3d.com/Packages/com.unity.inputsystem@latest)** package (`com.unity.inputsystem` in `Packages/manifest.json`); **Player → Active Input Handling** must stay on **Input System Package** (not “Input Manager only”). |
 | **Disk** | Large `Library/` folder; safe to delete and regenerate |
 | **OS** | Windows / macOS / Linux (editor-supported) |
 
