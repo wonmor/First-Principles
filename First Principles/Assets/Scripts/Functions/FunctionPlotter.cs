@@ -131,7 +131,12 @@ public class FunctionPlotter : MonoBehaviour
         }
 
         float dur = Mathf.Max(0.05f, graphRevealDurationSeconds);
-        _graphRevealT01 = Mathf.MoveTowards(_graphRevealT01, 1f, Time.deltaTime / dur);
+        // Lorenz butterfly already animates via _lorenzPhaseScroll; horizontal alpha reveal uses grid-x and
+        // can zero the whole polyline when revealX sits on gx0 (progress 0 → all vertices faded).
+        if (functionType == FunctionType.ChaosLorenzButterflyX)
+            _graphRevealT01 = 1f;
+        else
+            _graphRevealT01 = Mathf.MoveTowards(_graphRevealT01, 1f, Time.deltaTime / dur);
 
         if (functionType == FunctionType.ChaosLorenzButterflyX)
         {
@@ -158,16 +163,17 @@ public class FunctionPlotter : MonoBehaviour
         float gx0 = MapDisplayX(xStart) + go.x;
         float gx1 = MapDisplayX(xEnd) + go.x;
 
-        lineRenderer.SetGraphRevealFade(_graphRevealT01, gx0, gx1);
+        float revealT = functionType == FunctionType.ChaosLorenzButterflyX ? 1f : _graphRevealT01;
+        lineRenderer.SetGraphRevealFade(revealT, gx0, gx1);
         if (derivRenderer != null)
-            derivRenderer.SetGraphRevealFade(_graphRevealT01, gx0, gx1);
+            derivRenderer.SetGraphRevealFade(revealT, gx0, gx1);
 
         if (functionType == FunctionType.AeroDragPolarTriple)
         {
             if (overlayParasitic != null)
-                overlayParasitic.SetGraphRevealFade(_graphRevealT01, gx0, gx1);
+                overlayParasitic.SetGraphRevealFade(revealT, gx0, gx1);
             if (overlayInduced != null)
-                overlayInduced.SetGraphRevealFade(_graphRevealT01, gx0, gx1);
+                overlayInduced.SetGraphRevealFade(revealT, gx0, gx1);
         }
     }
 
@@ -177,7 +183,8 @@ public class FunctionPlotter : MonoBehaviour
         if (lr == null || lineRenderer == null)
             return;
         Vector2Int go = lineRenderer.gridSize / 2;
-        lr.SetGraphRevealFade(_graphRevealT01, MapDisplayX(xStart) + go.x, MapDisplayX(xEnd) + go.x);
+        float revealT = functionType == FunctionType.ChaosLorenzButterflyX ? 1f : _graphRevealT01;
+        lr.SetGraphRevealFade(revealT, MapDisplayX(xStart) + go.x, MapDisplayX(xEnd) + go.x);
     }
 
     public void InitPlotFunction()
@@ -330,6 +337,13 @@ public class FunctionPlotter : MonoBehaviour
     {
         lineRenderer = LineRendererUI.FindPrimaryCurve();
         derivRenderer = FindAnyObjectByType<DerivRendererUI>();
+
+        // Lorenz: disable per-vertex horizontal fade (see UpdateGraphRevealAnimation); derivative uses same flag.
+        bool lorenzButterfly = type == FunctionType.ChaosLorenzButterflyX;
+        if (lineRenderer != null)
+            lineRenderer.enableHorizontalGraphReveal = !lorenzButterfly;
+        if (derivRenderer != null)
+            derivRenderer.enableHorizontalGraphReveal = !lorenzButterfly;
 
         if (lineRenderer != null)
         {

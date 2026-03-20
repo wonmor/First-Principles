@@ -107,7 +107,7 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
             && (!Mathf.Approximately(integralCachedXStart, plotter.xStart)
                 || !Mathf.Approximately(integralCachedXEnd, plotter.xEnd)))
         {
-            riemann.RebuildForGraphingCalculator(plotter, RiemannRectCount, RiemannRule.Midpoint, CalculatorRiemannFill);
+            riemann.RebuildForGraphingCalculator(plotter, primaryCurve, RiemannRectCount, RiemannRule.Midpoint, CalculatorRiemannFill);
             integralCachedXStart = plotter.xStart;
             integralCachedXEnd = plotter.xEnd;
             if (primaryCurve.transform.parent != null)
@@ -168,7 +168,7 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
         integralBarsActive = true;
         RefreshButtonInteractable();
 
-        riemann.RebuildForGraphingCalculator(plotter, RiemannRectCount, RiemannRule.Midpoint, CalculatorRiemannFill);
+        riemann.RebuildForGraphingCalculator(plotter, primaryCurve, RiemannRectCount, RiemannRule.Midpoint, CalculatorRiemannFill);
         integralCachedXStart = plotter.xStart;
         integralCachedXEnd = plotter.xEnd;
         if (primaryCurve != null && primaryCurve.transform.parent != null)

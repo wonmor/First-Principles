@@ -947,9 +947,10 @@ public class LevelManager : MonoBehaviour
         {
             var curveLineRt = curveRenderer.GetComponent<RectTransform>();
             Transform lineParent = curveLineRt != null ? curveLineRt.parent : null;
-            if (lineParent != null && riemannRenderer.transform.parent != lineParent)
+            if (lineParent != null)
             {
-                riemannRenderer.transform.SetParent(lineParent, false);
+                if (riemannRenderer.transform.parent != lineParent)
+                    riemannRenderer.transform.SetParent(lineParent, false);
                 var riemannRt = riemannRenderer.GetComponent<RectTransform>();
                 if (curveLineRt != null && riemannRt != null)
                 {
@@ -960,6 +961,9 @@ public class LevelManager : MonoBehaviour
                     riemannRt.sizeDelta = curveLineRt.sizeDelta;
                     riemannRt.localScale = curveLineRt.localScale;
                 }
+
+                riemannRenderer.gameObject.SetActive(true);
+                riemannRenderer.enabled = true;
                 riemannRenderer.transform.SetSiblingIndex(0);
             }
         }
