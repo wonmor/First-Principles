@@ -9,18 +9,24 @@ using UnityEngine.UI;
 public class LineRendererUI : Graphic
 {
     internal const string DragPolarOverlayNamePrefix = "DragPolar_";
+    internal const string GraphCalcDerivOverlayPrefix = "GraphCalcDeriv_";
 
     /// <summary>
-    /// Main function curve (excludes drag-polar overlay clones named <c>DragPolar_*</c> from <c>FunctionPlotter</c>).
+    /// Main function curve (excludes drag-polar / graphing-calculator overlay clones).
     /// </summary>
     public static LineRendererUI FindPrimaryCurve()
     {
         var all = UnityEngine.Object.FindObjectsByType<LineRendererUI>(FindObjectsInactive.Include);
         foreach (var lr in all)
         {
-            if (lr != null && lr.gameObject != null
-                          && !lr.gameObject.name.StartsWith(DragPolarOverlayNamePrefix, StringComparison.Ordinal))
-                return lr;
+            if (lr == null || lr.gameObject == null)
+                continue;
+            string n = lr.gameObject.name;
+            if (n.StartsWith(DragPolarOverlayNamePrefix, StringComparison.Ordinal))
+                continue;
+            if (n.StartsWith(GraphCalcDerivOverlayPrefix, StringComparison.Ordinal))
+                continue;
+            return lr;
         }
 
         return all != null && all.Length > 0 ? all[0] : null;

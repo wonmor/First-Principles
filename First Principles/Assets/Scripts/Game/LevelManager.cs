@@ -125,7 +125,7 @@ public class LevelManager : MonoBehaviour
         if (graphCalculatorMode)
         {
             controlsHintText.text = LocalizationManager.Get("controls.calculator",
-                "<color=#7a8399>Graphing calculator</color>  <b>Type f(u)</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>Pinch</b>  ·  <b>Back</b>");
+                "<color=#7a8399>Graphing calculator</color>  <b>Type f(u)</b>  ·  <b>Deriv</b>  ·  <b>∫</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>Pinch</b>  ·  <b>Back</b>");
         }
         else if (DeviceLayout.PreferOnScreenGameControls)
         {
@@ -369,6 +369,7 @@ public class LevelManager : MonoBehaviour
             derivRenderer.enabled = false;
         }
 
+        EnsureRiemannRenderer();
         if (riemannRenderer != null)
             riemannRenderer.ClearStrips();
 
@@ -450,6 +451,11 @@ public class LevelManager : MonoBehaviour
 
         var pinch = gameObject.AddComponent<GraphPinchZoom>();
         pinch.Setup(functionPlotter);
+
+        var calcAnalysis = GetComponent<GraphCalculatorAnalysisControls>();
+        if (calcAnalysis == null)
+            calcAnalysis = gameObject.AddComponent<GraphCalculatorAnalysisControls>();
+        calcAnalysis.Configure(functionPlotter, riemannRenderer, curveRenderer, equationStyleRef, transRowBottom);
 
         RefreshControlsHintLocalized();
     }

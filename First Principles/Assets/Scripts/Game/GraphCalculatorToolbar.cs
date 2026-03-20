@@ -151,14 +151,14 @@ public class GraphCalculatorToolbar : MonoBehaviour
                 LocalizationManager.Get("graph.param_c", "C (vertical shift)"),
                 LocalizationManager.Get("graph.param_d", "D (horizontal shift)")
             };
-        string line1 = LocalizationManager.Get("graph.line1", "<b>Graphing calculator mode</b>");
+        // Title lives in the top story banner (graph.calculator_intro); keep this hint to controls + params only.
         string line2 = polar
             ? LocalizationManager.Get("graph.polar.line2",
                 "<size=88%><color=#c4d0e8>Polar plot: horizontal axis is <b>θ</b>, vertical is <b>r(θ)</b>. <b>Trans</b> adjusts A, k, C, D in the polar equation.</color></size>")
             : LocalizationManager.Get("graph.line2",
                 "<size=88%><color=#c4d0e8>Type <b>f(u)</b> below (variable <b>x</b> in the box = inner u). Then:</color></size>");
         string line3Fmt = LocalizationManager.Get("graph.line3",
-            "<size=92%><b>Trans</b> → {0} · double-tap <b>+</b> · hold <b>−</b> · <b>Scale</b> zoom in / hold zoom out · two-finger <b>pinch</b></size>");
+            "<size=96%><b>Deriv</b> adds f′…f⁽⁴⁾ (numeric) · <b>∫ area</b> Riemann strips once + primitive guess · <b>Trans</b> → {0} · double-tap <b>+</b> · hold <b>−</b> · <b>Scale</b> / <b>pinch</b></size>");
         string line3 = string.Format(line3Fmt, names[paramIndex]);
         float th0 = plot.transK * (plot.xStart - plot.transD);
         float th1 = plot.transK * (plot.xEnd - plot.transD);
@@ -185,7 +185,7 @@ public class GraphCalculatorToolbar : MonoBehaviour
 
         hint.richText = true;
         hint.alignment = TextAlignmentOptions.Center;
-        hint.text = line1 + "\n" + line2 + "\n" + line3 + "\n" + line4;
+        hint.text = line2 + "\n" + line3 + "\n" + line4;
         LocalizationManager.ApplyTextDirection(hint);
     }
 }

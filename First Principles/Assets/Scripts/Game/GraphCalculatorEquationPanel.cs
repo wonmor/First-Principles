@@ -23,7 +23,7 @@ public static class GraphCalculatorEquationPanel
         var existing = GameObject.Find(RootName);
         if (existing != null)
         {
-            ApplyEquationPanelFontAndWeight(existing, typographyReference);
+            ApplyEquationPanelFontAndWeight(existing, typographyReference, plotter);
             return;
         }
 
@@ -31,7 +31,7 @@ public static class GraphCalculatorEquationPanel
         if (legacyRoot != null)
         {
             legacyRoot.name = RootName;
-            ApplyEquationPanelFontAndWeight(legacyRoot, typographyReference);
+            ApplyEquationPanelFontAndWeight(legacyRoot, typographyReference, plotter);
             return;
         }
 
@@ -152,24 +152,42 @@ public static class GraphCalculatorEquationPanel
         LocalizationManager.LanguageChanged -= RefreshEquationPanelStaticCopy;
         LocalizationManager.LanguageChanged += RefreshEquationPanelStaticCopy;
 
-        void Apply(string s)
+        WireEquationApplyHandlers(root, plotter);
+    }
+
+    static void WireEquationApplyHandlers(GameObject root, FunctionPlotter plotter)
+    {
+        if (root == null || plotter == null)
+            return;
+
+        var input = root.GetComponentInChildren<TMP_InputField>(true);
+        var status = root.transform.Find("Status")?.GetComponent<TextMeshProUGUI>();
+        if (input == null)
+            return;
+
+        input.onSubmit.RemoveAllListeners();
+        input.onEndEdit.RemoveAllListeners();
+        input.onSubmit.AddListener(s => TryApplyEquation(plotter, status, s));
+        input.onEndEdit.AddListener(s => TryApplyEquation(plotter, status, s));
+    }
+
+    static void TryApplyEquation(FunctionPlotter plotter, TextMeshProUGUI status, string s)
+    {
+        string t = string.IsNullOrWhiteSpace(s) ? "" : s.Trim();
+        if (string.IsNullOrEmpty(t))
+            return;
+
+        if (!MathExpressionEvaluator.TryValidateRough(t, out string err))
         {
-            string t = string.IsNullOrWhiteSpace(s) ? "" : s.Trim();
-            if (string.IsNullOrEmpty(t))
-                return;
-
-            if (!MathExpressionEvaluator.TryValidateRough(t, out string err))
-            {
+            if (status != null)
                 status.text = $"<color=#ff9a9a>{TmpEscape(err)}</color>";
-                return;
-            }
-
-            status.text = LocalizationManager.Get("graph.status_graphed", "<color=#8fd9b3>Graphed</color>");
-            plotter.SetCustomExpression(t);
+            return;
         }
 
-        input.onSubmit.AddListener(Apply);
-        input.onEndEdit.AddListener(Apply);
+        if (status != null)
+            status.text = LocalizationManager.Get("graph.status_graphed", "<color=#8fd9b3>Graphed</color>");
+        plotter.SetCustomExpression(t);
+        GraphCalculatorAnalysisControls.NotifyExpressionChanged(plotter);
     }
 
     private static void RefreshEquationPanelStaticCopy()
@@ -213,7 +231,7 @@ public static class GraphCalculatorEquationPanel
     /// <summary>
     /// Re-applies project font + bold weights when the equation panel already exists (scene or prior session).
     /// </summary>
-    static void ApplyEquationPanelFontAndWeight(GameObject root, TextMeshProUGUI typographyReference)
+    static void ApplyEquationPanelFontAndWeight(GameObject root, TextMeshProUGUI typographyReference, FunctionPlotter plotter)
     {
         if (root == null)
             return;
@@ -232,5 +250,7 @@ public static class GraphCalculatorEquationPanel
 
         LocalizationManager.LanguageChanged -= RefreshEquationPanelStaticCopy;
         LocalizationManager.LanguageChanged += RefreshEquationPanelStaticCopy;
+
+        WireEquationApplyHandlers(root, plotter);
     }
 }

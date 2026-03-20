@@ -113,6 +113,57 @@ public class RiemannStripRendererUI : Graphic
         SetVerticesDirty();
     }
 
+    /// <summary>Riemann rectangles over the graphing calculator window (no <see cref="LevelDefinition"/>).</summary>
+    public void RebuildForGraphingCalculator(FunctionPlotter plotter, int rectCount, RiemannRule rule, Color fillColor)
+    {
+        strips.Clear();
+        color = fillColor;
+
+        if (plotter == null || rectCount < 1)
+        {
+            SetVerticesDirty();
+            return;
+        }
+
+        if (grid == null)
+            grid = GetComponentInParent<GridRendererUI>();
+        if (grid != null)
+            gridSize = grid.gridSize;
+
+        Vector2Int origin = gridSize / 2;
+        int n = Mathf.Max(1, rectCount);
+        float xStart = plotter.xStart;
+        float xEnd = plotter.xEnd;
+        float span = xEnd - xStart;
+        if (span <= 1e-6f)
+        {
+            SetVerticesDirty();
+            return;
+        }
+
+        float dx = span / n;
+
+        for (int i = 0; i < n; i++)
+        {
+            float xL = xStart + i * dx;
+            float xR = xStart + (i + 1) * dx;
+            float xS = SampleX(rule, xL, xR);
+            float gyTop = plotter.SampleCurveGridY(xS);
+            if (!IsFinite(gyTop))
+                continue;
+
+            float gxL = xL + origin.x;
+            float gxR = xR + origin.x;
+            float gyAxis = origin.y;
+            float ymin = Mathf.Min(gyAxis, gyTop);
+            float ymax = Mathf.Max(gyAxis, gyTop);
+
+            strips.Add(new Vector4(gxL, gxR, ymin, ymax));
+        }
+
+        SetVerticesDirty();
+    }
+
     private static float SampleX(RiemannRule rule, float xL, float xR)
     {
         return rule switch

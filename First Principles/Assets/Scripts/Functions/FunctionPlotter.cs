@@ -32,6 +32,9 @@ public class FunctionPlotter : MonoBehaviour
     // A infinitesimally small number chosen in order to perform numerical differentiation
     private float hValue = (float)(Mathf.Pow(10, -4));
 
+    /// <summary>Step <c>h</c> used for numeric derivatives (graph overlays share this).</summary>
+    public float NumericalDerivativeStep => hValue;
+
     // The type of function to be plotted
     public FunctionType functionType;
 
@@ -142,6 +145,27 @@ public class FunctionPlotter : MonoBehaviour
         return MapDisplayY(raw) + _cachedGridOriginY;
     }
 
+    /// <summary>
+    /// Graphing calculator: numeric <c>dⁿy/dxⁿ</c> at plotter <paramref name="xPlotter"/> (same vertical map as <see cref="ComputeGraph"/>).
+    /// </summary>
+    public float SampleNthDerivativeGridY(float xPlotter, int order)
+    {
+        if (lineRenderer == null)
+            lineRenderer = LineRendererUI.FindPrimaryCurve();
+        if (lineRenderer == null)
+            return float.NaN;
+
+        Vector2Int gridOrigin = lineRenderer.gridSize / 2;
+        float raw = MathNthDerivative.Evaluate(
+            xx => EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xx),
+            xPlotter,
+            Mathf.Clamp(order, 1, 4),
+            hValue);
+        if (!IsFinite(raw))
+            return float.NaN;
+        return MapDisplayY(raw) + gridOrigin.y;
+    }
+
     /// <summary>Numeric f′(x) in <b>raw</b> plotter units (not affected by vertical exaggeration). For gameplay thresholds.</summary>
     public float EvaluateNumericalDerivativeY(float xPlotter)
     {
@@ -152,6 +176,23 @@ public class FunctionPlotter : MonoBehaviour
     }
 
     float MapDisplayY(float rawY) => (rawY - _autoMid) * _autoScale;
+
+    /// <summary>
+    /// Inverse of vertical display fit: grid tick offset from center (one unit = one plotter‑y step)
+    /// maps to the <b>mathematical</b> y (or polar r) read on that horizontal line.
+    /// When auto-fit is off, this is identity (mid 0, scale 1).
+    /// </summary>
+    public float AxisTickOffsetToMathY(float tickOffsetFromCenter)
+    {
+        float s = Mathf.Max(_autoScale, 1e-6f);
+        return _autoMid + tickOffsetFromCenter / s;
+    }
+
+    /// <summary>Current vertical auto-fit pivot (math axis). For axis label refresh.</summary>
+    public float VerticalAxisLabelPivot => _autoMid;
+
+    /// <summary>Current vertical display stretch factor. For axis label refresh.</summary>
+    public float VerticalAxisLabelScale => _autoScale;
 
     public void SetEquationExtraSuffix(string suffix)
     {
