@@ -69,6 +69,8 @@ public class PlayerControllerUI2D : MonoBehaviour
     private bool touchingDerivativeNow;
     /// <summary>After using f′ air jump, stay true until you leave the band or land (prevents spam while sliding on the line).</summary>
     private bool derivativeAirJumpConsumedThisBand;
+    /// <summary>Fresh level entry: first grounded jump uses <see cref="jumpVelocityGridPerSec"/>×2 once.</summary>
+    private bool strongFirstGroundJumpPending;
     private float derivativeHighlightSmoothed;
     private AudioSource derivativeHitAudio;
 
@@ -128,7 +130,7 @@ public class PlayerControllerUI2D : MonoBehaviour
         this.world = world;
     }
 
-    public void ResetToSpawn(GraphWorld world)
+    public void ResetToSpawn(GraphWorld world, bool grantStrongFirstGroundJump = false)
     {
         if (world == null)
             return;
@@ -137,8 +139,8 @@ public class PlayerControllerUI2D : MonoBehaviour
         isDead = false;
         isFinished = false;
         grounded = false;
+        strongFirstGroundJumpPending = grantStrongFirstGroundJump;
 
-        float halfW = playerWidthGrid / 2f;
         float halfH = playerHeightGrid / 2f;
 
         posGrid = new Vector2(world.spawnXGrid, world.spawnYTopGrid + halfH + 0.01f);
@@ -204,7 +206,13 @@ public class PlayerControllerUI2D : MonoBehaviour
         {
             if (grounded)
             {
-                velGrid.y = jumpVelocityGridPerSec;
+                float jv = jumpVelocityGridPerSec;
+                if (strongFirstGroundJumpPending)
+                {
+                    jv *= 2f;
+                    strongFirstGroundJumpPending = false;
+                }
+                velGrid.y = jv;
                 grounded = false;
             }
             else if (CanUseDerivativeAirJump())

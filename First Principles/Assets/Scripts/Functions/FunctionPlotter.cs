@@ -3,7 +3,7 @@
  *
  * Maintenance overview:
  *   • Each Update() calls InitPlotFunction → samples f and numeric f' over [xStart,xEnd].
- *   • Points are in “grid space”: (xPlot + gridOrigin.x, yPlot + gridOrigin.y).
+ *   • Points are in “grid space”: (MapDisplayX(xPlot) + gridOrigin.x, MapDisplayY(yPlot) + gridOrigin.y).
  *   • To add a new curve: extend FunctionType, EvaluateFunctionY, and UpdateEquationText.
  *   • LevelManager sets public fields to match LevelDefinition; differentiate=true feeds DerivRendererUI.
  *   • SampleCurvePlotterY / SetEquationExtraSuffix support Riemann overlay & TMP sub-lines.
@@ -54,8 +54,18 @@ public class FunctionPlotter : MonoBehaviour
     [Range(0.38f, 0.92f)]
     public float verticalFillFraction = 0.74f;
 
+    [Tooltip("Level mode: horizontally scale the domain window [xStart,xEnd] so it fills most of the grid.")]
+    public bool autoScaleHorizontal = true;
+
+    [Tooltip("Fraction of half the grid width (from center) used by the fitted x-window.")]
+    [Range(0.38f, 0.92f)]
+    public float horizontalFillFraction = 0.74f;
+
     public float verticalScaleClampMin = 0.38f;
     public float verticalScaleClampMax = 7.5f;
+
+    public float horizontalScaleClampMin = 0.38f;
+    public float horizontalScaleClampMax = 7.5f;
 
     // Local points list
     private List<Vector2> points = new List<Vector2>();
@@ -64,6 +74,9 @@ public class FunctionPlotter : MonoBehaviour
     /// <summary>Vertical map: raw plotter y → offset used in grid space before adding grid origin y.</summary>
     private float _autoMid;
     private float _autoScale = 1f;
+    /// <summary>Horizontal map: plotter x → offset from center in grid columns before adding grid origin x.</summary>
+    private float _autoMidX;
+    private float _autoScaleX = 1f;
     private int _cachedGridOriginY;
 
     [SerializeField] TextMeshProUGUI equationText;
@@ -132,7 +145,8 @@ public class FunctionPlotter : MonoBehaviour
     {
         int a = HashCode.Combine(functionType, xStart, xEnd, step, transA, transK);
         int b = HashCode.Combine(transC, transD, power, baseN, customExpression ?? "");
-        return HashCode.Combine(a, b);
+        int c = HashCode.Combine(autoScaleVertical, autoScaleHorizontal, verticalFillFraction, horizontalFillFraction);
+        return HashCode.Combine(a, b, c);
     }
 
     void PushGraphRevealToRenderers()
@@ -141,8 +155,8 @@ public class FunctionPlotter : MonoBehaviour
             return;
 
         Vector2Int go = lineRenderer.gridSize / 2;
-        float gx0 = xStart + go.x;
-        float gx1 = xEnd + go.x;
+        float gx0 = MapDisplayX(xStart) + go.x;
+        float gx1 = MapDisplayX(xEnd) + go.x;
 
         lineRenderer.SetGraphRevealFade(_graphRevealT01, gx0, gx1);
         if (derivRenderer != null)
@@ -163,7 +177,7 @@ public class FunctionPlotter : MonoBehaviour
         if (lr == null || lineRenderer == null)
             return;
         Vector2Int go = lineRenderer.gridSize / 2;
-        lr.SetGraphRevealFade(_graphRevealT01, xStart + go.x, xEnd + go.x);
+        lr.SetGraphRevealFade(_graphRevealT01, MapDisplayX(xStart) + go.x, MapDisplayX(xEnd) + go.x);
     }
 
     public void InitPlotFunction()
@@ -246,6 +260,18 @@ public class FunctionPlotter : MonoBehaviour
 
     float MapDisplayY(float rawY) => (rawY - _autoMid) * _autoScale;
 
+    float MapDisplayX(float rawX) => (rawX - _autoMidX) * _autoScaleX;
+
+    /// <summary>Grid column offset from center → plotter <c>x</c> sampled for f / f′ (inverse of <see cref="MapDisplayX"/>).</summary>
+    public float DisplayOffsetFromCenterToPlotterX(float displayOffsetFromCenter)
+    {
+        float s = Mathf.Max(_autoScaleX, 1e-6f);
+        return displayOffsetFromCenter / s + _autoMidX;
+    }
+
+    /// <summary>Plotter <c>x</c> → absolute grid X (same convention as <see cref="ComputeGraph"/> polyline points).</summary>
+    public float MapPlotterXToGridX(float xPlotter, int gridOriginX) => MapDisplayX(xPlotter) + gridOriginX;
+
     /// <summary>
     /// Inverse of vertical display fit: grid tick offset from center (one unit = one plotter‑y step)
     /// maps to the <b>mathematical</b> y (or polar r) read on that horizontal line.
@@ -266,7 +292,7 @@ public class FunctionPlotter : MonoBehaviour
     /// </summary>
     public float AxisTickOffsetToMathX(float tickOffsetFromCenter)
     {
-        float xPlot = tickOffsetFromCenter;
+        float xPlot = DisplayOffsetFromCenterToPlotterX(tickOffsetFromCenter);
         if (functionType == FunctionType.CustomExpression)
             return transK * (xPlot - transD);
         return xPlot;
@@ -277,6 +303,12 @@ public class FunctionPlotter : MonoBehaviour
 
     /// <summary>Current vertical display stretch factor. For axis label refresh.</summary>
     public float VerticalAxisLabelScale => _autoScale;
+
+    /// <summary>Horizontal auto-fit pivot in plotter <c>x</c>. For axis label refresh.</summary>
+    public float HorizontalAxisLabelPivot => _autoMidX;
+
+    /// <summary>Horizontal display stretch (grid columns per plotter‑<c>x</c> unit). For axis label refresh.</summary>
+    public float HorizontalAxisLabelScale => _autoScaleX;
 
     public void SetEquationExtraSuffix(string suffix)
     {
@@ -368,6 +400,7 @@ public class FunctionPlotter : MonoBehaviour
 
         // Fit primarily to f(x) (and drag-polar overlays) so flat teaching curves fill the grid; f′ uses the same map.
         ComputeVerticalAutoFit(lineRenderer.gridSize.y, fLo, fHi);
+        ComputeHorizontalAutoFit(lineRenderer.gridSize.x, xStart, xEnd);
 
         // --- Pass 2: build polylines with display mapping ---
         for (float i = xStart; i <= xEnd; i += step)
@@ -377,10 +410,10 @@ public class FunctionPlotter : MonoBehaviour
             float dyValue = (EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xValue + hValue) - EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xValue - hValue)) / (hValue * 2);
 
             if (IsFinite(yValue))
-                points.Add(new Vector2(xValue + gridOrigin.x, MapDisplayY(yValue) + gridOrigin.y));
+                points.Add(new Vector2(MapDisplayX(xValue) + gridOrigin.x, MapDisplayY(yValue) + gridOrigin.y));
 
             if (IsFinite(dyValue))
-                dPoints.Add(new Vector2(xValue + gridOrigin.x, MapDisplayY(dyValue) + gridOrigin.y));
+                dPoints.Add(new Vector2(MapDisplayX(xValue) + gridOrigin.x, MapDisplayY(dyValue) + gridOrigin.y));
         }
     }
 
@@ -437,6 +470,37 @@ public class FunctionPlotter : MonoBehaviour
         targetHalf = Mathf.Max(targetHalf, 0.72f);
 
         _autoScale = Mathf.Clamp(targetHalf / halfSpan, verticalScaleClampMin, verticalScaleClampMax);
+    }
+
+    void ComputeHorizontalAutoFit(int gridXCells, float xDomainLo, float xDomainHi)
+    {
+        if (!autoScaleHorizontal
+            || gridXCells < 2
+            || float.IsInfinity(xDomainLo)
+            || float.IsInfinity(xDomainHi)
+            || Mathf.Abs(xDomainHi - xDomainLo) < 1e-6f)
+        {
+            _autoMidX = 0f;
+            _autoScaleX = 1f;
+            return;
+        }
+
+        float lo = Mathf.Min(xDomainLo, xDomainHi);
+        float hi = Mathf.Max(xDomainLo, xDomainHi);
+
+        bool useZeroPivot = lo <= 0f && hi >= 0f;
+        _autoMidX = useZeroPivot ? 0f : (lo + hi) * 0.5f;
+
+        float halfSpan = Mathf.Max(
+            Mathf.Max(Mathf.Abs(lo - _autoMidX), Mathf.Abs(hi - _autoMidX)),
+            1e-3f);
+        halfSpan *= 1.085f;
+
+        const float marginCells = 0.85f;
+        float targetHalf = horizontalFillFraction * (gridXCells * 0.5f - marginCells);
+        targetHalf = Mathf.Max(targetHalf, 0.72f);
+
+        _autoScaleX = Mathf.Clamp(targetHalf / halfSpan, horizontalScaleClampMin, horizontalScaleClampMax);
     }
 
     private float EvaluateFunctionY(FunctionType type, float transA, float transK, float transC, float transD, int power, int baseN, float xValue)
@@ -1036,9 +1100,9 @@ public class FunctionPlotter : MonoBehaviour
             float yInd = transA * Mathf.Pow(u, pow);
 
             if (IsFinite(yPar))
-                overlayParasitic.points.Add(new Vector2(xValue + gridOrigin.x, MapDisplayY(yPar) + gridOrigin.y));
+                overlayParasitic.points.Add(new Vector2(MapDisplayX(xValue) + gridOrigin.x, MapDisplayY(yPar) + gridOrigin.y));
             if (IsFinite(yInd))
-                overlayInduced.points.Add(new Vector2(xValue + gridOrigin.x, MapDisplayY(yInd) + gridOrigin.y));
+                overlayInduced.points.Add(new Vector2(MapDisplayX(xValue) + gridOrigin.x, MapDisplayY(yInd) + gridOrigin.y));
         }
 
         overlayParasitic.enabled = false;

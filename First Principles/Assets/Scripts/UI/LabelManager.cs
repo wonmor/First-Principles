@@ -32,6 +32,8 @@ public class LabelManager : MonoBehaviour
     private GridRendererUI gridRenderer;
     private float _lastAutoMid = float.NaN;
     private float _lastAutoScale = float.NaN;
+    private float _lastAutoMidX = float.NaN;
+    private float _lastAutoScaleX = float.NaN;
     private float _lastXStart = float.NaN;
     private float _lastXEnd = float.NaN;
     private float _lastTransK = float.NaN;
@@ -62,6 +64,16 @@ public class LabelManager : MonoBehaviour
             _lastAutoMid = mid;
             _lastAutoScale = sc;
             RefreshYAxisLabelText();
+        }
+
+        float midX = plotter.HorizontalAxisLabelPivot;
+        float scX = plotter.HorizontalAxisLabelScale;
+
+        if (!Mathf.Approximately(midX, _lastAutoMidX) || !Mathf.Approximately(scX, _lastAutoScaleX))
+        {
+            _lastAutoMidX = midX;
+            _lastAutoScaleX = scX;
+            RefreshXAxisLabelText();
         }
 
         if (HorizontalAxisStateChanged(plotter))
@@ -169,6 +181,8 @@ public class LabelManager : MonoBehaviour
         var pAfter = FindAnyObjectByType<FunctionPlotter>();
         _lastAutoMid = pAfter != null ? pAfter.VerticalAxisLabelPivot : 0f;
         _lastAutoScale = pAfter != null ? pAfter.VerticalAxisLabelScale : 1f;
+        _lastAutoMidX = pAfter != null ? pAfter.HorizontalAxisLabelPivot : 0f;
+        _lastAutoScaleX = pAfter != null ? pAfter.HorizontalAxisLabelScale : 1f;
         RefreshYAxisLabelText();
 
         if (pAfter != null)

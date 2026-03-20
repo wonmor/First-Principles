@@ -369,6 +369,7 @@ public class LevelManager : MonoBehaviour
         functionPlotter.SetEquationExtraSuffix("");
         functionPlotter.SetCustomExpression("x^2");
         functionPlotter.autoScaleVertical = false;
+        functionPlotter.autoScaleHorizontal = false;
 
         if (curveRenderer != null)
         {
@@ -2379,6 +2380,8 @@ public class LevelManager : MonoBehaviour
         functionPlotter.step = def.step;
         functionPlotter.autoScaleVertical = def.autoFitGraphVertical;
         functionPlotter.verticalFillFraction = def.graphVerticalFillFraction;
+        functionPlotter.autoScaleHorizontal = def.autoFitGraphHorizontal;
+        functionPlotter.horizontalFillFraction = def.graphHorizontalFillFraction;
 
         functionPlotter.transA = def.transA;
         functionPlotter.transK = def.transK;
@@ -2475,7 +2478,8 @@ public class LevelManager : MonoBehaviour
         if (playerController != null)
             playerController.SetInputLocked(true);
 
-        yield return LoadWorldAfterThemeChange(def);
+        bool grantStrongFirstJump = !graphCalculatorMode && !skipSpawnSpotlight;
+        yield return LoadWorldAfterThemeChange(def, grantStrongFirstJump);
 
         bool showIntro = !skipNextStageIntro
                          && !graphCalculatorMode
@@ -2823,7 +2827,7 @@ public class LevelManager : MonoBehaviour
     /// After theme swap, FunctionPlotter.Update repopulates points; we defer one frame so
     /// <see cref="LineRendererUI.points"/> / derivative lists are current before sampling columns.
     /// </summary>
-    private IEnumerator LoadWorldAfterThemeChange(LevelDefinition def)
+    private IEnumerator LoadWorldAfterThemeChange(LevelDefinition def, bool grantStrongFirstGroundJump)
     {
         // Wait for the plot to regenerate points with the new parameters.
         yield return null;
@@ -2860,7 +2864,7 @@ public class LevelManager : MonoBehaviour
             playerController.SetDeathMinYGrid(deathMinYGrid);
 
         playerController.SetWorld(world);
-        playerController.ResetToSpawn(world);
+        playerController.ResetToSpawn(world, grantStrongFirstGroundJump);
     }
 
     private IEnumerator FadeStoryTextRoutine()

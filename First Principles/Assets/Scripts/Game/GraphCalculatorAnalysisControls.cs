@@ -134,12 +134,12 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
                 continue;
 
             lr.points.Clear();
-            for (float x = plotter.xStart; x <= plotter.xEnd; x += plotter.step)
-            {
-                float gy = plotter.SampleNthDerivativeGridY(x, k + 1);
-                if (float.IsFinite(gy))
-                    lr.points.Add(new Vector2(x + gridOrigin.x, gy));
-            }
+                for (float x = plotter.xStart; x <= plotter.xEnd; x += plotter.step)
+                {
+                    float gy = plotter.SampleNthDerivativeGridY(x, k + 1);
+                    if (float.IsFinite(gy))
+                        lr.points.Add(new Vector2(plotter.MapPlotterXToGridX(x, gridOrigin.x), gy));
+                }
 
             lr.enabled = false;
             lr.enabled = true;

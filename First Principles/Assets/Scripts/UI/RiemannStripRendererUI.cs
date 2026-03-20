@@ -129,8 +129,10 @@ public class RiemannStripRendererUI : Graphic
             if (!IsFinite(gyTop))
                 continue;
 
-            float gxL = xL + origin.x;
-            float gxR = xR + origin.x;
+            float gxL = plotter.MapPlotterXToGridX(xL, origin.x);
+            float gxR = plotter.MapPlotterXToGridX(xR, origin.x);
+            if (gxL > gxR)
+                (gxL, gxR) = (gxR, gxL);
             float gyAxis = origin.y;
             float ymin = Mathf.Min(gyAxis, gyTop);
             float ymax = Mathf.Max(gyAxis, gyTop);
@@ -181,8 +183,10 @@ public class RiemannStripRendererUI : Graphic
             if (!IsFinite(gyTop))
                 continue;
 
-            float gxL = xL + origin.x;
-            float gxR = xR + origin.x;
+            float gxL = plotter.MapPlotterXToGridX(xL, origin.x);
+            float gxR = plotter.MapPlotterXToGridX(xR, origin.x);
+            if (gxL > gxR)
+                (gxL, gxR) = (gxR, gxL);
             float gyAxis = origin.y;
             float ymin = Mathf.Min(gyAxis, gyTop);
             float ymax = Mathf.Max(gyAxis, gyTop);

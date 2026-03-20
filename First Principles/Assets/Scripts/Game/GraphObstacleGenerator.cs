@@ -139,7 +139,10 @@ public class GraphObstacleGenerator : MonoBehaviour
             for (int col = 0; col < gridSize.x; col++)
             {
                 float xSample = col + 0.5f;
-                float xPlotter = Mathf.Clamp(xSample - gridOrigin.x, def.xStart, def.xEnd);
+                float xGridOffset = xSample - gridOrigin.x;
+                float xPlotter = functionPlotter != null
+                    ? Mathf.Clamp(functionPlotter.DisplayOffsetFromCenterToPlotterX(xGridOffset), def.xStart, def.xEnd)
+                    : Mathf.Clamp(xGridOffset, def.xStart, def.xEnd);
 
                 bool hasCurve = functionPlotter != null && IsFiniteFloat(functionPlotter.SampleCurveGridY(xPlotter));
                 float yCurve = hasCurve ? functionPlotter.SampleCurveGridY(xPlotter) : float.NaN;
@@ -262,8 +265,10 @@ public class GraphObstacleGenerator : MonoBehaviour
             if (!IsFiniteFloat(yGrid))
                 continue;
 
-            float colL = xL + gridOrigin.x;
-            float colR = xR + gridOrigin.x;
+            float colL = functionPlotter.MapPlotterXToGridX(xL, gridOrigin.x);
+            float colR = functionPlotter.MapPlotterXToGridX(xR, gridOrigin.x);
+            if (colL > colR)
+                (colL, colR) = (colR, colL);
             float center = 0.5f * (colL + colR);
             float halfSpan = 0.5f * (colR - colL) * cov;
             float pMin = Mathf.Clamp(center - halfSpan, 0f, gridSize.x);
@@ -334,7 +339,10 @@ public class GraphObstacleGenerator : MonoBehaviour
                 continue;
 
             float xSample = col + 0.5f;
-            float xPlotter = Mathf.Clamp(xSample - gridOrigin.x, def.xStart, def.xEnd);
+            float xGridOff = xSample - gridOrigin.x;
+            float xPlotter = functionPlotter != null
+                ? Mathf.Clamp(functionPlotter.DisplayOffsetFromCenterToPlotterX(xGridOff), def.xStart, def.xEnd)
+                : Mathf.Clamp(xGridOff, def.xStart, def.xEnd);
             float dyRaw = functionPlotter != null ? functionPlotter.EvaluateNumericalDerivativeY(xPlotter) : float.NaN;
             bool hasDeriv = IsFiniteFloat(dyRaw);
             bool safeByDerivative = hasDeriv && dyRaw > def.derivativeSafeThreshold;

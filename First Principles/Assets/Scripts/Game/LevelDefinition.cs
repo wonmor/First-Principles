@@ -33,6 +33,13 @@ public class LevelDefinition : ScriptableObject
     [Range(0.38f, 0.92f)]
     public float graphVerticalFillFraction = 0.74f;
 
+    [Tooltip("Fit the sampled x window horizontally so the domain uses most of the grid (wide but flat domains read clearly). Off for graphing calculator mode.")]
+    public bool autoFitGraphHorizontal = true;
+
+    [Tooltip("Target fraction of half the grid width (from center line) used by [xStart,xEnd] (after padding).")]
+    [Range(0.38f, 0.92f)]
+    public float graphHorizontalFillFraction = 0.74f;
+
     public float xStart = -20f;
     public float xEnd = 20f;
     public float step = 0.1f;
