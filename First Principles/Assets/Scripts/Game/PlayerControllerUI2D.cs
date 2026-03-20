@@ -39,8 +39,8 @@ public class PlayerControllerUI2D : MonoBehaviour
     [SerializeField] private Color derivativeHitBackgroundTintDelta = new Color(0.048f, 0.06f, 0.1f, 0f);
 
     [Header("Player Size (Grid Units)")]
-    [SerializeField] private float playerWidthGrid = 0.6f;
-    [SerializeField] private float playerHeightGrid = 0.9f;
+    [SerializeField] private float playerWidthGrid = 0.78f;
+    [SerializeField] private float playerHeightGrid = 1.12f;
 
     private RectTransform playerRect;
     private Image playerImage;
@@ -245,9 +245,21 @@ public class PlayerControllerUI2D : MonoBehaviour
 
         posGrid = nextPos;
 
+        ClampHorizontalToPlayBounds();
+
         TickDerivativeBackgroundTint(dt);
 
         ApplyVisualPosition();
+    }
+
+    /// <summary>Hard horizontal limits so the avatar stays over the padded playfield (screen/safe + touch bar).</summary>
+    private void ClampHorizontalToPlayBounds()
+    {
+        if (world == null || !world.hasPlayBounds)
+            return;
+
+        float halfW = playerWidthGrid * 0.5f;
+        posGrid.x = Mathf.Clamp(posGrid.x, world.playBounds.XMin + halfW, world.playBounds.XMax - halfW);
     }
 
     /// <summary>Air jump only while overlapping f′ and not already used until you leave the band.</summary>

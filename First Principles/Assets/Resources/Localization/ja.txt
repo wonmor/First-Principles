@@ -1,5 +1,5 @@
 # 日本語
-ui.choose_stage=グラフのステージを選ぶ
+ui.choose_stage=レベルを選択
 ui.math_tips=数学のヒント
 ui.back_menu=メニューへ戻る
 ui.graphing_calculator_mode=グラフ電卓
@@ -30,6 +30,7 @@ graph.param_d=D（横シフト）
 graph.calculator_intro=<b>グラフ電卓モード</b>\n<size=88%>ほぼ任意の<b>f(u)</b>を入力（式の変数<b>x</b>）；<b>Trans</b>で A,k,C,D を調整；<b>Scale</b>と<b>ピンチ</b>でウィンドウをズーム。</size>
 menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
 menu.credits_line=<size=34>ジョン・ソン（オーチ・エアロスペース）× ラヤン・カイシ（GameGenesis）</size>
+menu.support_contact=<size=32><color=#94a3b8>サポート：</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
 level.0=ファーストプリンシプル入門
 level.1=放物線の傾き
 level.2=サイン波
@@ -71,5 +72,6 @@ level.37=航空：フゴイド／減衰ピッチ・上下動
 level.38=航空：ニュートン流 Cp ~ sin²α
 level.39=航空：ストルーハル／渦放出音
 level.40=航空：再突入減衰包絡線（ρV加熱）
-level.41=競技数学：ln、凹性と境界
-level.42=BOSS：マンデルブロ脱出断面（フラクタル）
+level.41=経済：ドットコムバブルと暴落（模式化インデックス）
+level.42=経済：2008年危機と回復（模式化インデックス）
+level.43=BOSS：マンデルブロ脱出断面（フラクタル）

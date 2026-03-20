@@ -77,7 +77,8 @@ public static class GameLevelCatalog
         "Aerospace: Newtonian Cp ~ sin²α",
         "Aerospace: Strouhal / vortex shedding tone",
         "Aerospace: re-entry decay envelope (ρV heating mood)",
-        "Competition math: ln, concavity & bound tricks",
+        "Economics: dot-com bubble & crash (stylized index)",
+        "Economics: 2008 crisis & recovery (stylized index)",
         "BOSS: Mandelbrot escape slice (fractal boundary mood)"
     };
 
@@ -93,7 +94,7 @@ public static class GameLevelCatalog
         new LevelSelectCategory("level_select.cat.engineering", "Engineering", 14, 16),
         new LevelSelectCategory("level_select.cat.ap_bc", "AP Calculus BC & Physics C", 17, 33),
         new LevelSelectCategory("level_select.cat.aerospace", "Aerospace", 34, 40),
-        new LevelSelectCategory("level_select.cat.finale", "Advanced & boss", 41, 42),
+        new LevelSelectCategory("level_select.cat.finale", "Advanced & boss", 41, 43),
     };
 
     /// <summary>First index of the contiguous <b>Aerospace:</b> block (must match <see cref="LevelManager"/> sample levels).</summary>

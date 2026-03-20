@@ -8,7 +8,7 @@ import pathlib
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "First Principles/Assets/Resources/Localization/LevelStories"
 
-# Compact in-game banner copy per level index (0..42). Keep HTML-ish TMP tags sparingly.
+# Compact in-game banner copy per level index (0..43). Keep HTML-ish TMP tags sparingly.
 # English originals are in LevelManager.BuildSampleLayers — these are localized summaries.
 
 STORIES: dict[str, dict[int, str]] = {
@@ -54,8 +54,9 @@ STORIES: dict[str, dict[int, str]] = {
         38: "<b>Modèle newtonien hypersonique</b> — coefficient ~ <color=#fca5a5>sin²α</color> côté face au vent.\n\n<size=92%><color=#a8b2d1>Vocabulaire calcul pour boucliers thermiques & trajectoires, pas du CFD complet.</color></size>",
         39: "<b>Nombre de Strouhal</b> — f ≈ St·U/D pour l'allée de tourbillons.\n\n<size=92%><color=#a8b2d1>Vibrations, bruit, fatigue — l'onde sinusoïdale trace une sonde idéale.</color></size>",
         40: "<b>Rentrée atmosphérique (qualitatif)</b> — flux thermique ~ ρV³ en ordres de grandeur ; l'enveloppe se <color=#fde047>détend</color> quand ρ↓ et V↓.\n\n<size=92%><color=#a8b2d1>Analogie pédagogique, pas une fiche SpaceX.</color></size>",
-        41: "<b>Maths de concours</b> — AMC/AIME : bornes, symétrie, concavité. <color=#fdba74>ln est concave</color> sur (0,∞) : cordes sous le graphe ⇒ inégalités linéaires.\n\n<size=92%><color=#a8b2d1>Vos pieds suivent ln décalé ; f' rappelle 1/x — pas affilié MAA.</color></size>",
-        42: "<b>Mandelbrot final</b> — plan <color=#a8b2d1>c</color> coloré par temps d'échappement ; ligne = Re(c) fixe. Courbe verte = coupe en Im(c).\n\n<size=92%><color=#a8b2d1>Cardioïde & bulbes = frontière des ensembles de Julia ; zoom profond = autre moteur. Itérations avec |Im(c)|.</color></size>",
+        41: "<b>Bulle internet</b> — trajectoire d'indice stylisée (pas le vrai S&amp;P).\n\n<size=92%><color=#a8b2d1>Montée, trou d'air, reprise lente — allégorie pédagogique.</color></size>",
+        42: "<b>Crise 2008</b> — stress crédit & immobilier, courbe qualitative seulement.\n\n<size=92%><color=#a8b2d1>Pas de données réelles — vocabulaire de pente en classe.</color></size>",
+        43: "<b>Mandelbrot final</b> — plan <color=#a8b2d1>c</color> coloré par temps d'échappement ; ligne = Re(c) fixe. Courbe verte = coupe en Im(c).\n\n<size=92%><color=#a8b2d1>Cardioïde & bulbes = frontière des ensembles de Julia ; zoom profond = autre moteur. Itérations avec |Im(c)|.</color></size>",
     },
 }
 
@@ -67,8 +68,8 @@ def _esc(s: str) -> str:
 
 
 def emit(lang: str, m: dict[int, str]) -> None:
-    lines = [f"# Level stories ({lang}) — keys story.0 … story.42", ""]
-    for i in range(43):
+    lines = [f"# Level stories ({lang}) — keys story.0 … story.43", ""]
+    for i in range(44):
         if i not in m:
             continue
         lines.append(f"story.{i}={_esc(m[i])}")
@@ -120,8 +121,9 @@ def main() -> None:
         38: "<b>Newton DRUCK ~ sin²α</b> Leeseite.\n\n<size=92%><color=#a8b2d1>Lehrmodell Hyperschall, kein CFD.</color></size>",
         39: "<b>Strouhal</b> f ~ St·U/D.\n\n<size=92%><color=#a8b2d1>Ergung & Schall.</color></size>",
         40: "<b>Wiedereintritt</b> — qualitative Entspannung der Heizkurve.\n\n<size=92%><color=#a8b2d1>Kein quantitatives Memo.</color></size>",
-        41: "<b>Wettkampfmath</b> — Konvexität, ln konkav, Schranken.\n\n<size=92%><color=#a8b2d1>Nicht mit MAA verbunden.</color></size>",
-        42: "<b>Mandelbrot</b> — c-Ebene, Fluchtzeit, Schnitt bei festem Re(c).\n\n<size=92%><color=#a8b2d1>Julia-Grenze ; tiefer Zoom braucht andere Engine.</color></size>",
+        41: "<b>Dotcom-Blase</b> — stilisierter Index (keine echten S&amp;P-Daten).\n\n<size=92%><color=#a8b2d1>Aufstieg, Luftloch, langsames Erholen — Lehr-Allegorie.</color></size>",
+        42: "<b>Finanzkrise 2008</b> — Hypotheken-Stress, qualitativ (keine Tickdaten).\n\n<size=92%><color=#a8b2d1>Nur Kurvenform fürs Kalkül-Gefühl.</color></size>",
+        43: "<b>Mandelbrot</b> — c-Ebene, Fluchtzeit, Schnitt bei festem Re(c).\n\n<size=92%><color=#a8b2d1>Julia-Grenze ; tiefer Zoom braucht andere Engine.</color></size>",
     }
 
     # Spanish
@@ -167,8 +169,9 @@ def main() -> None:
         38: "<b>Newton ~ sin²α</b> windward.\n\n<size=92%><color=#a8b2d1>Modelo docente, no CFD.</color></size>",
         39: "<b>Strouhal</b> vórtices.\n\n<size=92%><color=#a8b2d1>Frecuencia ⋍ St·U/D.</color></size>",
         40: "<b>Reentrada</b> relajación cualitativa.\n\n<size=92%><color=#a8b2d1>No memo cuantitativo.</color></size>",
-        41: "<b>Olimpiada/concurso</b> concavidad, ln cóncavo, cotas.\n\n<size=92%><color=#a8b2d1>Sin afiliación MAA.</color></size>",
-        42: "<b>Mandelbrot</b> plano c, tiempo escape, corte Re fijo.\n\n<size=92%><color=#a8b2d1>Julia desconexión ; zoom profundo otro motor.</color></size>",
+        41: "<b>Burbuja dot-com</b> — trayectoria de índice estilizada (no S&amp;P real).\n\n<size=92%><color=#a8b2d1>Auge, caída, reconstrucción lenta — alegoría docente.</color></size>",
+        42: "<b>Crisis 2008</b> — estrés hipotecario y repricing global (curva cualitativa).\n\n<size=92%><color=#a8b2d1>No es data descargada; solo forma para clase de cálculo.</color></size>",
+        43: "<b>Mandelbrot</b> plano c, tiempo escape, corte Re fijo.\n\n<size=92%><color=#a8b2d1>Julia desconexión ; zoom profundo otro motor.</color></size>",
     }
 
     for lang in ("fr", "de", "es"):

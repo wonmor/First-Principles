@@ -1,4 +1,4 @@
-# Level stories (ja) — keys story.0 … story.42
+# Level stories (ja) — keys story.0 … story.43
 
 story.0=<color=#c4b5fd><b>導関数</b></color>＝接線の傾き。<b>f(x)</b>がどれだけ速く上下するか。\n\n金色が道、水色がf'(x)で<i>床が続く場所</i>を形作る。|f'|が十分大きいと足場が支え、小さいと虚空が開く。\n\n<size=88%><color=#94a3b8><b>第一原理の思考:</b>比喩を剥がして事実まで下り、再構築する。<b>f</b>は成果の物語、<b>f'</b>は入力の感度。</color></size>
 story.1=旅人は坂が優しい所を歩く。導関数が負に転じると地面が途切れ、隙間が現れる。
@@ -41,5 +41,6 @@ story.37=<b>フーゴイド/短周期</b>を減衰振動で漫画化。\n\n<size
 story.38=<b>ニュートン的</b>風上圧力～<color=#fca5a5>sin²α</color>の教養モデル。\n\n<size=92%><color=#a8b2d1>CFDの代替ではない。</color></size>
 story.39=<b>ストルーハル</b>：f ≈ St·U/D、渦放出のトーン。\n\n<size=92%><color=#a8b2d1>振動と騒音の指針。</color></size>
 story.40=<b>再突入</b>の熱脅威カーブを質的に緩めるイメージ。\n\n<size=92%><color=#a8b2d1>定量メモではない。</color></size>
-story.41=<b>競技数学:</b> 凹性、<color=#fdba74>lnは上に凸</color>、接線·弦の線形境界。\n\n<size=92%><color=#a8b2d1>MAA非提携。</color></size>
-story.42=<b>マンデルブロ集合</b>：c平面の滑らか脱出時間、<color=#86efac>Re(c)</color>固定の切断。\n\n<size=92%><color=#a8b2d1>ジュリアの境界；深いズームは別エンジン。|Im(c)|切断。</color></size>
+story.41=<b>ドットコムバブル</b> — 模式化インデックス（実S&amp;Pではない）。\n\n<size=92%><color=#a8b2d1>上昇・エアポケット・緩い回復の教学シルエット。</color></size>
+story.42=<b>2008年危機</b> — 住宅・信用ストレスの雰囲気、定性曲線のみ。\n\n<size=92%><color=#a8b2d1>実データの再現ではない。</color></size>
+story.43=<b>マンデルブロ集合</b>：c平面の滑らか脱出時間、<color=#86efac>Re(c)</color>固定の切断。\n\n<size=92%><color=#a8b2d1>ジュリアの境界；深いズームは別エンジン。|Im(c)|切断。</color></size>

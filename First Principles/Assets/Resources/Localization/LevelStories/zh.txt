@@ -1,4 +1,4 @@
-# Level stories (zh) — keys story.0 … story.42
+# Level stories (zh) — keys story.0 … story.43
 
 story.0=<color=#c4b5fd><b>导数</b></color>=切线斜率：<b>f(x)</b>变化多快。\n\n金光为路径，冰蓝f'(x)决定<i>地面承载</i>何处。|f'|够大才有平台，否则裂开虚空。\n\n<size=88%><color=#94a3b8><b>第一性原理：</b>剥离类比直到事实，再向上推理。<b>f</b>是结果故事，<b>f'</b>是输入敏感度。</color></size>
 story.1=旅人在缓坡行走。导数为负，地面变薄成缝。
@@ -41,5 +41,6 @@ story.37=<b>长周期/短周期</b>用阻尼振荡漫画化。\n\n<size=92%><col
 story.38=<b>牛顿型</b>~<color=#fca5a5>sin²α</color>迎风压—教学习题。\n\n<size=92%><color=#a8b2d1>非CFD。</color></size>
 story.39=<b>斯特劳哈尔</b>涡脱落频率 ~ St·U/D。\n\n<size=92%><color=#a8b2d1>振动与噪声线索。</color></size>
 story.40=<b>再入</b>热威胁曲线定性放松。\n\n<size=92%><color=#a8b2d1>非定量备忘录。</color></size>
-story.41=<b>竞赛数学:</b> 凹性、<color=#fdba74>ln凹</color>、线性界。\n\n<size=92%><color=#a8b2d1>与MAA无关。</color></size>
-story.42=<b>曼德博</b>c平面、光滑逃逸时间、固定Re切片。\n\n<size=92%><color=#a8b2d1>Julia边界；深 zoom 另需引擎。|Im(c)|切片。</color></size>
+story.41=<b>互联网泡沫</b> — 示意指数走势（非真实标普数据）。\n\n<size=92%><color=#a8b2d1>爬升、急跌、缓慢修复的教学轮廓。</color></size>
+story.42=<b>2008危机</b> — 房贷与信用压力氛围，仅定性曲线。\n\n<size=92%><color=#a8b2d1>非下载行情；课堂斜率叙事。</color></size>
+story.43=<b>曼德博</b>c平面、光滑逃逸时间、固定Re切片。\n\n<size=92%><color=#a8b2d1>Julia边界；深 zoom 另需引擎。|Im(c)|切片。</color></size>

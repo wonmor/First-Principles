@@ -1,4 +1,4 @@
-# Level stories (es) — keys story.0 … story.42
+# Level stories (es) — keys story.0 … story.43
 
 story.0=<color=#c4b5fd><b>Derivada</b></color> = pendiente tangente: qué tan rápido sube/baja <b>f(x)</b>.\n\nLuz dorada = camino ; azul hielo = f'(x) moldea <i>dónde hay suelo</i>. Donde |f'| basta, hay plataformas ; si no, el vacío.\n\n<size=88%><color=#94a3b8><b>Principios primero:</b> quitar analogías hasta hechos, luego razonar. <b>f</b> modelo del resultado ; <b>f'</b> sensibilidad.</color></size>
 story.1=Un viajero camina donde la pendiente es amable. Si la derivada es negativa, el suelo se vuelve grieta.
@@ -41,5 +41,6 @@ story.37=<b>Fugoide / corto período</b> cartoon amortiguado.\n\n<size=92%><colo
 story.38=<b>Newton ~ sin²α</b> windward.\n\n<size=92%><color=#a8b2d1>Modelo docente, no CFD.</color></size>
 story.39=<b>Strouhal</b> vórtices.\n\n<size=92%><color=#a8b2d1>Frecuencia ⋍ St·U/D.</color></size>
 story.40=<b>Reentrada</b> relajación cualitativa.\n\n<size=92%><color=#a8b2d1>No memo cuantitativo.</color></size>
-story.41=<b>Olimpiada/concurso</b> concavidad, ln cóncavo, cotas.\n\n<size=92%><color=#a8b2d1>Sin afiliación MAA.</color></size>
-story.42=<b>Mandelbrot</b> plano c, tiempo escape, corte Re fijo.\n\n<size=92%><color=#a8b2d1>Julia desconexión ; zoom profundo otro motor.</color></size>
+story.41=<b>Burbuja dot-com</b> — trayectoria de índice estilizada (no S&amp;P real).\n\n<size=92%><color=#a8b2d1>Auge, caída, reconstrucción lenta — alegoría docente.</color></size>
+story.42=<b>Crisis 2008</b> — estrés hipotecario y repricing global (curva cualitativa).\n\n<size=92%><color=#a8b2d1>No es data descargada; solo forma para clase de cálculo.</color></size>
+story.43=<b>Mandelbrot</b> plano c, tiempo escape, corte Re fijo.\n\n<size=92%><color=#a8b2d1>Julia desconexión ; zoom profundo otro motor.</color></size>

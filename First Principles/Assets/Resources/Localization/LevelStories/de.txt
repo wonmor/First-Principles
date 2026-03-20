@@ -1,4 +1,4 @@
-# Level stories (de) — keys story.0 … story.42
+# Level stories (de) — keys story.0 … story.43
 
 story.0=<color=#c4b5fd><b>Ableitung</b></color> = Steigung der Tangente — wie schnell <b>f(x)</b> steigt oder fällt.\n\nGoldenes Licht: Ihr Pfad ; Eisblau: f'(x) formt <i>wo der Boden trägt</i>. Wo |f'| groß genug ist, gibt es Plattformen — sonst öffnet sich die Leere.\n\n<size=88%><color=#94a3b8><b>First-Principles-Denken:</b> Analogien streifen bis zu Fakten, dann neu aufbauen. <b>f</b> = Outcome-Modell ; <b>f'</b> = Sensitivität.</color></size>
 story.1=Ein Wanderer geht, wo die Steigung freundlich ist. Wird die Ableitung negativ, schmilzt der Boden zur Lücke.
@@ -41,5 +41,6 @@ story.37=<b>Phugoid / kurze Periode</b> — gedämpfte Oszillation cartoon.\n\n<
 story.38=<b>Newton DRUCK ~ sin²α</b> Leeseite.\n\n<size=92%><color=#a8b2d1>Lehrmodell Hyperschall, kein CFD.</color></size>
 story.39=<b>Strouhal</b> f ~ St·U/D.\n\n<size=92%><color=#a8b2d1>Ergung & Schall.</color></size>
 story.40=<b>Wiedereintritt</b> — qualitative Entspannung der Heizkurve.\n\n<size=92%><color=#a8b2d1>Kein quantitatives Memo.</color></size>
-story.41=<b>Wettkampfmath</b> — Konvexität, ln konkav, Schranken.\n\n<size=92%><color=#a8b2d1>Nicht mit MAA verbunden.</color></size>
-story.42=<b>Mandelbrot</b> — c-Ebene, Fluchtzeit, Schnitt bei festem Re(c).\n\n<size=92%><color=#a8b2d1>Julia-Grenze ; tiefer Zoom braucht andere Engine.</color></size>
+story.41=<b>Dotcom-Blase</b> — stilisierter Index (keine echten S&amp;P-Daten).\n\n<size=92%><color=#a8b2d1>Aufstieg, Luftloch, langsames Erholen — Lehr-Allegorie.</color></size>
+story.42=<b>Finanzkrise 2008</b> — Hypotheken-Stress, qualitativ (keine Tickdaten).\n\n<size=92%><color=#a8b2d1>Nur Kurvenform fürs Kalkül-Gefühl.</color></size>
+story.43=<b>Mandelbrot</b> — c-Ebene, Fluchtzeit, Schnitt bei festem Re(c).\n\n<size=92%><color=#a8b2d1>Julia-Grenze ; tiefer Zoom braucht andere Engine.</color></size>

@@ -24,8 +24,9 @@ public class SceneFader : MonoBehaviour
 	private Image fadeOutUIImage;
 
 	private TextMeshProUGUI graphicCalculatorMenuButtonText;
-	private TextMeshProUGUI tutorialMenuButtonText;
 	private TextMeshProUGUI menuLanguageButtonLabel;
+	private Image playerIconMenuButtonImage;
+	private TextMeshProUGUI playerIconMenuGlyphTmp;
 
 	public float fadeSpeed = 0.8f;
 
@@ -50,6 +51,8 @@ public class SceneFader : MonoBehaviour
 			fadeOutUIImage.enabled = true;
 			fadeOutUIImage.raycastTarget = true;
 			fadeOutUIImage2.gameObject.SetActive(false);
+
+            PlayerGlyphSettings.GlyphChanged += RefreshPlayerIconMenuButton;
 
 			ZoomIn();
 			StartCoroutine(SpawnMenuExtrasNextFrame());
@@ -81,6 +84,7 @@ public class SceneFader : MonoBehaviour
     void OnDisable()
     {
         LocalizationManager.LanguageChanged -= RefreshMenuLocalizedControls;
+        PlayerGlyphSettings.GlyphChanged -= RefreshPlayerIconMenuButton;
     }
 	#endregion
 
@@ -162,8 +166,9 @@ public class SceneFader : MonoBehaviour
     {
         yield return null;
         TrySpawnGraphicCalculatorMenuButton();
-        TrySpawnTutorialMenuButton();
         TrySpawnLanguagePicker();
+        // Spawn last so it stays above sibling buttons under the play row for clicks.
+        TrySpawnPlayerIconPickerButton();
         RefreshMenuLocalizedControls();
     }
 
@@ -175,17 +180,13 @@ public class SceneFader : MonoBehaviour
             LocalizationManager.ApplyTextDirection(graphicCalculatorMenuButtonText);
         }
 
-        if (tutorialMenuButtonText != null)
-        {
-            tutorialMenuButtonText.text = LocalizationManager.Get("menu.tutorial_button", "How to play");
-            LocalizationManager.ApplyTextDirection(tutorialMenuButtonText);
-        }
-
         if (menuLanguageButtonLabel != null)
         {
             menuLanguageButtonLabel.text = LocalizationManager.GetLanguageChipDisplayText();
             LocalizationManager.ApplyLanguagePickerTextDirection(menuLanguageButtonLabel);
         }
+
+        RefreshPlayerIconMenuButton();
 
         if (string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))
         {
@@ -250,8 +251,8 @@ public class SceneFader : MonoBehaviour
         trt.SetParent(go.transform, false);
         trt.anchorMin = Vector2.zero;
         trt.anchorMax = Vector2.one;
-        trt.offsetMin = new Vector2(10f, 6f);
-        trt.offsetMax = new Vector2(-10f, -6f);
+        trt.offsetMin = new Vector2(12f, 6f);
+        trt.offsetMax = new Vector2(-12f, -6f);
 
         graphicCalculatorMenuButtonText = textGo.AddComponent<TextMeshProUGUI>();
         bool tablet = DeviceLayout.IsTabletLike();
@@ -273,12 +274,30 @@ public class SceneFader : MonoBehaviour
             graphicCalculatorMenuButtonText.font = TMP_Settings.defaultFontAsset;
     }
 
-    /// <summary>Opens scroll tutorial (derivative air jump, controls, level select).</summary>
-    private void TrySpawnTutorialMenuButton()
+    private void RefreshPlayerIconMenuButton()
+    {
+        if (playerIconMenuGlyphTmp != null)
+        {
+            string g = PlayerGlyphSettings.GetSelectedGlyph();
+            string setLabel = LocalizationManager.Get("menu.player_icon_set", "Set player icon");
+            playerIconMenuGlyphTmp.text =
+                $"<size=188%><b><color=#fffef9>{g}</color></b></size>\n<size=82%><b>{setLabel}</b></size>";
+            LocalizationManager.ApplyTextDirection(playerIconMenuGlyphTmp);
+        }
+
+        if (playerIconMenuButtonImage != null)
+        {
+            playerIconMenuButtonImage.color =
+                RuntimeUiPolish.BrightenPlayerAccent(PlayerGlyphSettings.GetAccentForCurrentSelection());
+        }
+    }
+
+    /// <summary>Above Play, screen-centered horizontally (Play may be offset in scene art).</summary>
+    private void TrySpawnPlayerIconPickerButton()
     {
         if (!string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))
             return;
-        if (GameObject.Find("MenuTutorialEntryButton") != null)
+        if (GameObject.Find("MenuPlayerIconButton") != null)
             return;
 
         var play = GameObject.FindGameObjectWithTag("PlayButton");
@@ -289,15 +308,23 @@ public class SceneFader : MonoBehaviour
         if (playRt == null)
             return;
 
-        var go = new GameObject("MenuTutorialEntryButton");
+        bool tablet = DeviceLayout.IsTabletLike();
+        // Lower toward Play (smaller gap above the Play button).
+        float aboveOffset = tablet ? 38f : 30f;
+
+        var go = new GameObject("MenuPlayerIconButton");
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(playRt.parent, false);
         rt.localScale = Vector3.one;
-        rt.anchorMin = playRt.anchorMin;
-        rt.anchorMax = playRt.anchorMax;
-        rt.pivot = playRt.pivot;
-        rt.sizeDelta = playRt.sizeDelta;
-        rt.anchoredPosition = playRt.anchoredPosition + new Vector2(0f, -92f);
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        // Slightly narrower than Play width; keep enough height so two-line label isn’t cramped (not short vertically).
+        float iconWidth = playRt.sizeDelta.x * (tablet ? 1.02f : 1.06f);
+        rt.sizeDelta = new Vector2(iconWidth, tablet ? 98f : 90f);
+        float stackY = playRt.anchoredPosition.y + aboveOffset + playRt.sizeDelta.y * 0.5f + rt.sizeDelta.y * 0.5f;
+        rt.anchoredPosition = new Vector2(0f, stackY);
+        rt.SetAsLastSibling();
 
         var playImg = play.GetComponent<Image>();
         var img = go.AddComponent<Image>();
@@ -308,7 +335,8 @@ public class SceneFader : MonoBehaviour
         }
 
         RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.24f, 0.30f, 0.55f, 0.98f);
+        img.color = RuntimeUiPolish.BrightenPlayerAccent(PlayerGlyphSettings.GetAccentForCurrentSelection());
+        playerIconMenuButtonImage = img;
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
@@ -316,7 +344,7 @@ public class SceneFader : MonoBehaviour
             Color.Lerp(img.color, Color.white, 0.2f),
             Color.Lerp(img.color, Color.black, 0.18f));
         RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.28f);
-        btn.onClick.AddListener(OpenMenuTutorialOverlay);
+        btn.onClick.AddListener(OpenMenuPlayerGlyphPickerOverlay);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -326,32 +354,38 @@ public class SceneFader : MonoBehaviour
         trt.offsetMin = new Vector2(10f, 6f);
         trt.offsetMax = new Vector2(-10f, -6f);
 
-        tutorialMenuButtonText = textGo.AddComponent<TextMeshProUGUI>();
-        bool tablet = DeviceLayout.IsTabletLike();
-        tutorialMenuButtonText.text = LocalizationManager.Get("menu.tutorial_button", "How to play");
-        tutorialMenuButtonText.fontSize = UiTypography.Scale(tablet ? 30 : 26);
-        tutorialMenuButtonText.alignment = TextAlignmentOptions.Center;
-        tutorialMenuButtonText.color = new Color(0.92f, 0.98f, 1f, 1f);
-        tutorialMenuButtonText.textWrappingMode = TextWrappingModes.Normal;
-        tutorialMenuButtonText.richText = true;
-        LocalizationManager.ApplyTextDirection(tutorialMenuButtonText);
+        playerIconMenuGlyphTmp = textGo.AddComponent<TextMeshProUGUI>();
+        playerIconMenuGlyphTmp.fontSize = UiTypography.Scale(tablet ? 29 : 26);
+        playerIconMenuGlyphTmp.fontStyle = FontStyles.Bold;
+        playerIconMenuGlyphTmp.enableAutoSizing = false;
+        playerIconMenuGlyphTmp.alignment = TextAlignmentOptions.Center;
+        playerIconMenuGlyphTmp.color = new Color(0.98f, 0.99f, 1f, 1f);
+        playerIconMenuGlyphTmp.outlineWidth = 0.22f;
+        playerIconMenuGlyphTmp.outlineColor = new Color(0f, 0f, 0f, 0.38f);
+        playerIconMenuGlyphTmp.textWrappingMode = TextWrappingModes.Normal;
+        playerIconMenuGlyphTmp.overflowMode = TextOverflowModes.Overflow;
+        playerIconMenuGlyphTmp.richText = true;
+        LocalizationManager.ApplyTextDirection(playerIconMenuGlyphTmp);
+
         var refTmp = play.GetComponentInChildren<TextMeshProUGUI>();
         if (refTmp != null && refTmp.font != null)
         {
-            tutorialMenuButtonText.font = refTmp.font;
+            playerIconMenuGlyphTmp.font = refTmp.font;
             if (refTmp.fontSharedMaterial != null)
-                tutorialMenuButtonText.fontSharedMaterial = refTmp.fontSharedMaterial;
+                playerIconMenuGlyphTmp.fontSharedMaterial = refTmp.fontSharedMaterial;
         }
         else if (TMP_Settings.defaultFontAsset != null)
-            tutorialMenuButtonText.font = TMP_Settings.defaultFontAsset;
+            playerIconMenuGlyphTmp.font = TMP_Settings.defaultFontAsset;
+
+        playerIconMenuGlyphTmp.fontStyle = FontStyles.Bold;
     }
 
-    private static void OpenMenuTutorialOverlay()
+    private static void OpenMenuPlayerGlyphPickerOverlay()
     {
-        var canvas = Object.FindAnyObjectByType<Canvas>();
+        var canvas = Object.FindFirstObjectByType<Canvas>();
         if (canvas == null)
             return;
-        MenuTutorialOverlay.Open(canvas.transform);
+        MenuPlayerGlyphPickerOverlay.Open(canvas.transform);
     }
 
     /// <summary>Tappable control to cycle UI language (compact for phones).</summary>
@@ -377,8 +411,8 @@ public class SceneFader : MonoBehaviour
         rt.anchorMin = new Vector2(0f, 1f);
         rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0f, 1f);
-        rt.anchoredPosition = new Vector2(tablet ? 22f : 16f, tablet ? -18f : -14f);
-        rt.sizeDelta = new Vector2(tablet ? 320f : 280f, tablet ? 48f : 44f);
+        rt.anchoredPosition = new Vector2(tablet ? 22f : 16f, tablet ? -20f : -16f);
+        rt.sizeDelta = new Vector2(tablet ? 400f : 360f, tablet ? 68f : 60f);
 
         var img = go.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
@@ -396,14 +430,18 @@ public class SceneFader : MonoBehaviour
         trt.SetParent(go.transform, false);
         trt.anchorMin = Vector2.zero;
         trt.anchorMax = Vector2.one;
-        trt.offsetMin = new Vector2(10f, 4f);
-        trt.offsetMax = new Vector2(-10f, -4f);
+        trt.offsetMin = new Vector2(12f, 6f);
+        trt.offsetMax = new Vector2(-12f, -6f);
 
         menuLanguageButtonLabel = textGo.AddComponent<TextMeshProUGUI>();
-        menuLanguageButtonLabel.fontSize = UiTypography.Scale(tablet ? 22 : 19);
+        menuLanguageButtonLabel.enableAutoSizing = true;
+        menuLanguageButtonLabel.fontSizeMin = Mathf.Max(12, UiTypography.Scale(14));
+        menuLanguageButtonLabel.fontSizeMax = UiTypography.Scale(tablet ? 28 : 24);
+        menuLanguageButtonLabel.fontSize = menuLanguageButtonLabel.fontSizeMax;
         menuLanguageButtonLabel.alignment = TextAlignmentOptions.Center;
         menuLanguageButtonLabel.color = new Color(0.93f, 0.96f, 1f, 1f);
         menuLanguageButtonLabel.textWrappingMode = TextWrappingModes.Normal;
+        menuLanguageButtonLabel.overflowMode = TextOverflowModes.Overflow;
 
         var refTmp = Object.FindAnyObjectByType<TextMeshProUGUI>();
         if (refTmp != null && refTmp.font != null)

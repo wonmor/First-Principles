@@ -1,5 +1,5 @@
 # اردو — First Principles
-ui.choose_stage=ایک گراف اسٹیج منتخب کریں
+ui.choose_stage=لیول منتخب کریں
 ui.math_tips=ریاضی کے نکات و اقتباسات
 ui.back_menu=مینو پر واپس
 ui.graphing_calculator_mode=گرافنگ کیلکولیٹر
@@ -32,6 +32,7 @@ graph.calculator_intro=<b>گرافنگ کیلکولیٹر موڈ</b>\n<size=88%>
 aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>ڈریگ پولر یاد دہانی</color></b> (ہر <b>ایرواسپیس</b> اسٹیج)\n<size=92%><b>پیراسیٹک (صفر-لفٹ) ڈریگ</b> — رگڑ، شکل، مداخلت کو ماڈل میں <b>C<sub>D0</sub></b> میں سمیٹا جاتا ہے (لفٹ کے ساتھ نہيں بڑھنے والا حصہ)۔\n<b>انڈیوسڈ ڈریگ</b> — لفٹ بنانے کی قیمت: ~ <b>K C<sub>L</sub>²</b>۔\n<b>کل ڈریگ پولر</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>۔</size>
 menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × Rayan Kaissi (GameGenesis)</size>
+menu.support_contact=<size=32><color=#94a3b8>معاونت:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
 level.0=ابتدائی اصول: تعارف
 level.1=پارابولا کی ڈھلوان
 level.2=جیا کی لہریں
@@ -73,5 +74,6 @@ level.37=ایرواسپیس: فیگوئڈ / ڈیمپڈ موڈ
 level.38=ایرواسپیس: نیوٹنی Cp ~ sin²α
 level.39=ایرواسپیس: اسٹروہل / وورٹیکس شیڈنگ
 level.40=ایرواسپیس: دوبارہ دخول زوال
-level.41=مقابلے کی ریاض: ln و حدیں
-level.42=بوس: مینڈلبرو فرکٹل سلائس
+level.41=معیشت: ڈاٹ کام ببل اور حادثہ (اسٹائل شدہ انڈیکس)
+level.42=معیشت: 2008 بحران اور بحالی (اسٹائل شدہ انڈیکس)
+level.43=بوس: مینڈلبرو فرکٹل سلائس

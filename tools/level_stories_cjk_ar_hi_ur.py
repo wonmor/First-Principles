@@ -48,8 +48,9 @@ def emit_remaining_story_bundles(emit) -> None:
         38: "<b>ニュートン的</b>風上圧力～<color=#fca5a5>sin²α</color>の教養モデル。\n\n<size=92%><color=#a8b2d1>CFDの代替ではない。</color></size>",
         39: "<b>ストルーハル</b>：f ≈ St·U/D、渦放出のトーン。\n\n<size=92%><color=#a8b2d1>振動と騒音の指針。</color></size>",
         40: "<b>再突入</b>の熱脅威カーブを質的に緩めるイメージ。\n\n<size=92%><color=#a8b2d1>定量メモではない。</color></size>",
-        41: "<b>競技数学:</b> 凹性、<color=#fdba74>lnは上に凸</color>、接線·弦の線形境界。\n\n<size=92%><color=#a8b2d1>MAA非提携。</color></size>",
-        42: "<b>マンデルブロ集合</b>：c平面の滑らか脱出時間、<color=#86efac>Re(c)</color>固定の切断。\n\n<size=92%><color=#a8b2d1>ジュリアの境界；深いズームは別エンジン。|Im(c)|切断。</color></size>",
+        41: "<b>ドットコムバブル</b> — 模式化インデックス（実S&amp;Pではない）。\n\n<size=92%><color=#a8b2d1>上昇・エアポケット・緩い回復の教学シルエット。</color></size>",
+        42: "<b>2008年危機</b> — 住宅・信用ストレスの雰囲気、定性曲線のみ。\n\n<size=92%><color=#a8b2d1>実データの再現ではない。</color></size>",
+        43: "<b>マンデルブロ集合</b>：c平面の滑らか脱出時間、<color=#86efac>Re(c)</color>固定の切断。\n\n<size=92%><color=#a8b2d1>ジュリアの境界；深いズームは別エンジン。|Im(c)|切断。</color></size>",
     })
 
     # Korean (compact)
@@ -95,8 +96,9 @@ def emit_remaining_story_bundles(emit) -> None:
         38: "<b>뉴턴 sin²α</b> 교양 모델.\n\n<size=92%><color=#a8b2d1>CFD 아님.</color></size>",
         39: "<b>스트루할</b> vortex 톤.\n\n<size=92%><color=#a8b2d1>f ≈ St·U/D.</color></size>",
         40: "<b>재진입</b> 열 위협 완화 질서.\n\n<size=92%><color=#a8b2d1>정량 메모 아님.</color></size>",
-        41: "<b>경시:</b> 오목·<color=#fdba74>ln 오목</color>·경계.\n\n<size=92%><color=#a8b2d1>MAA 무관.</color></size>",
-        42: "<b>만델브로</b> c평면, 탈출시간, Re 고정 절편.\n\n<size=92%><color=#a8b2d1>줄리아 경계; 딥 줌은 다른 엔진.</color></size>",
+        41: "<b>닷컴 버블</b> — 스타일화 지수 경로(실제 S&amp;P 데이터 아님).\n\n<size=92%><color=#a8b2d1>급등·급락·회복 — 교육용 형태.</color></size>",
+        42: "<b>2008 위기</b> — 주택·크레딧 스트레스 분위기, 질적 곡선.\n\n<size=92%><color=#a8b2d1>실제 시계열 복제 아님.</color></size>",
+        43: "<b>만델브로</b> c평면, 탈출시간, Re 고정 절편.\n\n<size=92%><color=#a8b2d1>줄리아 경계; 딥 줌은 다른 엔진.</color></size>",
     })
 
     # Simplified Chinese
@@ -142,8 +144,9 @@ def emit_remaining_story_bundles(emit) -> None:
         38: "<b>牛顿型</b>~<color=#fca5a5>sin²α</color>迎风压—教学习题。\n\n<size=92%><color=#a8b2d1>非CFD。</color></size>",
         39: "<b>斯特劳哈尔</b>涡脱落频率 ~ St·U/D。\n\n<size=92%><color=#a8b2d1>振动与噪声线索。</color></size>",
         40: "<b>再入</b>热威胁曲线定性放松。\n\n<size=92%><color=#a8b2d1>非定量备忘录。</color></size>",
-        41: "<b>竞赛数学:</b> 凹性、<color=#fdba74>ln凹</color>、线性界。\n\n<size=92%><color=#a8b2d1>与MAA无关。</color></size>",
-        42: "<b>曼德博</b>c平面、光滑逃逸时间、固定Re切片。\n\n<size=92%><color=#a8b2d1>Julia边界；深 zoom 另需引擎。|Im(c)|切片。</color></size>",
+        41: "<b>互联网泡沫</b> — 示意指数走势（非真实标普数据）。\n\n<size=92%><color=#a8b2d1>爬升、急跌、缓慢修复的教学轮廓。</color></size>",
+        42: "<b>2008危机</b> — 房贷与信用压力氛围，仅定性曲线。\n\n<size=92%><color=#a8b2d1>非下载行情；课堂斜率叙事。</color></size>",
+        43: "<b>曼德博</b>c平面、光滑逃逸时间、固定Re切片。\n\n<size=92%><color=#a8b2d1>Julia边界；深 zoom 另需引擎。|Im(c)|切片。</color></size>",
     })
 
     # Arabic
@@ -189,8 +192,9 @@ def emit_remaining_story_bundles(emit) -> None:
         38: "<b>نيوتني</b> ~ sin²α تعليمي.\n\n<size=92%><color=#a8b2d1>ليس CFD.</color></size>",
         39: "<b>ستروهال</b> vortices.\n\n<size=92%><color=#a8b2d1>f ≈ St·U/D.</color></size>",
         40: "<b>دخول غلاف جوي</b> — <i>تخفيف نوعي</i> لمنحنى التسخين.\n\n<size=92%><color=#a8b2d1>ليس وثيقة كمية.</color></size>",
-        41: "<b>مسابقات:</b> تقعر، ln مقعر، حدود.\n\n<size=92%><color=#a8b2d1>غير تابع لـ MAA.</color></size>",
-        42: "<b>ماندلبرو</b> مستوى c، زمن هروب، شريح بـ Re ثابت.\n\n<size=92%><color=#a8b2d1>حد جوليا؛ تكبير عميق بمحرك آخر.</color></size>",
+        41: "<b>فقاعة الدوت كوم</b> — مؤشر توضيحي (ليس S&amp;P الحقيقي).\n\n<size=92%><color=#a8b2d1>صعود، هبوط حاد، تعافٍ بطيء — تمثيل تعليمي.</color></size>",
+        42: "<b>أزمة 2008</b> — رهن عقاري وضغط ائتمان، منحنى نوعي فقط.\n\n<size=92%><color=#a8b2d1>ليس بيانات فعلية.</color></size>",
+        43: "<b>ماندلبرو</b> مستوى c، زمن هروب، شريح بـ Re ثابت.\n\n<size=92%><color=#a8b2d1>حد جوليا؛ تكبير عميق بمحرك آخر.</color></size>",
     })
 
     # Hindi
@@ -236,8 +240,9 @@ def emit_remaining_story_bundles(emit) -> None:
         38: "<b>न्यूटनी ~ sin²α</b> शिक्षा मॉडल.\n\n<size=92%><color=#a8b2d1>CFD नहीं।</color></size>",
         39: "<b>स्ट्रौहल</b> शेडिंग.\n\n<size=92%><color=#a8b2d1>f ≈ St·U/D.</color></size>",
         40: "<b>पुनः प्रवेश</b> गर्मी वक्र ढील।\n\n<size=92%><color=#a8b2d1>मात्रात्मक मेमो नहीं।</color></size>",
-        41: "<b>प्रतियोगिता गणित:</b> अवकलता, ln अवकल, सीमाएँ।\n\n<size=92%><color=#a8b2d1>MAA से अलग।</color></size>",
-        42: "<b>मैंडेलब्रॉट</b> c-तल, भागने का समय, स्थिर Re काट।\n\n<size=92%><color=#a8b2d1>जुलिया सीमा; गहरा ज़ूम अलग इंजन।</color></size>",
+        41: "<b>डॉट-कॉम बुलबुला</b> — नमूना सूचकांक (वास्तविक S&amp;P नहीं)।\n\n<size=92%><color=#a8b2d1>उछाल, गिरावट, धीमी वसूली — शिक्षण रूपक।</color></size>",
+        42: "<b>2008 संकट</b> — गिरवी/क्रेडिट तनाव माहौल, केवल गुणात्मक।\n\n<size=92%><color=#a8b2d1>वास्तविक डेटा पुनर्निर्माण नहीं।</color></size>",
+        43: "<b>मैंडेलब्रॉट</b> c-तल, भागने का समय, स्थिर Re काट।\n\n<size=92%><color=#a8b2d1>जुलिया सीमा; गहरा ज़ूम अलग इंजन।</color></size>",
     })
 
     # Urdu
@@ -283,6 +288,7 @@ def emit_remaining_story_bundles(emit) -> None:
         38: "<b>Newtonian</b> تعلیم۔\n\n<size=92%><color=#a8b2d1>CFDنہیں۔</color></size>",
         39: "<b>Strouhal</b>.\n\n<size=92%><color=#a8b2d1>f ≈ St·U/D۔</color></size>",
         40: "<b>دوبارہ دخول</b> نِرم گرم منحنی۔\n\n<size=92%><color=#a8b2d1>مقدار نوٹ نہیں۔</color></size>",
-        41: "<b>مقابلہ ریاضی</b>.\n\n<size=92%><color=#a8b2d1>MAA سے الگ۔</color></size>",
-        42: "<b>مینڈلبروٹ</b>۔\n\n<size=92%><color=#a8b2d1>julia سرحد۔</color></size>",
+        41: "<b>ڈاٹ کام ببل</b> — اسٹائل شدہ انڈیکس (اصلی S&amp;P نہیں)۔\n\n<size=92%><color=#a8b2d1>چڑھاو، گراو، آہستہ بحالی — تعلیمی شکل۔</color></size>",
+        42: "<b>2008 بحران</b> — رہن/کریڈٹ دباؤ، صرف کوالٹیٹیو۔\n\n<size=92%><color=#a8b2d1>حقیقی ڈیٹا نقل نہیں۔</color></size>",
+        43: "<b>مینڈلبروٹ</b>۔\n\n<size=92%><color=#a8b2d1>julia سرحد۔</color></size>",
     })

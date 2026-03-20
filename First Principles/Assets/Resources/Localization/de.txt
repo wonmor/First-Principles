@@ -1,5 +1,5 @@
 # Deutsch
-ui.choose_stage=Graph-Phase wählen
+ui.choose_stage=Level wählen
 ui.math_tips=Mathe-Tipps & Kurzinfos
 ui.back_menu=Zum Menü
 ui.graphing_calculator_mode=Grafikrechner
@@ -30,6 +30,7 @@ graph.param_d=D (horizontale Verschiebung)
 graph.calculator_intro=<b>Grafikrechner-Modus</b>\n<size=88%>Geben Sie fast beliebiges <b>f(u)</b> ein (Variable <b>x</b> in Ihrer Formel); <b>Trans</b> stellt A, k, C, D ein; <b>Maßstab</b> und <b>Pinch</b> zoomen das Fenster.</size>
 menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
+menu.support_contact=<size=32><color=#94a3b8>Support:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
 level.0=Einstieg: Erste Prinzipien
 level.1=Steigung der Parabel
 level.2=Sinuswellen
@@ -71,5 +72,6 @@ level.37=Luftfahrt: Phugoid / gedämpfte Nick-Hubbewegung
 level.38=Luftfahrt: newtonsch Cp ~ sin²α
 level.39=Luftfahrt: Strouhal / Wirbelabwurf-Ton
 level.40=Luftfahrt: Wiedereintritts-Hülle (ρV Erwärmung)
-level.41=Wettkampf: ln, Krümmung & Schranken
-level.42=BOSS: Mandelbrot-Escapeschnitt (Fraktal)
+level.41=Wirtschaft: Dotcom-Blase & Crash (stilisierter Index)
+level.42=Wirtschaft: Krise 2008 & Erholung (stilisierter Index)
+level.43=BOSS: Mandelbrot-Escapeschnitt (Fraktal)

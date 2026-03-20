@@ -398,12 +398,13 @@ public class LevelManager : MonoBehaviour
             bool tablet = DeviceLayout.IsTabletLike();
             float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset + 312f : 318f;
             hrt.anchoredPosition = new Vector2(0f, up);
-            hrt.sizeDelta = new Vector2(tablet ? 1000f : 920f, tablet ? 128f : 118f);
+            hrt.sizeDelta = new Vector2(tablet ? 1040f : 960f, tablet ? 144f : 132f);
 
             paramHint = hintGo.AddComponent<TextMeshProUGUI>();
             paramHint.richText = true;
             paramHint.textWrappingMode = TextWrappingModes.Normal;
-            paramHint.fontSize = UiTypography.Scale(tablet ? 26 : 23);
+            paramHint.overflowMode = TextOverflowModes.Overflow;
+            paramHint.fontSize = UiTypography.Scale(tablet ? 31 : 27);
             paramHint.alignment = TextAlignmentOptions.Top;
             paramHint.color = new Color(0.9f, 0.93f, 0.98f, 0.96f);
             ApplyPrimaryUiTypography(paramHint, FindPrimaryEquationTmp(), outlineWidth: 0.12f, outlineAlpha: 0.45f);
@@ -499,10 +500,33 @@ public class LevelManager : MonoBehaviour
         rect.pivot = new Vector2(0, 0);
 
         var img = playerGo.AddComponent<Image>();
-        img.sprite = RuntimeUiPolish.SoftCharacterBlob != null ? RuntimeUiPolish.SoftCharacterBlob : TryGetSquareSprite();
-        img.color = RuntimeUiPolish.PlayerBody;
+        img.sprite = TryGetSquareSprite();
+        img.color = Color.clear;
         img.type = Image.Type.Simple;
-        RuntimeUiPolish.ApplyDropShadow(rect, new Vector2(1f, -2f), 0.35f);
+        img.raycastTarget = false;
+
+        var glyphGo = new GameObject("Glyph");
+        var glyphRt = glyphGo.AddComponent<RectTransform>();
+        glyphRt.SetParent(rect, false);
+        glyphRt.anchorMin = Vector2.zero;
+        glyphRt.anchorMax = Vector2.one;
+        glyphRt.offsetMin = Vector2.zero;
+        glyphRt.offsetMax = Vector2.zero;
+        var glyphTmp = glyphGo.AddComponent<TextMeshProUGUI>();
+        glyphTmp.text = PlayerGlyphSettings.GetSelectedGlyph();
+        glyphTmp.alignment = TextAlignmentOptions.Center;
+        glyphTmp.enableAutoSizing = true;
+        glyphTmp.fontSizeMin = 22;
+        glyphTmp.fontSizeMax = 512;
+        glyphTmp.color = RuntimeUiPolish.PlayerBody;
+        glyphTmp.richText = false;
+        glyphTmp.raycastTarget = false;
+        ApplyPrimaryUiTypography(glyphTmp, FindPrimaryEquationTmp(), outlineWidth: 0.18f, outlineAlpha: 0.42f);
+        // ApplyPrimaryUiTypography copies reference fontStyle; keep the player glyph visibly bold/thick.
+        glyphTmp.fontStyle = FontStyles.Bold;
+        // Slight rim so the bright fill still separates from lime/purple graph lines.
+        glyphTmp.outlineWidth = 0.22f;
+        glyphTmp.outlineColor = new Color(0.04f, 0.06f, 0.12f, 0.40f);
 
         playerController = playerGo.AddComponent<PlayerControllerUI2D>();
         playerController.BindVisual(rect, img);
@@ -584,7 +608,7 @@ public class LevelManager : MonoBehaviour
             panelRt.pivot = new Vector2(0f, 1f);
             float topPad = DeviceLayout.PreferOnScreenGameControls ? 12f : 20f;
             panelRt.anchoredPosition = new Vector2(18f, -topPad);
-            panelRt.sizeDelta = new Vector2(380f, 80f);
+            panelRt.sizeDelta = new Vector2(440f, 88f);
             RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(2f, -3f), 0.26f);
 
             var panelBg = panelGo.AddComponent<Image>();
@@ -619,10 +643,11 @@ public class LevelManager : MonoBehaviour
 
             var tmp = textGo.AddComponent<TextMeshProUGUI>();
             tmp.richText = true;
-            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+            tmp.textWrappingMode = TextWrappingModes.Normal;
+            tmp.overflowMode = TextOverflowModes.Overflow;
             tmp.fontSize = UiTypography.Scale(28);
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = UiTypography.Scale(18);
+            tmp.fontSizeMin = UiTypography.Scale(16);
             tmp.fontSizeMax = UiTypography.Scale(30);
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
             tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
@@ -669,6 +694,7 @@ public class LevelManager : MonoBehaviour
                 var tmp = textGo.AddComponent<TextMeshProUGUI>();
                 tmp.richText = true;
                 tmp.textWrappingMode = TextWrappingModes.Normal;
+                tmp.overflowMode = TextOverflowModes.Overflow;
                 tmp.fontSize = UiTypography.Scale(24);
                 tmp.alignment = TextAlignmentOptions.Midline;
                 tmp.color = new Color(0.82f, 0.85f, 0.92f, 0.92f);
@@ -862,8 +888,7 @@ public class LevelManager : MonoBehaviour
         riemannRenderer = go.AddComponent<RiemannStripRendererUI>();
         riemannRenderer.raycastTarget = false;
 
-        int lineIdx = curveRenderer.transform.GetSiblingIndex();
-        go.transform.SetSiblingIndex(lineIdx);
+        go.transform.SetSiblingIndex(0);
     }
 
     /// <summary>
@@ -1139,7 +1164,8 @@ public class LevelManager : MonoBehaviour
             riemannRectCount: 14,
             showRiemannVisualization: true,
             useRiemannStairPlatforms: true,
-            riemannFillColor: new Color(0.95f, 0.35f, 0.4f, 0.32f)
+            riemannFillColor: new Color(0.95f, 0.35f, 0.4f, 0.32f),
+            riemannPlatformCoverage: 0.58f
         ));
 
         var riemannRightColors = new[]
@@ -1174,7 +1200,8 @@ public class LevelManager : MonoBehaviour
             riemannRectCount: 14,
             showRiemannVisualization: true,
             useRiemannStairPlatforms: true,
-            riemannFillColor: new Color(0.25f, 0.55f, 0.95f, 0.3f)
+            riemannFillColor: new Color(0.25f, 0.55f, 0.95f, 0.3f),
+            riemannPlatformCoverage: 0.58f
         ));
 
         var riemannMidColors = new[]
@@ -1209,7 +1236,8 @@ public class LevelManager : MonoBehaviour
             riemannRectCount: 14,
             showRiemannVisualization: true,
             useRiemannStairPlatforms: true,
-            riemannFillColor: new Color(0.45f, 0.85f, 0.55f, 0.28f)
+            riemannFillColor: new Color(0.45f, 0.85f, 0.55f, 0.28f),
+            riemannPlatformCoverage: 0.58f
         ));
 
         var engDampColors = new[]
@@ -1361,7 +1389,7 @@ public class LevelManager : MonoBehaviour
             baseN: 2,
             story:
                 "<b>Polar coordinates</b>: describe points by <color=#fde047>(r, θ)</color> instead of (x, y). A <b>cardioid</b> has the family flavor r ~ 1 + cos θ — a heartbeat‑shaped loop.\n\n" +
-                "Here the horizontal axis stands in for θ and the vertical for r(θ) (same trick AP uses when you first graph polar equations before converting to x = r cos θ, y = r sin θ).\n\n" +
+                "The big equation shows <b>r(θ)</b> with a <b>θ</b> window — an <b>r-vs-θ</b> plot (AP-style), not <b>y</b> versus Cartesian <b>x</b> on the labels. Later you convert to the plane with <b>x = r cos θ</b>, <b>y = r sin θ</b>.\n\n" +
                 "<size=92%><color=#a8b2d1>Area in polar uses ½∫ r² dθ; tangent slope needs dr/dθ.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
@@ -1849,31 +1877,55 @@ public class LevelManager : MonoBehaviour
             storyPauseSecondsOverride: 2.65f
         ));
 
-        // Competition math (41) + Mandelbrot boss (42) — keep order aligned with GameLevelCatalog.
+        // Economics bonus (41–42) + Mandelbrot boss (43) — order matches GameLevelCatalog.
         levels.Add(MakeLevel(
             GameLevelCatalog.DisplayNames[41],
-            FunctionType.NaturalLog,
-            curveColor: new Color(0.42f, 0.88f, 0.96f, 1f),
-            derivativeColor: new Color(0.98f, 0.62f, 0.32f, 1f),
-            transA: 0.58f,
-            transK: 0.26f,
-            transC: -1.92f,
-            transD: -1.85f,
+            FunctionType.EconomyDotcomBubbleStylized,
+            curveColor: new Color(0.14f, 0.58f, 0.34f, 1f),
+            derivativeColor: new Color(0.98f, 0.72f, 0.28f, 1f),
+            transA: 2.35f,
+            transK: 0.118f,
+            transC: -2.38f,
+            transD: 0f,
             power: 2,
             baseN: 2,
             story:
-                "<b>Competition mathematics</b> — contests like <color=#7dd3fc>AMC / AIME</color> and proof‑style olympiads reward <i>structure</i>: symmetry, bounding, and knowing when a function is <b>concave or convex</b>.\n\n" +
-                "The natural log is <color=#fdba74>concave on (0,∞)</color> — **chords lie below the graph**, tangents lie above on one side — a factory of **linear bounds** (tangents & secants) used in inequalities and “prove bound” problems.\n\n" +
-                "<size=92%><color=#a8b2d1>Your feet follow \\(\\ln\\) on a shifted domain; the derivative plot mirrors \\(1/x\\) behavior — the same reciprocal intuition behind many integral estimates. Not affiliated with MAA or any contest body.</color></size>",
+                "<b>Dot‑com bubble — stylized chart walk</b> — equity indices like the broad <color=#86efac>S&amp;P 500</color> (or the racier <color=#7dd3fc>Nasdaq Composite</color>) climbed through the late 1990s, then <color=#fca5a5>gapped down</color> as the 2000–02 tech hangover unwound years of euphoria.\n\n" +
+                "This path is a <b>smooth teaching silhouette</b> — not downloaded tick data — but it catches the storytelling shape: **grind, parabolic enthusiasm, air pocket, slow rebuild**. Slopes and concavity still read like real market moods.\n\n" +
+                "<size=92%><color=#a8b2d1>Educational allegory only; not investment advice or a replica of any index.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
-            gridCenter: new Color(0.14f, 0.38f, 0.46f, 0.38f),
-            gridOutside: new Color(0.1f, 0.26f, 0.32f, 0.11f),
-            storyPauseSecondsOverride: 2.85f
+            gridCenter: new Color(0.18f, 0.32f, 0.22f, 0.38f),
+            gridOutside: new Color(0.12f, 0.22f, 0.15f, 0.11f),
+            storyPauseSecondsOverride: 2.95f,
+            graphStep: 0.09f
         ));
 
         levels.Add(MakeLevel(
             GameLevelCatalog.DisplayNames[42],
+            FunctionType.EconomySubprime2008Stylized,
+            curveColor: new Color(0.72f, 0.22f, 0.2f, 1f),
+            derivativeColor: new Color(0.52f, 0.78f, 0.95f, 1f),
+            transA: 2.5f,
+            transK: 0.115f,
+            transC: -2.42f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Global financial crisis — stylized stress curve</b> — US <color=#fde047>housing & mortgage</color> risk, structured credit losses, and institutional fragility fed a <color=#fca5a5>violent repricing</color> in 2007–09 that spilled across banks, money markets, and real economies (familiar names in history books: Lehman’s collapse in Sept 2008 as a flashpoint).\n\n" +
+                "Again: <b>no real GSPC series here</b> — just a qualitative spline with a **crest near complacency**, a **cliff**, and a **long crawl** that matches how people <i>remember</i> the V‑shock conversation.\n\n" +
+                "<size=92%><color=#a8b2d1>Simplified drama for calculus class; markets are vastly richer than one line.</color></size>",
+            derivativePopTriggerCountOverride: 4,
+            applyGridTheming: true,
+            gridCenter: new Color(0.36f, 0.14f, 0.12f, 0.36f),
+            gridOutside: new Color(0.26f, 0.1f, 0.09f, 0.1f),
+            storyPauseSecondsOverride: 3.05f,
+            graphStep: 0.09f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[43],
             FunctionType.MandelbrotEscapeImSlice,
             curveColor: new Color(0.25f, 0.98f, 0.62f, 1f),
             derivativeColor: new Color(0.98f, 0.38f, 0.82f, 1f),
@@ -1928,7 +1980,8 @@ public class LevelManager : MonoBehaviour
         float graphStep = 0f,
         float? levelXStart = null,
         float? levelXEnd = null,
-        Color[] dragPolarOverlayColors = null)
+        Color[] dragPolarOverlayColors = null,
+        float? riemannPlatformCoverage = null)
     {
         var def = ScriptableObject.CreateInstance<LevelDefinition>();
         def.levelName = name;
@@ -1988,6 +2041,8 @@ public class LevelManager : MonoBehaviour
         def.useRiemannStairPlatforms = useRiemannStairPlatforms;
         if (riemannFillColor.HasValue)
             def.riemannFillColor = riemannFillColor.Value;
+        if (riemannPlatformCoverage.HasValue)
+            def.riemannPlatformCoverage = Mathf.Clamp(riemannPlatformCoverage.Value, 0.22f, 1f);
 
         if (dragPolarOverlayColors != null && dragPolarOverlayColors.Length >= 2)
         {
@@ -2364,12 +2419,25 @@ public class LevelManager : MonoBehaviour
 
         EnsureRiemannRenderer();
         if (riemannRenderer != null)
+        {
+            bool riemannBackdrop = def.riemannRectCount > 0
+                && (def.showRiemannVisualization
+                    || (def.useRiemannStairPlatforms && def.riemannRule != RiemannRule.None));
+            if (riemannBackdrop)
+                riemannRenderer.transform.SetSiblingIndex(0);
             riemannRenderer.Rebuild(def, functionPlotter);
+        }
 
         var curvePoints = curveRenderer.points;
         var derivPoints = derivRenderer.points;
 
-        var world = obstacleGenerator.GenerateWorld(def, curvePoints, derivPoints, functionPlotter);
+        var playBounds = GameplayPlayBounds.Compute(cartesianPlaneRect, gridSize);
+        var world = obstacleGenerator.GenerateWorld(def, curvePoints, derivPoints, functionPlotter, playBounds);
+        if (world.hasPlayBounds)
+            playerController.SetDeathMinYGrid(world.playBounds.YMin - 0.4f);
+        else
+            playerController.SetDeathMinYGrid(deathMinYGrid);
+
         playerController.SetWorld(world);
         playerController.ResetToSpawn(world);
     }

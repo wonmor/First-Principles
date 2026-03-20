@@ -91,6 +91,10 @@ public class LevelDefinition : ScriptableObject
     [Tooltip("Platforms are flat per subinterval at the Riemann sample height (step terrain under the curve).")]
     public bool useRiemannStairPlatforms = false;
 
+    [Tooltip("When stair platforms are on: each tread covers this fraction of its subinterval width (rest is air). Lower = wider gaps, more jumps.")]
+    [Range(0.22f, 1f)]
+    public float riemannPlatformCoverage = 0.62f;
+
     public Color riemannFillColor = new Color(0.25f, 0.55f, 0.95f, 0.32f);
 
     public void EnsureDefaultStagePopData(int stageCount)

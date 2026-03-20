@@ -149,9 +149,9 @@ Engineering math is still “calculus + algebra + models,” but the **goal** is
 
 ---
 
-## Competition math stage (level select)
+## Economics “index chart” stages (qualitative)
 
-Level select includes **“Competition math: ln, concavity & bound tricks”** — a \(\ln\)-shaped run framed for **contest-style** thinking (bounds, concavity, domain care). Unofficial context and study map: **[Competition math]({% link competition-math.md %})**.
+Level select includes **two stylized curves** meant to evoke broad equity-index narratives: a **late‑1990s / dot‑com run-up and unwind**, and a **2007–09 global financial crisis** arc (housing, credit, Lehman-era history-book framing). The graphs are **smooth teaching splines**, not downloaded ticker data. For contest/concavity notes with \(\ln\), see **[Competition math]({% link competition-math.md %})** (still in docs; the old dedicated \(\ln\) contest stage was replaced by these economics moods in the catalog).
 
 ---
 

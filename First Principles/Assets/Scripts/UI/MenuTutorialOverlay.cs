@@ -213,8 +213,8 @@ public static class MenuTutorialOverlay
             "<b>Air jump on the derivative</b>\n" +
             "While you are <b>in the air</b>, if your character overlaps the <b>derivative curve</b>, you can press <b>Jump again</b> for an extra hop.\n\n" +
             "<size=94%><color=#a8b2d1>The derivative line brightens when you touch it. You get <b>one</b> bonus jump each time you brush it until you leave the curve or land. On phones you may feel a short vibration when you touch \\(f'\\); on PC a sound plays instead when vibration isn’t available.</color></size>\n\n" +
-            "<b>Level select</b>\n" +
-            "<size=94%>Stages are grouped (Core, Engineering, AP Calculus, Aerospace …). Pick a group, then a level.</size>";
+            "<b>Select level</b>\n" +
+            "<size=94%>On this screen, stages are grouped (Core, Engineering, AP Calculus, Aerospace …). Tap <b>How to play</b> at the bottom to reopen this help. Pick a group, then a level.</size>";
     }
 
     private static void RefreshAllLocalized()

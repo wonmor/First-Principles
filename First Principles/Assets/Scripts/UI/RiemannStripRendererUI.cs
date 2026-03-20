@@ -62,7 +62,13 @@ public class RiemannStripRendererUI : Graphic
         strips.Clear();
         color = def.riemannFillColor;
 
-        if (!def.showRiemannVisualization || def.riemannRectCount < 1 || plotter == null)
+        bool backdrop =
+            def.riemannRectCount >= 1
+            && plotter != null
+            && (def.showRiemannVisualization
+                || (def.useRiemannStairPlatforms && def.riemannRule != RiemannRule.None));
+
+        if (!backdrop)
         {
             SetVerticesDirty();
             return;

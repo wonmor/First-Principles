@@ -1,5 +1,5 @@
 # Français
-ui.choose_stage=Choisissez un niveau graphique
+ui.choose_stage=Choisir un niveau
 ui.math_tips=Astuces & formules
 ui.back_menu=Retour au menu
 ui.graphing_calculator_mode=Calculatrice graphique
@@ -30,6 +30,7 @@ graph.param_d=D (translation horizontale)
 graph.calculator_intro=<b>Mode calculatrice graphique</b>\n<size=88%>Saisissez presque n’importe quelle <b>f(u)</b> (variable <b>x</b> dans la formule) ; <b>Trans</b> règle A, k, C, D ; <b>Échelle</b> et <b>pincement</b> zooment la fenêtre.</size>
 menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × Rayan Kaissi (GameGenesis)</size>
+menu.support_contact=<size=32><color=#94a3b8>Assistance :</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
 level.0=Introduction : premiers principes
 level.1=Pente d’une parabole
 level.2=Vague sinusoïdale
@@ -71,5 +72,6 @@ level.37=Aéro : phugoïde / oscillation amortie tangage–pilonnement
 level.38=Aéro : newtonien Cp ~ sin²α
 level.39=Aéro : Strouhal / tonalité tourbillonnaire
 level.40=Aéro : enveloppe rentrée (échauffement ρV)
-level.41=Concours : ln, concavité & bornes
-level.42=BOSS : tranche d’échappement Mandelbrot (fractale)
+level.41=Éco : bulle internet & krach (indice stylisé)
+level.42=Éco : crise 2008 & reprise (indice stylisé)
+level.43=BOSS : tranche d’échappement Mandelbrot (fractale)

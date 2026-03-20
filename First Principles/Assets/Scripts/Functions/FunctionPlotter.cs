@@ -119,6 +119,10 @@ public class FunctionPlotter : MonoBehaviour
         equationExtraSuffix = suffix ?? "";
     }
 
+    /// <summary>True when the curve is the polar graph <c>r(θ)</c> (horizontal axis = θ, vertical = r), not Cartesian <c>y(x)</c>.</summary>
+    public static bool IsPolarPlotStyle(FunctionType type) =>
+        type == FunctionType.PolarCardioid || type == FunctionType.PolarRose;
+
     /// <summary>Switches to typed expression mode (graphing calculator).</summary>
     public void SetCustomExpression(string expression)
     {
@@ -267,8 +271,62 @@ public class FunctionPlotter : MonoBehaviour
             // Mandelbrot: escape-time vs Im(c) with Re(c)=transA; use |Im| inside iteration (same count as c̄) — cheap symmetry about the real axis.
             FunctionType.MandelbrotEscapeImSlice => MandelbrotEscapeImSliceY(u, transA, transC, power, baseN),
 
+            // Qualitative economics teaching curves (not real market data; smooth spline through stylized knots).
+            FunctionType.EconomyDotcomBubbleStylized => EconomyDotcomBubbleStylizedY(u, transA, transC),
+            FunctionType.EconomySubprime2008Stylized => EconomySubprime2008StylizedY(u, transA, transC),
+
             _ => 0f
         };
+    }
+
+    /// <summary>Knots for a smooth “index chart” arc: grind higher, parabolic enthusiasm, air-pocket, long recovery (dot-com era mood).</summary>
+    private static readonly float[] EconomyDotcomKnotsU =
+    {
+        -2.65f, -1.55f, -0.65f, 0.02f, 0.32f, 0.52f, 0.88f, 1.35f, 2.65f
+    };
+
+    private static readonly float[] EconomyDotcomKnotsY =
+    {
+        0.11f, 0.24f, 0.48f, 0.93f, 0.62f, 0.37f, 0.35f, 0.46f, 0.71f
+    };
+
+    /// <summary>Knots: pre-crisis climb, crest, cliff, trough, slow crawl up (2008 financial-crisis mood).</summary>
+    private static readonly float[] EconomySubprimeKnotsU =
+    {
+        -2.65f, -1.15f, -0.35f, 0.02f, 0.22f, 0.42f, 0.72f, 1.25f, 2.65f
+    };
+
+    private static readonly float[] EconomySubprimeKnotsY =
+    {
+        0.17f, 0.38f, 0.78f, 0.9f, 0.36f, 0.29f, 0.33f, 0.49f, 0.67f
+    };
+
+    private static float EconomyDotcomBubbleStylizedY(float u, float a, float c) =>
+        c + a * PiecewiseSmoothstepY(u, EconomyDotcomKnotsU, EconomyDotcomKnotsY);
+
+    private static float EconomySubprime2008StylizedY(float u, float a, float c) =>
+        c + a * PiecewiseSmoothstepY(u, EconomySubprimeKnotsU, EconomySubprimeKnotsY);
+
+    /// <summary>Piecewise segments with SmoothStep for a continuous, chart-like polyline (no real ticker data).</summary>
+    private static float PiecewiseSmoothstepY(float u, float[] xs, float[] ys)
+    {
+        if (xs == null || ys == null || xs.Length != ys.Length || xs.Length < 2)
+            return 0f;
+        if (u <= xs[0])
+            return ys[0];
+        if (u >= xs[xs.Length - 1])
+            return ys[xs.Length - 1];
+        for (int i = 0; i < xs.Length - 1; i++)
+        {
+            if (u <= xs[i + 1])
+            {
+                float denom = xs[i + 1] - xs[i];
+                float t = denom > 1e-6f ? (u - xs[i]) / denom : 0f;
+                t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t));
+                return Mathf.Lerp(ys[i], ys[i + 1], t);
+            }
+        }
+        return ys[ys.Length - 1];
     }
 
     private float EvaluateCustomExpression(float transA, float transC, float u)
@@ -498,11 +556,22 @@ public class FunctionPlotter : MonoBehaviour
                 equationText.text = $@"\(f={a}\, e^{{-{k}|u|}}+{c},\; u={k}(x-{d})\)";
                 break;
             case FunctionType.PolarCardioid:
-                equationText.text = $@"\(r \propto 1+\cos\theta,\; \theta\leftrightarrow u={k}(x-{d})\)";
+            {
+                float thLo = Mathf.Min(transK * (xStart - transD), transK * (xEnd - transD));
+                float thHi = Mathf.Max(transK * (xStart - transD), transK * (xEnd - transD));
+                equationText.text =
+                    $@"\(r(\theta)={a}(1+\cos\theta)+{c}\)\n<size=88%><color=#a8b2d1>\(\theta\in[{thLo:0.##},{thHi:0.##}]\)</color></size>";
                 break;
+            }
             case FunctionType.PolarRose:
-                equationText.text = $@"\(r \propto \cos({power}\theta),\; \theta\leftrightarrow u={k}(x-{d})\)";
+            {
+                int nRose = Mathf.Max(1, power);
+                float thLo = Mathf.Min(transK * (xStart - transD), transK * (xEnd - transD));
+                float thHi = Mathf.Max(transK * (xStart - transD), transK * (xEnd - transD));
+                equationText.text =
+                    $@"\(r(\theta)={a}\cos({nRose}\theta)+{c}\)\n<size=88%><color=#a8b2d1>\(\theta\in[{thLo:0.##},{thHi:0.##}]\)</color></size>";
                 break;
+            }
             case FunctionType.CircleUpper:
                 equationText.text = $@"\(u^{2}+(y-{c})^{2}={a}^{2}\ \text{{(upper)}},\; u={k}(x-{d})\)";
                 break;
@@ -525,6 +594,18 @@ public class FunctionPlotter : MonoBehaviour
             case FunctionType.MandelbrotEscapeImSlice:
                 equationText.text =
                     $@"<b>\(\text{{Mandelbrot slice}}\)</b> \(h\propto\text{{escape-time}},\; c=({a})+\mathrm{{i}}u,\; u={k}(x-{d}),\; N={power}\)";
+                break;
+            case FunctionType.EconomyDotcomBubbleStylized:
+                equationText.text =
+                    "<b>Stylized equity index path</b> (dot-com era <i>mood</i>)\n" +
+                    $"<size=92%><color=#a8b2d1>Not S&amp;P 500 or Nasdaq data — a smooth teaching curve through a <color=#86efac>late-90s run-up</color>, <color=#fca5a5>2000–02 drawdown</color>, and slow recovery. " +
+                    $"Height = <b>{c}</b> + <b>{a}</b>·(piecewise path), <i>u</i> = <b>{k}</b>(x−<b>{d}</b>).</color></size>";
+                break;
+            case FunctionType.EconomySubprime2008Stylized:
+                equationText.text =
+                    "<b>Stylized index path</b> (2008 crisis <i>mood</i>)\n" +
+                    $"<size=92%><color=#a8b2d1>Not GSPC / real estate indices — qualitative <color=#fde047>pre-crisis climb</color>, <color=#f87171>sharp stress pocket</color>, then crawl. " +
+                    $"Height = <b>{c}</b> + <b>{a}</b>·(piecewise path), <i>u</i> = <b>{k}</b>(x−<b>{d}</b>).</color></size>";
                 break;
             case FunctionType.CustomExpression:
             {
@@ -677,7 +758,13 @@ public enum FunctionType
     /// Parabolic drag polar with <b>three</b> rendered curves: \(C_{D,\mathrm{par}}\) (flat),
     /// \(C_{D,\mathrm{ind}} \propto u^{\texttt{power}}\), and total \(C_{D,\mathrm{tot}}\) (same as <see cref="Power"/> with \(u=k(x-D)\)).
     /// </summary>
-    AeroDragPolarTriple
+    AeroDragPolarTriple,
+
+    /// <summary>Smooth stylized “index chart” evoking late-90s run-up and drawdown (not real market data).</summary>
+    EconomyDotcomBubbleStylized,
+
+    /// <summary>Smooth stylized path evoking 2007–09 equity stress / recovery (not real market data).</summary>
+    EconomySubprime2008Stylized
 }
 
 /* 

@@ -1,4 +1,4 @@
-# Level stories (ko) — keys story.0 … story.42
+# Level stories (ko) — keys story.0 … story.43
 
 story.0=<color=#c4b5fd><b>도함수</b></color>=접선의 기울기.<b>f(x)</b>가 얼마나 빨리 오르내리는가.\n\n금빛은 길, 얼음빛 f'(x)는 <i>바닥이 버티는 곳</i>을 만든다. |f'|이 충분하면 발판이 이어지고, 아니면 공허가 열린다.\n\n<size=88%><color=#94a3b8><b>퍼스트 프린시플:</b> 비유를 깎아 사실로 내려가 다시 조립한다. <b>f</b>는 결과 모델, <b>f'</b>는 입력 민감도.</color></size>
 story.1=여행자는 완만한 기울기를 걷는다. 도함수가 음이 되면 땅이 갈라진다.
@@ -41,5 +41,6 @@ story.37=<b>퓨고이드/단주기</b> 감쇠 만화.\n\n<size=92%><color=#a8b2d
 story.38=<b>뉴턴 sin²α</b> 교양 모델.\n\n<size=92%><color=#a8b2d1>CFD 아님.</color></size>
 story.39=<b>스트루할</b> vortex 톤.\n\n<size=92%><color=#a8b2d1>f ≈ St·U/D.</color></size>
 story.40=<b>재진입</b> 열 위협 완화 질서.\n\n<size=92%><color=#a8b2d1>정량 메모 아님.</color></size>
-story.41=<b>경시:</b> 오목·<color=#fdba74>ln 오목</color>·경계.\n\n<size=92%><color=#a8b2d1>MAA 무관.</color></size>
-story.42=<b>만델브로</b> c평면, 탈출시간, Re 고정 절편.\n\n<size=92%><color=#a8b2d1>줄리아 경계; 딥 줌은 다른 엔진.</color></size>
+story.41=<b>닷컴 버블</b> — 스타일화 지수 경로(실제 S&amp;P 데이터 아님).\n\n<size=92%><color=#a8b2d1>급등·급락·회복 — 교육용 형태.</color></size>
+story.42=<b>2008 위기</b> — 주택·크레딧 스트레스 분위기, 질적 곡선.\n\n<size=92%><color=#a8b2d1>실제 시계열 복제 아님.</color></size>
+story.43=<b>만델브로</b> c평면, 탈출시간, Re 고정 절편.\n\n<size=92%><color=#a8b2d1>줄리아 경계; 딥 줌은 다른 엔진.</color></size>

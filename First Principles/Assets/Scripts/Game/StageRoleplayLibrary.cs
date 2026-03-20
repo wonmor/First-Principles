@@ -94,8 +94,10 @@ public static class StageRoleplayLibrary
         // 40
         "<b>Shield monk.</b> Re-entry trades dynamic pressure against velocity cubed in campfire tales. The envelope relaxes: breathe as ρ and V forgive you.",
         // 41
-        "<b>Puzzle duelist.</b> ln invites concavity duels and bound tricks—tangents lie kindly below the curve. Contest math rewards impolite inequalities made polite.",
+        "<b>Equities ghost.</b> You ride a stylized dot-com decade—run-up, vertigo, air pocket—where every slope is a headline and second derivative feels like sentiment flipping overnight.",
         // 42
+        "<b>Risk officer.</b> The 2008 arc is a cliff masquerading as a bull: crawl the crest, brace for the sheer drop, then learn that recovery is a slow integral, not a bounce.",
+        // 43
         "<b>Fractal exile.</b> Mandelbrot boundary guards escape routes—each iterate is a spell. Step wrong and infinity notices; step right and you pierce a holographic veil."
     };
 

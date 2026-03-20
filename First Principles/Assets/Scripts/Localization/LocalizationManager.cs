@@ -7,7 +7,7 @@ using UnityEngine;
 // -----------------------------------------------------------------------------
 // LocalizationManager — key=value tables under Resources/Localization/{code}.txt
 // -----------------------------------------------------------------------------
-// PlayerPrefs key: fp_language. Codes: en, hi, ur, ar, fr, zh, ko, ja, de, es
+// PlayerPrefs key: fp_language. Codes: en, hi, ur, ar, fr, zh, ko, ja, de, es, it, cs, pl, ru
 // -----------------------------------------------------------------------------
 
 /// <summary>Loads string tables and notifies listeners when the active language changes.</summary>
@@ -16,7 +16,7 @@ public static class LocalizationManager
     public const string PlayerPrefsKey = "fp_language";
 
     /// <summary>Ordered list used by the menu language control and <see cref="CycleNext"/>.</summary>
-    public static readonly string[] LanguageCodes = { "en", "hi", "ur", "ar", "fr", "zh", "ko", "ja", "de", "es" };
+    public static readonly string[] LanguageCodes = { "en", "hi", "ur", "ar", "fr", "zh", "ko", "ja", "de", "es", "it", "cs", "pl", "ru" };
 
     private static readonly Dictionary<string, string> Table = new Dictionary<string, string>(StringComparer.Ordinal);
     private static string _current = "en";
@@ -73,6 +73,14 @@ public static class LocalizationManager
                 return "zh";
             case SystemLanguage.Spanish:
                 return "es";
+            case SystemLanguage.Italian:
+                return "it";
+            case SystemLanguage.Czech:
+                return "cs";
+            case SystemLanguage.Polish:
+                return "pl";
+            case SystemLanguage.Russian:
+                return "ru";
             case SystemLanguage.Arabic:
                 return "ar";
             case SystemLanguage.Hindi:
@@ -103,6 +111,10 @@ public static class LocalizationManager
             case "ja": return "日本語";
             case "de": return "Deutsch";
             case "es": return "Español";
+            case "it": return "Italiano";
+            case "cs": return "Čeština";
+            case "pl": return "Polski";
+            case "ru": return "Русский";
             default: return code;
         }
     }

@@ -14,13 +14,32 @@ public static class SceneCreditsFooter
     public const string CreditsLineDefaultEn =
         "<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>";
 
-    /// <summary>Centered block: version line, then credits when <c>menu.credits_line</c> is non-empty.</summary>
+    public const string SupportContactDefault =
+        "<size=32><color=#94a3b8>Support:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>";
+
+    /// <summary>Centered block: version, credits, support email (<c>menu.support_contact</c>).</summary>
     public static string BuildMenuFooterRichText()
     {
         string ver = LocalizationManager.Get("menu.version_line", HomeFooterDefault);
         string cred = LocalizationManager.Get("menu.credits_line", CreditsLineDefaultEn);
-        if (string.IsNullOrWhiteSpace(cred))
-            return "<align=center>" + ver + "</align>";
-        return "<align=center>" + ver + "\n\n" + cred + "</align>";
+        string sup = LocalizationManager.Get("menu.support_contact", SupportContactDefault);
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append("<align=center>");
+        sb.Append(ver);
+        if (!string.IsNullOrWhiteSpace(cred))
+        {
+            sb.Append("\n\n");
+            sb.Append(cred);
+        }
+
+        if (!string.IsNullOrWhiteSpace(sup))
+        {
+            sb.Append("\n\n");
+            sb.Append(sup);
+        }
+
+        sb.Append("</align>");
+        return sb.ToString();
     }
 }

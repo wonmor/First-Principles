@@ -22,6 +22,7 @@ public class LevelSelectController : MonoBehaviour
     [SerializeField] private Color buttonColor = new Color(0.20f, 0.23f, 0.30f, 0.95f);
 
     private TextMeshProUGUI titleTmp;
+    private TextMeshProUGUI howToPlayTmp;
     private TextMeshProUGUI mathTipsTmp;
     private TextMeshProUGUI backTmp;
     private TextMeshProUGUI levelSelectLangTmp;
@@ -65,11 +66,18 @@ public class LevelSelectController : MonoBehaviour
             }
             else
             {
-                titleTmp.text = LocalizationManager.Get("ui.choose_stage", "Choose a graph stage");
+                titleTmp.text = LocalizationManager.Get("ui.choose_stage", "Select level");
             }
 
             LocalizationManager.ApplyTextDirection(titleTmp);
         }
+
+        if (howToPlayTmp != null)
+        {
+            howToPlayTmp.text = LocalizationManager.Get("menu.tutorial_button", "How to play");
+            LocalizationManager.ApplyTextDirection(howToPlayTmp);
+        }
+
         if (mathTipsTmp != null)
         {
             mathTipsTmp.text = LocalizationManager.Get("ui.math_tips", "Math tips & snippets");
@@ -139,6 +147,16 @@ public class LevelSelectController : MonoBehaviour
         pimg.color = backgroundColor;
         pimg.raycastTarget = true;
 
+        var backdropGo = new GameObject("FallingSymbolsBackdrop");
+        var backdropRt = backdropGo.AddComponent<RectTransform>();
+        backdropRt.SetParent(prt, false);
+        backdropRt.anchorMin = Vector2.zero;
+        backdropRt.anchorMax = Vector2.one;
+        backdropRt.offsetMin = Vector2.zero;
+        backdropRt.offsetMax = Vector2.zero;
+        backdropGo.AddComponent<LevelSelectFallingSymbolsBackdrop>();
+        backdropGo.transform.SetAsFirstSibling();
+
         var titleGo = new GameObject("Title");
         var titleRt = titleGo.AddComponent<RectTransform>();
         titleRt.SetParent(panel.transform, false);
@@ -150,7 +168,7 @@ public class LevelSelectController : MonoBehaviour
         titleRt.anchoredPosition = Vector2.zero;
 
         titleTmp = titleGo.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = LocalizationManager.Get("ui.choose_stage", "Choose a graph stage");
+        titleTmp.text = LocalizationManager.Get("ui.choose_stage", "Select level");
         titleTmp.fontSize = UiTypography.Scale(tablet ? 52 : 46);
         titleTmp.alignment = TextAlignmentOptions.Center;
         titleTmp.color = RuntimeUiPolish.TitleIvory;
@@ -213,7 +231,7 @@ public class LevelSelectController : MonoBehaviour
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        _levelRowHeight = tablet ? 92f : 84f;
+        _levelRowHeight = tablet ? 100f : 92f;
         _levelContentPadVertical = _levelContentVlg.padding.top + _levelContentVlg.padding.bottom;
         _levelContentLayoutElement = contentGo.AddComponent<LayoutElement>();
         _levelContentLayoutElement.minHeight = 400f;
@@ -223,8 +241,9 @@ public class LevelSelectController : MonoBehaviour
         RebuildScrollContent(_levelScroll, contentRt);
         StartCoroutine(FinalizeScrollAfterTmpLayout(_levelScroll, contentRt));
 
-        // Under scroll in hierarchy so the list stays visible; chip sits in the band above scroll (see anchors).
+        // Chips anchored to bottom (Math tips above How to play); create order puts How to play on top in sibling stack.
         CreateMathArticlesButton(panel.transform, canvas.transform);
+        CreateHowToPlayButton(panel.transform, canvas.transform);
 
         CreateBackButton(panel.transform);
     }
@@ -256,18 +275,79 @@ public class LevelSelectController : MonoBehaviour
         RebuildScrollContent(scroll, contentRt);
     }
 
+    private void CreateHowToPlayButton(Transform panelRoot, Transform canvasTransform)
+    {
+        if (GameObject.Find("LevelSelectHowToPlayButton") != null)
+            return;
+
+        var go = new GameObject("LevelSelectHowToPlayButton");
+        var rt = go.AddComponent<RectTransform>();
+        rt.SetParent(panelRoot, false);
+        bool tablet = DeviceLayout.IsTabletLike();
+        // Leave room for bottom-left Back button (see CreateBackButton).
+        float bottomInset = tablet ? 84f : 88f;
+        float howH = tablet ? 64f : 58f;
+        // Bottom-centered — lowest chip (Math tips sits above; see CreateMathArticlesButton).
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.pivot = new Vector2(0.5f, 0f);
+        rt.sizeDelta = new Vector2(tablet ? 620f : 560f, howH);
+        rt.anchoredPosition = new Vector2(0f, bottomInset);
+
+        var img = go.AddComponent<Image>();
+        RuntimeUiPolish.UseRoundedSliced(img);
+        img.color = new Color(0.24f, 0.30f, 0.55f, 0.96f);
+
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = img;
+        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color,
+            Color.Lerp(img.color, Color.white, 0.2f),
+            Color.Lerp(img.color, Color.black, 0.18f));
+        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.26f);
+
+        var textGo = new GameObject("Text");
+        var trt = textGo.AddComponent<RectTransform>();
+        trt.SetParent(go.transform, false);
+        trt.anchorMin = Vector2.zero;
+        trt.anchorMax = Vector2.one;
+        trt.offsetMin = new Vector2(12f, 6f);
+        trt.offsetMax = new Vector2(-12f, -6f);
+
+        howToPlayTmp = textGo.AddComponent<TextMeshProUGUI>();
+        howToPlayTmp.text = LocalizationManager.Get("menu.tutorial_button", "How to play");
+        howToPlayTmp.fontSize = UiTypography.Scale(tablet ? 30 : 27);
+        howToPlayTmp.alignment = TextAlignmentOptions.Center;
+        howToPlayTmp.color = new Color(0.92f, 0.98f, 1f, 1f);
+        howToPlayTmp.textWrappingMode = TextWrappingModes.Normal;
+        howToPlayTmp.overflowMode = TextOverflowModes.Overflow;
+        howToPlayTmp.richText = true;
+        CopyFontFromAny(howToPlayTmp);
+        LocalizationManager.ApplyTextDirection(howToPlayTmp);
+
+        btn.onClick.AddListener(() =>
+        {
+            if (canvasTransform == null)
+                return;
+            MenuTutorialOverlay.Open(canvasTransform);
+        });
+    }
+
     private void CreateMathArticlesButton(Transform panelRoot, Transform canvasTransform)
     {
         var go = new GameObject("MathArticlesButton");
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(panelRoot, false);
         bool tablet = DeviceLayout.IsTabletLike();
-        // Above scroll region (see DeviceLayout.LevelSelectScrollAnchorMax).
-        rt.anchorMin = new Vector2(0.5f, tablet ? 0.84f : 0.83f);
-        rt.anchorMax = new Vector2(0.5f, tablet ? 0.84f : 0.83f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(tablet ? 620f : 560f, tablet ? 68f : 62f);
-        rt.anchoredPosition = Vector2.zero;
+        float bottomInset = tablet ? 84f : 88f;
+        float howH = tablet ? 64f : 58f;
+        float mathH = tablet ? 68f : 62f;
+        float chipGap = 10f;
+        // Bottom band — directly above "How to play".
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.pivot = new Vector2(0.5f, 0f);
+        rt.sizeDelta = new Vector2(tablet ? 620f : 560f, mathH);
+        rt.anchoredPosition = new Vector2(0f, bottomInset + howH + chipGap);
 
         var img = go.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
@@ -313,8 +393,8 @@ public class LevelSelectController : MonoBehaviour
         rt.anchorMin = new Vector2(0f, 1f);
         rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0f, 1f);
-        rt.anchoredPosition = new Vector2(tablet ? 14f : 10f, tablet ? -8f : -6f);
-        rt.sizeDelta = new Vector2(tablet ? 300f : 260f, tablet ? 44f : 40f);
+        rt.anchoredPosition = new Vector2(tablet ? 14f : 10f, tablet ? -10f : -8f);
+        rt.sizeDelta = new Vector2(tablet ? 380f : 340f, tablet ? 64f : 56f);
 
         var img = go.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
@@ -332,14 +412,18 @@ public class LevelSelectController : MonoBehaviour
         trt.SetParent(go.transform, false);
         trt.anchorMin = Vector2.zero;
         trt.anchorMax = Vector2.one;
-        trt.offsetMin = new Vector2(8f, 4f);
-        trt.offsetMax = new Vector2(-8f, -4f);
+        trt.offsetMin = new Vector2(12f, 6f);
+        trt.offsetMax = new Vector2(-12f, -6f);
 
         levelSelectLangTmp = textGo.AddComponent<TextMeshProUGUI>();
-        levelSelectLangTmp.fontSize = UiTypography.Scale(tablet ? 20 : 18);
+        levelSelectLangTmp.enableAutoSizing = true;
+        levelSelectLangTmp.fontSizeMin = Mathf.Max(12, UiTypography.Scale(14));
+        levelSelectLangTmp.fontSizeMax = UiTypography.Scale(tablet ? 26 : 22);
+        levelSelectLangTmp.fontSize = levelSelectLangTmp.fontSizeMax;
         levelSelectLangTmp.alignment = TextAlignmentOptions.Center;
         levelSelectLangTmp.color = new Color(0.93f, 0.96f, 1f, 1f);
         levelSelectLangTmp.textWrappingMode = TextWrappingModes.Normal;
+        levelSelectLangTmp.overflowMode = TextOverflowModes.Overflow;
         CopyFontFromAny(levelSelectLangTmp);
         RefreshLevelSelectLanguageLabel();
     }
@@ -362,8 +446,8 @@ public class LevelSelectController : MonoBehaviour
 
         bool tablet = DeviceLayout.IsTabletLike();
         var le = go.AddComponent<LayoutElement>();
-        le.preferredHeight = tablet ? 92f : 84f;
-        le.minHeight = tablet ? 92f : 84f;
+        le.preferredHeight = tablet ? 100f : 92f;
+        le.minHeight = tablet ? 100f : 92f;
 
         Color bg = backgroundOverride ?? buttonColor;
         var img = go.AddComponent<Image>();
@@ -387,7 +471,12 @@ public class LevelSelectController : MonoBehaviour
 
         var tmp = textGo.AddComponent<TextMeshProUGUI>();
         tmp.text = label;
-        tmp.fontSize = UiTypography.Scale(tablet ? 32 : 30);
+        tmp.textWrappingMode = TextWrappingModes.Normal;
+        tmp.overflowMode = TextOverflowModes.Overflow;
+        tmp.enableAutoSizing = true;
+        tmp.fontSizeMin = Mathf.Max(14, UiTypography.Scale(17));
+        tmp.fontSizeMax = UiTypography.Scale(tablet ? 32 : 30);
+        tmp.fontSize = tmp.fontSizeMax;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(tmp);

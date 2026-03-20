@@ -1,5 +1,5 @@
 # 简体中文
-ui.choose_stage=选择图象关卡
+ui.choose_stage=选择关卡
 ui.math_tips=数学提示摘录
 ui.back_menu=返回菜单
 ui.graphing_calculator_mode=图形计算器
@@ -30,6 +30,7 @@ graph.param_d=D（横向平移）
 graph.calculator_intro=<b>图形计算器模式</b>\n<size=88%>可输入几乎任意 <b>f(u)</b>（式中变量 <b>x</b>）；<b>Trans</b> 调整 A、k、C、D；<b>Scale</b> 与 <b>捏合</b> 缩放窗口。</size>
 menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong（Orch Aerospace）× Rayan Kaissi（GameGenesis）</size>
+menu.support_contact=<size=32><color=#94a3b8>支持：</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
 level.0=第一性原理入门
 level.1=抛物线斜率
 level.2=正弦波动
@@ -71,5 +72,6 @@ level.37=航空：起伏运动 / 阻尼俯仰-沉浮
 level.38=航空：牛顿流 Cp ~ sin²α
 level.39=航空：斯特劳哈尔 / 涡脱落音
 level.40=航空：再入衰减包络（ρV 加热）
-level.41=竞赛数学：ln、凹性与界
-level.42=BOSS：曼德博逃逸截面（分形）
+level.41=经济：互联网泡沫与崩盘（示意指数曲线）
+level.42=经济：2008 危机与复苏（示意指数曲线）
+level.43=BOSS：曼德博逃逸截面（分形）

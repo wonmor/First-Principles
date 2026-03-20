@@ -1,4 +1,4 @@
-# Level stories (fr) — keys story.0 … story.42
+# Level stories (fr) — keys story.0 … story.43
 
 story.0=<color=#c4b5fd><b>Dérivée</b></color> = pente de la tangente : à quelle vitesse <b>f(x)</b> monte ou descend.\n\nLa lumière dorée suit votre chemin ; le bleu glacial est f'(x), qui façonne <i>où le sol tient</i>. Là où |f'| est assez grand, les plateformes portent ; sinon le vide s'ouvre.\n\n<size=88%><color=#94a3b8><b>Mindset « premiers principes » :</b> comme dans les discours Tesla/SpaceX — enlever les analogies jusqu'aux faits, puis reconstruire. Ici <b>f</b> modélise le résultat ; <b>f'</b> montre où un petit changement d'entrée bouge vite la sortie.</color></size>
 story.1=Un voyageur marche quand la pente est douce. Quand la dérivée devient négative, le sol se rétrécit en un vide.
@@ -41,5 +41,6 @@ story.37=<b>Longitudinal avion :</b> modes <color=#7dd3fc>courte période</color
 story.38=<b>Modèle newtonien hypersonique</b> — coefficient ~ <color=#fca5a5>sin²α</color> côté face au vent.\n\n<size=92%><color=#a8b2d1>Vocabulaire calcul pour boucliers thermiques & trajectoires, pas du CFD complet.</color></size>
 story.39=<b>Nombre de Strouhal</b> — f ≈ St·U/D pour l'allée de tourbillons.\n\n<size=92%><color=#a8b2d1>Vibrations, bruit, fatigue — l'onde sinusoïdale trace une sonde idéale.</color></size>
 story.40=<b>Rentrée atmosphérique (qualitatif)</b> — flux thermique ~ ρV³ en ordres de grandeur ; l'enveloppe se <color=#fde047>détend</color> quand ρ↓ et V↓.\n\n<size=92%><color=#a8b2d1>Analogie pédagogique, pas une fiche SpaceX.</color></size>
-story.41=<b>Maths de concours</b> — AMC/AIME : bornes, symétrie, concavité. <color=#fdba74>ln est concave</color> sur (0,∞) : cordes sous le graphe ⇒ inégalités linéaires.\n\n<size=92%><color=#a8b2d1>Vos pieds suivent ln décalé ; f' rappelle 1/x — pas affilié MAA.</color></size>
-story.42=<b>Mandelbrot final</b> — plan <color=#a8b2d1>c</color> coloré par temps d'échappement ; ligne = Re(c) fixe. Courbe verte = coupe en Im(c).\n\n<size=92%><color=#a8b2d1>Cardioïde & bulbes = frontière des ensembles de Julia ; zoom profond = autre moteur. Itérations avec |Im(c)|.</color></size>
+story.41=<b>Bulle internet</b> — trajectoire d'indice stylisée (pas le vrai S&amp;P).\n\n<size=92%><color=#a8b2d1>Montée, trou d'air, reprise lente — allégorie pédagogique.</color></size>
+story.42=<b>Crise 2008</b> — stress crédit & immobilier, courbe qualitative seulement.\n\n<size=92%><color=#a8b2d1>Pas de données réelles — vocabulaire de pente en classe.</color></size>
+story.43=<b>Mandelbrot final</b> — plan <color=#a8b2d1>c</color> coloré par temps d'échappement ; ligne = Re(c) fixe. Courbe verte = coupe en Im(c).\n\n<size=92%><color=#a8b2d1>Cardioïde & bulbes = frontière des ensembles de Julia ; zoom profond = autre moteur. Itérations avec |Im(c)|.</color></size>

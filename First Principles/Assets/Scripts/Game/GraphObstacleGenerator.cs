@@ -39,6 +39,10 @@ public class GraphWorld
 
     public float spawnXGrid;
     public float spawnYTopGrid;
+
+    /// <summary>When true, keeps the avatar inside <see cref="playBounds"/> horizontally and uses them for fall death.</summary>
+    public bool hasPlayBounds;
+    public GameplayPlayBounds playBounds;
 }
 
 /// <summary>
@@ -64,7 +68,13 @@ public class GraphObstacleGenerator : MonoBehaviour
     }
 
     /// <param name="functionPlotter">Required for Riemann stair mode; used to evaluate exact f at sample x.</param>
-    public GraphWorld GenerateWorld(LevelDefinition def, List<Vector2> curvePoints, List<Vector2> derivPoints, FunctionPlotter functionPlotter = null)
+    /// <param name="playBoundsOptional">Inset AABB in grid units; null = full grid, no player hard clamp.</param>
+    public GraphWorld GenerateWorld(
+        LevelDefinition def,
+        List<Vector2> curvePoints,
+        List<Vector2> derivPoints,
+        FunctionPlotter functionPlotter = null,
+        GameplayPlayBounds? playBoundsOptional = null)
     {
         if (obstaclesRoot == null)
         {
@@ -87,6 +97,10 @@ public class GraphObstacleGenerator : MonoBehaviour
         var world = new GraphWorld();
         world.gridSize = gridSize;
 
+        var bounds = playBoundsOptional ?? GameplayPlayBounds.FullGrid(gridSize);
+        world.hasPlayBounds = playBoundsOptional.HasValue;
+        world.playBounds = bounds;
+
         float originY = gridSize.y / 2f;
         float width = gridSize.x;
         var gridOrigin = new Vector2Int(gridSize.x / 2, gridSize.y / 2);
@@ -97,87 +111,66 @@ public class GraphObstacleGenerator : MonoBehaviour
             && functionPlotter != null
             && (def.xEnd - def.xStart) > 1e-6f;
 
-        // Finish zone at the far right.
+        // Finish zone at the far right inside the padded play area.
         float finishWidth = 1f;
-        world.finish = new GridRect(width - finishWidth, width, 0f, gridSize.y);
+        world.finish = new GridRect(Mathf.Max(bounds.XMax - finishWidth, bounds.XMin), bounds.XMax, bounds.YMin, bounds.YMax);
 
         int spawnCol = 0;
         float spawnYTop = float.PositiveInfinity;
         bool spawnChosen = false;
 
-        // Generate columns.
-        for (int col = 0; col < gridSize.x; col++)
+        if (useRiemannStairs)
         {
-            float xSample = col + 0.5f;
-            float xPlotCol = xSample - gridOrigin.x;
-            float xPlotForF = xPlotCol;
-            float xDerivSample = xSample;
-
-            if (useRiemannStairs)
+            BuildRiemannSpacedStairWorld(
+                def,
+                derivPoints,
+                functionPlotter,
+                world,
+                gridOrigin,
+                originY,
+                bounds,
+                ref spawnCol,
+                ref spawnYTop,
+                ref spawnChosen);
+        }
+        else
+        {
+            // Classic column scan: derivative / forced edges decide safe vs hazard; curve sets platform height.
+            for (int col = 0; col < gridSize.x; col++)
             {
-                int n = Mathf.Max(1, def.riemannRectCount);
-                float dx = (def.xEnd - def.xStart) / n;
-                float t = (xPlotCol - def.xStart) / dx;
-                int idx = Mathf.Clamp(Mathf.FloorToInt(t), 0, n - 1);
-                float xL = def.xStart + idx * dx;
-                float xR = def.xStart + (idx + 1) * dx;
-                xPlotForF = def.riemannRule switch
+                float xSample = col + 0.5f;
+                float xDerivSample = xSample;
+
+                bool hasCurve = TrySampleNearestY(curvePoints, xSample, out float yCurve);
+                bool hasDeriv = TrySampleNearestY(derivPoints, xDerivSample, out float yDeriv);
+
+                float dyValue = hasDeriv ? (yDeriv - originY) : float.NegativeInfinity;
+                bool safeByDerivative = hasDeriv && dyValue > def.derivativeSafeThreshold;
+
+                bool forcedSafeStart = col < def.forcePlatformsAtStartColumns;
+                bool forcedSafeEnd = col >= gridSize.x - def.forcePlatformsAtEndColumns;
+                bool safe = safeByDerivative || forcedSafeStart || forcedSafeEnd;
+
+                if (!safe)
                 {
-                    RiemannRule.Left => xL,
-                    RiemannRule.Right => xR,
-                    RiemannRule.Midpoint => 0.5f * (xL + xR),
-                    _ => xPlotCol
-                };
-                xDerivSample = xPlotForF + gridOrigin.x;
-            }
+                    var hazard = new GridRect(col, col + 1f, 0f, def.hazardHeightGrid);
+                    AddHazardClamped(world, def, $"Hazard_{col}", hazard, bounds);
+                    continue;
+                }
 
-            bool hasCurve;
-            float yCurve;
-            if (useRiemannStairs)
-            {
-                float yPlot = functionPlotter.SampleCurvePlotterY(xPlotForF);
-                hasCurve = IsFiniteFloat(yPlot);
-                yCurve = yPlot + gridOrigin.y;
-            }
-            else
-            {
-                hasCurve = TrySampleNearestY(curvePoints, xSample, out yCurve);
-            }
+                float platformTop = hasCurve ? yCurve : originY;
+                platformTop = Mathf.Clamp(platformTop, def.platformThicknessGrid, gridSize.y - 0.01f);
+                float platformBottom = Mathf.Clamp(platformTop - def.platformThicknessGrid, 0f, platformTop);
 
-            bool hasDeriv = TrySampleNearestY(derivPoints, xDerivSample, out float yDeriv);
+                var platform = new GridRect(col, col + 1f, platformBottom, platformTop);
+                AddPlatformClamped(world, def, $"Platform_{col}", platform, bounds);
 
-            float dyValue = hasDeriv ? (yDeriv - originY) : float.NegativeInfinity;
-            bool safeByDerivative = hasDeriv && dyValue > def.derivativeSafeThreshold;
-
-            bool forcedSafeStart = col < def.forcePlatformsAtStartColumns;
-            bool forcedSafeEnd = col >= gridSize.x - def.forcePlatformsAtEndColumns;
-            bool safe = safeByDerivative || forcedSafeStart || forcedSafeEnd;
-
-            // Skip columns that are completely out of range to avoid off-screen platforms.
-            if (!safe)
-            {
-                var hazard = new GridRect(col, col + 1f, 0f, def.hazardHeightGrid);
-                world.hazards.Add(hazard);
-                // Make hazards follow the derivative theme color for stronger readability.
-                CreateRectVisual($"Hazard_{col}", hazard, def.derivativeColor);
-                continue;
-            }
-
-            // Safe platform height based on the curve.
-            float platformTop = hasCurve ? yCurve : originY;
-            platformTop = Mathf.Clamp(platformTop, def.platformThicknessGrid, gridSize.y - 0.01f);
-            float platformBottom = Mathf.Clamp(platformTop - def.platformThicknessGrid, 0f, platformTop);
-
-            var platform = new GridRect(col, col + 1f, platformBottom, platformTop);
-            world.platforms.Add(platform);
-            CreateRectVisual($"Platform_{col}", platform, def.curveColor);
-
-            // Pick the lowest platform among the starting columns so the player doesn't spawn at the top of the graph.
-            if (forcedSafeStart && safe && (!spawnChosen || platformTop < spawnYTop))
-            {
-                spawnCol = col;
-                spawnYTop = platformTop;
-                spawnChosen = true;
+                if (forcedSafeStart && safe && (!spawnChosen || platformTop < spawnYTop))
+                {
+                    spawnCol = col;
+                    spawnYTop = platformTop;
+                    spawnChosen = true;
+                }
             }
         }
 
@@ -196,8 +189,208 @@ public class GraphObstacleGenerator : MonoBehaviour
             spawnYTop = world.platforms[0].yMax;
         world.spawnYTopGrid = spawnYTop;
 
+        if (world.hasPlayBounds)
+        {
+            float hx = 0.5f;
+            world.spawnXGrid = Mathf.Clamp(world.spawnXGrid, bounds.XMin + hx, bounds.XMax - hx);
+            world.spawnYTopGrid = Mathf.Clamp(world.spawnYTopGrid, bounds.YMin + def.platformThicknessGrid * 0.5f, bounds.YMax);
+        }
+
         CreateFinishExitGradient(world.finish);
         return world;
+    }
+
+    private static bool TryClampRectToBounds(GridRect r, GameplayPlayBounds b, out GridRect clipped)
+    {
+        float x0 = Mathf.Max(r.xMin, b.XMin);
+        float x1 = Mathf.Min(r.xMax, b.XMax);
+        float y0 = Mathf.Max(r.yMin, b.YMin);
+        float y1 = Mathf.Min(r.yMax, b.YMax);
+        if (x1 - x0 < 0.03f || y1 - y0 < 0.03f)
+        {
+            clipped = default;
+            return false;
+        }
+
+        clipped = new GridRect(x0, x1, y0, y1);
+        return true;
+    }
+
+    private void AddPlatformClamped(GraphWorld world, LevelDefinition def, string name, GridRect rect, GameplayPlayBounds b)
+    {
+        if (!TryClampRectToBounds(rect, b, out var c))
+            return;
+        world.platforms.Add(c);
+        CreateRectVisual(name, c, def.curveColor);
+    }
+
+    private void AddHazardClamped(GraphWorld world, LevelDefinition def, string name, GridRect rect, GameplayPlayBounds b)
+    {
+        if (!TryClampRectToBounds(rect, b, out var c))
+            return;
+        world.hazards.Add(c);
+        CreateRectVisual(name, c, def.derivativeColor);
+    }
+
+    /// <summary>
+    /// Riemann stair levels: one tread per subinterval, narrowed so gaps stay air; full rectangles
+    /// stay visible via <see cref="RiemannStripRendererUI"/> backdrop.
+    /// </summary>
+    private void BuildRiemannSpacedStairWorld(
+        LevelDefinition def,
+        List<Vector2> derivPoints,
+        FunctionPlotter functionPlotter,
+        GraphWorld world,
+        Vector2Int gridOrigin,
+        float originY,
+        GameplayPlayBounds bounds,
+        ref int spawnCol,
+        ref float spawnYTop,
+        ref bool spawnChosen)
+    {
+        int n = Mathf.Max(1, def.riemannRectCount);
+        float dxPlot = (def.xEnd - def.xStart) / n;
+        float cov = Mathf.Clamp(def.riemannPlatformCoverage, 0.22f, 1f);
+
+        for (int i = 0; i < n; i++)
+        {
+            float xL = def.xStart + i * dxPlot;
+            float xR = def.xStart + (i + 1) * dxPlot;
+            float xS = SampleRiemannSampleX(def.riemannRule, xL, xR);
+            float yPlot = functionPlotter.SampleCurvePlotterY(xS);
+            if (!IsFiniteFloat(yPlot))
+                continue;
+
+            float colL = xL + gridOrigin.x;
+            float colR = xR + gridOrigin.x;
+            float center = 0.5f * (colL + colR);
+            float halfSpan = 0.5f * (colR - colL) * cov;
+            float pMin = Mathf.Clamp(center - halfSpan, 0f, gridSize.x);
+            float pMax = Mathf.Clamp(center + halfSpan, 0f, gridSize.x);
+            if (pMax - pMin < 0.18f)
+                continue;
+
+            float platformTop = yPlot + gridOrigin.y;
+            platformTop = Mathf.Clamp(platformTop, def.platformThicknessGrid, gridSize.y - 0.01f);
+            float platformBottom = Mathf.Clamp(platformTop - def.platformThicknessGrid, 0f, platformTop);
+
+            var plat = new GridRect(pMin, pMax, platformBottom, platformTop);
+            AddPlatformClamped(world, def, $"Platform_Riemann_{i}", plat, bounds);
+        }
+
+        float starterRefTop = float.NaN;
+        foreach (var p in world.platforms)
+        {
+            if (p.xMax <= 0f)
+                continue;
+            if (p.xMin >= def.forcePlatformsAtStartColumns + 4)
+                continue;
+            if (float.IsNaN(starterRefTop) || p.yMax < starterRefTop)
+                starterRefTop = p.yMax;
+        }
+
+        if (float.IsNaN(starterRefTop))
+            starterRefTop = Mathf.Clamp(gridSize.y * 0.24f, def.platformThicknessGrid * 2.5f, gridSize.y * 0.42f);
+
+        for (int col = 0; col < def.forcePlatformsAtStartColumns; col++)
+        {
+            if (ColumnOverlapsAnyPlatform(col, world.platforms))
+                continue;
+
+            float platformTop = Mathf.Clamp(starterRefTop, def.platformThicknessGrid, gridSize.y - 0.01f);
+            float platformBottom = Mathf.Clamp(platformTop - def.platformThicknessGrid, 0f, platformTop);
+            var pad = new GridRect(col, col + 1f, platformBottom, platformTop);
+            AddPlatformClamped(world, def, $"Platform_StartPad_{col}", pad, bounds);
+        }
+
+        float endRefTop = starterRefTop;
+        foreach (var p in world.platforms)
+        {
+            if (p.xMin < gridSize.x - def.forcePlatformsAtEndColumns - 4)
+                continue;
+            endRefTop = Mathf.Max(endRefTop, p.yMax);
+        }
+
+        for (int col = gridSize.x - def.forcePlatformsAtEndColumns; col < gridSize.x; col++)
+        {
+            if (col < 0)
+                continue;
+            if (ColumnOverlapsAnyPlatform(col, world.platforms))
+                continue;
+
+            float platformTop = Mathf.Clamp(endRefTop, def.platformThicknessGrid, gridSize.y - 0.01f);
+            float platformBottom = Mathf.Clamp(platformTop - def.platformThicknessGrid, 0f, platformTop);
+            var pad = new GridRect(col, col + 1f, platformBottom, platformTop);
+            AddPlatformClamped(world, def, $"Platform_EndPad_{col}", pad, bounds);
+        }
+
+        for (int col = 0; col < gridSize.x; col++)
+        {
+            if (col + 1f <= bounds.XMin || col >= bounds.XMax)
+                continue;
+
+            if (ColumnOverlapsAnyPlatform(col, world.platforms))
+                continue;
+
+            float xSample = col + 0.5f;
+            bool hasDeriv = TrySampleNearestY(derivPoints, xSample, out float yDeriv);
+            float dyValue = hasDeriv ? (yDeriv - originY) : float.NegativeInfinity;
+            bool safeByDerivative = hasDeriv && dyValue > def.derivativeSafeThreshold;
+            if (!safeByDerivative)
+            {
+                var hazard = new GridRect(col, col + 1f, 0f, def.hazardHeightGrid);
+                AddHazardClamped(world, def, $"Hazard_{col}", hazard, bounds);
+            }
+        }
+
+        spawnChosen = false;
+        spawnYTop = float.PositiveInfinity;
+        for (int col = 0; col < def.forcePlatformsAtStartColumns; col++)
+        {
+            foreach (var p in world.platforms)
+            {
+                if (!IntervalsOverlap(col, col + 1f, p.xMin, p.xMax))
+                    continue;
+                if (!spawnChosen || p.yMax < spawnYTop)
+                {
+                    spawnChosen = true;
+                    spawnYTop = p.yMax;
+                    spawnCol = col;
+                }
+            }
+        }
+    }
+
+    private static float SampleRiemannSampleX(RiemannRule rule, float xL, float xR)
+    {
+        return rule switch
+        {
+            RiemannRule.Left => xL,
+            RiemannRule.Right => xR,
+            RiemannRule.Midpoint => 0.5f * (xL + xR),
+            _ => 0.5f * (xL + xR)
+        };
+    }
+
+    private static bool IntervalsOverlap(float a0, float a1, float b0, float b1)
+    {
+        return a1 > b0 && a0 < b1;
+    }
+
+    private static bool ColumnOverlapsAnyPlatform(int col, List<GridRect> platforms)
+    {
+        if (platforms == null || platforms.Count == 0)
+            return false;
+        float c0 = col;
+        float c1 = col + 1f;
+        for (int i = 0; i < platforms.Count; i++)
+        {
+            var p = platforms[i];
+            if (c1 > p.xMin && c0 < p.xMax)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -212,7 +405,7 @@ public class GraphObstacleGenerator : MonoBehaviour
         const float fadeWidthGrid = 2.85f;
         float xMax = finishBand.xMax;
         float xMin = Mathf.Max(0f, xMax - fadeWidthGrid);
-        var rect = new GridRect(xMin, xMax, 0f, gridSize.y);
+        var rect = new GridRect(xMin, xMax, finishBand.yMin, finishBand.yMax);
 
         float pxX = rect.xMin * unitWidth;
         float pxY = rect.yMin * unitHeight;
