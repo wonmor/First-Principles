@@ -506,13 +506,15 @@ public class LevelManager : MonoBehaviour
             TightenGraphCalculatorStoryBanner();
         }
 
-        // Keep score on the same panel; hide only STAGE (not meaningful in calculator).
-        if (stageHudText != null)
-            stageHudText.gameObject.SetActive(false);
-        if (scoreHudText != null)
+        // No STAGE / PTS HUD in calculator — hide the whole panel (not platformer scoring).
+        if (stageHudText != null && stageHudText.transform.parent != null)
+            stageHudText.transform.parent.gameObject.SetActive(false);
+        else
         {
-            scoreHudText.gameObject.SetActive(true);
-            RefreshScoreHud();
+            if (stageHudText != null)
+                stageHudText.gameObject.SetActive(false);
+            if (scoreHudText != null)
+                scoreHudText.gameObject.SetActive(false);
         }
 
         functionPlotter.transA = 1f;
@@ -1092,8 +1094,8 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Stage + score share <c>StageHudPanel</c>. Graphing calculator hides only the stage line; platformer needs
-    /// both visible. Other UI can reparent later — re-activate panel + stage and bring HUD forward.
+    /// Stage + score share <c>StageHudPanel</c>. Graphing calculator hides the whole panel; platformer needs
+    /// both lines visible. Other UI can reparent later — re-activate panel + children and bring HUD forward.
     /// </summary>
     private void EnsurePlatformerHudPresentation()
     {
@@ -1105,6 +1107,12 @@ public class LevelManager : MonoBehaviour
             var stagePanel = stageHudText.transform.parent.gameObject;
             stagePanel.SetActive(true);
             stageHudText.gameObject.SetActive(true);
+            if (scoreHudText != null)
+            {
+                scoreHudText.gameObject.SetActive(true);
+                RefreshScoreHud();
+            }
+
             stagePanel.transform.SetAsLastSibling();
         }
     }
