@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Full-screen scroll overlay for <see cref="LearningArticleLibrary"/> — opened from <b>Level select</b>
-/// (<i>Math tips &amp; snippets</i>) or from the <b>Game</b> scene (<i>Math concepts</i>).
+/// (<i>Math tips &amp; snippets</i>, full glossary) or from the <b>Game</b> scene (<i>Math concepts</i>, sections for the current level when the locale article uses <c>@@SECTION=</c> markers).
 /// </summary>
 public static class MathArticlesOverlay
 {
@@ -12,12 +12,17 @@ public static class MathArticlesOverlay
 
     private static TextMeshProUGUI closeButtonTmp;
     private static TextMeshProUGUI articleBodyTmp;
+    /// <summary>Preserves level filter when the article reloads after a language change.</summary>
+    private static int? _articleLevelFilter;
 
     /// <param name="canvasTransform">Usually the scene Canvas; overlay becomes its last sibling.</param>
-    public static void Open(Transform canvasTransform)
+    /// <param name="forGameLevelIndex"><see langword="null"/> = full glossary (level select). Otherwise filtered sections for that level.</param>
+    public static void Open(Transform canvasTransform, int? forGameLevelIndex = null)
     {
         if (canvasTransform == null)
             return;
+
+        _articleLevelFilter = forGameLevelIndex;
 
         var existing = canvasTransform.Find(OverlayName);
         if (existing != null)
@@ -45,6 +50,7 @@ public static class MathArticlesOverlay
 
         void Close()
         {
+            _articleLevelFilter = null;
             LocalizationManager.LanguageChanged -= RefreshArticleBodyGlobal;
             articleBodyTmp = null;
             UnityEngine.Object.Destroy(root);
@@ -200,7 +206,7 @@ public static class MathArticlesOverlay
     {
         if (articleBodyTmp == null)
             return;
-        articleBodyTmp.text = LearningArticleLibrary.GetLevelSelectArticleRichText();
+        articleBodyTmp.text = LearningArticleLibrary.GetArticleRichTextForOverlay(_articleLevelFilter);
         ApplyArticleReadingLayout(articleBodyTmp);
         LocalizationManager.ApplyTextDirection(articleBodyTmp);
         var scroll = articleBodyTmp.GetComponentInParent<ScrollRect>();

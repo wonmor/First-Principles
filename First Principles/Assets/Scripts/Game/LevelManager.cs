@@ -950,7 +950,7 @@ public class LevelManager : MonoBehaviour
         CreateMathConceptsButtonIfNeeded(canvas, equationStyle);
     }
 
-    /// <summary>Top-right control: opens <see cref="MathArticlesOverlay"/> (same body as level-select math tips).</summary>
+    /// <summary>Top-right control: opens <see cref="MathArticlesOverlay"/> with math sections scoped to the current level (full glossary in graphing-calculator mode).</summary>
     private void CreateMathConceptsButtonIfNeeded(Canvas canvas, TextMeshProUGUI equationStyle)
     {
         if (canvas == null || GameObject.Find("MathConceptsButton") != null)
@@ -979,7 +979,8 @@ public class LevelManager : MonoBehaviour
         RuntimeUiPolish.ApplyButtonTransitions(btn, RuntimeUiPolish.AccentTeal,
             Color.Lerp(RuntimeUiPolish.AccentTeal, Color.white, 0.18f),
             Color.Lerp(RuntimeUiPolish.AccentTeal, Color.black, 0.25f));
-        btn.onClick.AddListener(() => MathArticlesOverlay.Open(canvas.transform));
+        btn.onClick.AddListener(() => MathArticlesOverlay.Open(canvas.transform,
+            graphCalculatorMode ? (int?)null : currentLevelIndex));
         RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.3f);
 
         var textGo = new GameObject("Text");
