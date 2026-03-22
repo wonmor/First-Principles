@@ -13,8 +13,6 @@ ui.jump=कूद
 ui.move=चलें
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(कीबोर्ड: तीर / स्पेस)</color></size>
 hud.stage=चरण
-controls.desktop=<color=#7a8399>चलें</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>कूद</color>  <b><color=#ffd978>स्पेस</color></b>
-controls.calculator=<color=#7a8399>ग्राफ़िंग कैलकुलेटर</color>  <b>f(u) लिखें</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>पिंच</b>  ·  <b>वापस</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) जब x>0 · min(x,3)...
 graph.status_enter=Enter / ग्राफ़ के लिए बाहर टैप करें

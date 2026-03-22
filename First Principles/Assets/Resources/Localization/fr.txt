@@ -12,8 +12,6 @@ ui.jump=Saut
 ui.move=Déplacer
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(clavier : flèches / Espace)</color></size>
 hud.stage=NIVEAU
-controls.desktop=<color=#7a8399>Déplacer</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Saut</color>  <b><color=#ffd978>Espace</color></b>
-controls.calculator=<color=#7a8399>Calculatrice graphique</color>  <b>Saisir f(u)</b>  ·  <b>Trans</b>  ·  <b>Échelle</b>  ·  <b>Pincer</b>  ·  <b>Retour</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) si x>0 · min(x,3)...
 graph.status_enter=Entrée / toucher ailleurs pour tracer

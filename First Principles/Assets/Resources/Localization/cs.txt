@@ -25,8 +25,6 @@ ui.jump=Skok
 ui.move=Pohyb
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(klávesnice: šipky / Mezerník)</color></size>
 hud.stage=FÁZE
-controls.desktop=<color=#7a8399>Pohyb</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Skok</color>  <b><color=#ffd978>Mezerník</color></b>
-controls.calculator=<color=#7a8399>Grafická kalkulačka</color>  <b>Zadejte f(u)</b>  ·  <b>Trans</b>  ·  <b>Měřítko</b>  ·  <b>Špetka</b>  ·  <b>Zpět</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) pro x>0 · min(x,3)...
 graph.status_enter=Enter / klepněte mimo pro graf

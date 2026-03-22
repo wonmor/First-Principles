@@ -12,8 +12,6 @@ ui.jump=Saltar
 ui.move=Mover
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(teclado: flechas / Espacio)</color></size>
 hud.stage=FASE
-controls.desktop=<color=#7a8399>Mover</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Saltar</color>  <b><color=#ffd978>Espacio</color></b>
-controls.calculator=<color=#7a8399>Calculadora gráfica</color>  <b>Escribir f(u)</b>  ·  <b>Trans</b>  ·  <b>Escala</b>  ·  <b>Pellizco</b>  ·  <b>Atrás</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) para x>0 · min(x,3)...
 graph.status_enter=Intro / tocar fuera para graficar

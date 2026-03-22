@@ -12,8 +12,6 @@ ui.jump=Sprung
 ui.move=Bewegen
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(Tastatur: Pfeile / Leertaste)</color></size>
 hud.stage=PHASE
-controls.desktop=<color=#7a8399>Bewegen</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Sprung</color>  <b><color=#ffd978>Leertaste</color></b>
-controls.calculator=<color=#7a8399>Grafikrechner</color>  <b>f(u) eingeben</b>  ·  <b>Trans</b>  ·  <b>Maßstab</b>  ·  <b>Pinch</b>  ·  <b>Zurück</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) für x>0 · min(x,3)...
 graph.status_enter=Eingabe / außerhalb tippen zum Zeichnen

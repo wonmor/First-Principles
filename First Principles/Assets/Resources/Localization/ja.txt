@@ -12,8 +12,6 @@ ui.jump=ジャンプ
 ui.move=移動
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（キーボード：矢印／スペース）</color></size>
 hud.stage=ステージ
-controls.desktop=<color=#7a8399>移動</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>ジャンプ</color>  <b><color=#ffd978>スペース</color></b>
-controls.calculator=<color=#7a8399>グラフ電卓</color>  <b>f(u) を入力</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>ピンチ</b>  ·  <b>戻る</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) （x>0）· min(x,3)...
 graph.status_enter=Enter／外側タップでグラフ描画

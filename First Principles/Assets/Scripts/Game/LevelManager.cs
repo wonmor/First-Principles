@@ -55,7 +55,6 @@ public class LevelManager : MonoBehaviour
     private TextMeshProUGUI storyText;
     private TextMeshProUGUI stageHudText;
     private TextMeshProUGUI scoreHudText;
-    private TextMeshProUGUI controlsHintText;
     private int lastStageHudKey = int.MinValue;
     private Sprite cachedHudPanelSprite;
     private float storyMiddlePauseSeconds = 1.65f;
@@ -91,9 +90,6 @@ public class LevelManager : MonoBehaviour
     [Header("Spawn spotlight")]
     [Tooltip("Total time from level ready until controls unlock from spotlight (fade in + hold + fade out).")]
     [SerializeField] private float spawnSpotlightTotalSeconds = 1.5f;
-
-    [Tooltip("Full-screen touch control instructions (mobile only), shown before spawn spotlight.")]
-    [SerializeField] private float mobileControlGuideSeconds = 1.5f;
 
     [Tooltip("Optional; if null, loads Resources/UI_SpotlightDim then Shader.Find.")]
     [SerializeField] private Shader spawnSpotlightShader;
@@ -134,7 +130,6 @@ public class LevelManager : MonoBehaviour
 
     private void OnLocalizationChanged()
     {
-        RefreshControlsHintLocalized();
         RefreshMathConceptsLabelLocalized();
         RefreshStageHudLocalizedForce();
 
@@ -159,30 +154,6 @@ public class LevelManager : MonoBehaviour
 
         if (!graphCalculatorMode)
             RefreshScoreHud();
-    }
-
-    private void RefreshControlsHintLocalized()
-    {
-        if (controlsHintText == null)
-            return;
-
-        if (graphCalculatorMode)
-        {
-            controlsHintText.text = LocalizationManager.Get("controls.calculator",
-                "<color=#7a8399>Graphing calculator</color>  <b>Type f(u)</b>  ·  <b>Deriv</b>  ·  <b>∫</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>Pinch</b>  ·  <b>Back</b>");
-        }
-        else if (DeviceLayout.PreferOnScreenGameControls)
-        {
-            controlsHintText.text = LocalizationManager.Get("controls.mobile",
-                "<color=#7a8399>Move</color>  <b><color=#ffd978>\u25C0 \u25B6</color></b>  <color=#5c6577>\u00b7</color>  <color=#7a8399>Jump</color>  <b><color=#ffd978>tap</color></b>  <size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>");
-        }
-        else
-        {
-            controlsHintText.text = LocalizationManager.Get("controls.desktop",
-                "<color=#7a8399>Move</color>  <b><color=#ffd978>\u2190</color></b>  <b><color=#ffd978>\u2192</color></b>  <color=#5c6577>\u00b7</color>  <color=#7a8399>Jump</color>  <b><color=#ffd978>Space</color></b>");
-        }
-
-        LocalizationManager.ApplyTextDirection(controlsHintText);
     }
 
     private void RefreshMathConceptsLabelLocalized()
@@ -656,8 +627,6 @@ public class LevelManager : MonoBehaviour
         if (calcAnalysis == null)
             calcAnalysis = gameObject.AddComponent<GraphCalculatorAnalysisControls>();
         calcAnalysis.Configure(functionPlotter, riemannRenderer, curveRenderer, equationStyleRef, transRowBottom);
-
-        RefreshControlsHintLocalized();
     }
 
     /// <summary>Trans / Scale labels use the project TMP default font and bold weight in calculator mode.</summary>
@@ -974,50 +943,6 @@ public class LevelManager : MonoBehaviour
         }
 
         CreateMathConceptsButtonIfNeeded(canvas, equationStyle);
-
-        // Build hint for every mode so graphing calculator → platformer does not skip creation on first HUD pass.
-        if (controlsHintText == null)
-        {
-            bool tabletUi = DeviceLayout.IsTabletLike();
-            var barGo = new GameObject("ControlsHintPanel");
-            var barRt = barGo.AddComponent<RectTransform>();
-            var safe = MobileUiRoots.GetSafeContentParent(canvas.transform);
-            barRt.SetParent(safe != null ? safe : canvas.transform, false);
-            barRt.anchorMin = new Vector2(0.5f, 0f);
-            barRt.anchorMax = new Vector2(0.5f, 0f);
-            barRt.pivot = new Vector2(0.5f, 0f);
-            float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset : 22f;
-            barRt.anchoredPosition = new Vector2(0f, up);
-            barRt.sizeDelta = new Vector2(tabletUi ? 900f : 760f, tabletUi ? 60f : 56f);
-
-            var barBg = barGo.AddComponent<Image>();
-            barBg.sprite = panelSprite;
-            barBg.color = new Color(0.08f, 0.09f, 0.13f, 0.85f);
-            barBg.raycastTarget = false;
-            barBg.type = panelSprite != null && panelSprite.border.sqrMagnitude > 0.001f ? Image.Type.Sliced : Image.Type.Simple;
-
-            var textGo = new GameObject("ControlsHint");
-            var textRt = textGo.AddComponent<RectTransform>();
-            textRt.SetParent(barGo.transform, false);
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
-            textRt.offsetMin = new Vector2(20f, 8f);
-            textRt.offsetMax = new Vector2(-20f, -8f);
-
-            var tmp = textGo.AddComponent<TextMeshProUGUI>();
-            tmp.richText = true;
-            tmp.textWrappingMode = TextWrappingModes.Normal;
-            tmp.overflowMode = TextOverflowModes.Overflow;
-            tmp.fontSize = UiTypography.Scale(24);
-            tmp.alignment = TextAlignmentOptions.Midline;
-            tmp.color = new Color(0.82f, 0.85f, 0.92f, 0.92f);
-            tmp.characterSpacing = 0.25f;
-            ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.5f);
-            controlsHintText = tmp;
-            barRt.SetAsLastSibling();
-        }
-
-        RefreshControlsHintLocalized();
     }
 
     /// <summary>Top-right control: opens <see cref="MathArticlesOverlay"/> (same body as level-select math tips).</summary>
@@ -1163,7 +1088,7 @@ public class LevelManager : MonoBehaviour
     /// <summary>
     /// Stage + score live on <c>StageHudPanel</c>; graphing calculator mode deactivates that parent. Other UI
     /// (equation strip, overlays) can also reparent later and steal draw order — re-activate and bring HUD forward
-    /// so stage, PTS, and the bottom controls hint stay visible in platformer mode.
+    /// so stage and PTS stay visible in platformer mode.
     /// </summary>
     private void EnsurePlatformerHudPresentation()
     {
@@ -1175,13 +1100,6 @@ public class LevelManager : MonoBehaviour
             var stagePanel = stageHudText.transform.parent.gameObject;
             stagePanel.SetActive(true);
             stagePanel.transform.SetAsLastSibling();
-        }
-
-        if (controlsHintText != null && controlsHintText.transform.parent != null)
-        {
-            var hintPanel = controlsHintText.transform.parent.gameObject;
-            hintPanel.SetActive(true);
-            hintPanel.transform.SetAsLastSibling();
         }
     }
 
@@ -3026,9 +2944,6 @@ public class LevelManager : MonoBehaviour
         if (showIntro)
             yield return RunEnumerated(RunStageIntroCoroutine(def));
 
-        if (DeviceLayout.PreferOnScreenGameControls && runSpawnSpotlight && playerController != null)
-            yield return RunEnumerated(RunMobileControlGuideRoutine());
-
         if (runSpawnSpotlight && playerController != null)
             yield return RunEnumerated(RunSpawnSpotlightRoutine());
 
@@ -3059,63 +2974,6 @@ public class LevelManager : MonoBehaviour
 
         while (inner.MoveNext())
             yield return inner.Current;
-    }
-
-    /// <summary>
-    /// Mobile: full-screen instruction card before spawn spotlight (input still locked).
-    /// </summary>
-    private IEnumerator RunMobileControlGuideRoutine()
-    {
-        var canvas = FindAnyObjectByType<Canvas>();
-        if (canvas == null)
-            yield break;
-
-        var safe = MobileUiRoots.GetSafeContentParent(canvas.transform) as RectTransform;
-        Transform parent = safe != null ? safe.transform : canvas.transform;
-
-        var go = new GameObject("MobileControlGuideOverlay", typeof(RectTransform));
-        var rt = go.GetComponent<RectTransform>();
-        rt.SetParent(parent, false);
-        rt.SetAsLastSibling();
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-
-        var dim = go.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.05f, 0.12f, 0.92f);
-        dim.raycastTarget = true;
-
-        var textGo = new GameObject("GuideText", typeof(RectTransform));
-        var trt = textGo.GetComponent<RectTransform>();
-        trt.SetParent(go.transform, false);
-        trt.anchorMin = new Vector2(0.06f, 0.12f);
-        trt.anchorMax = new Vector2(0.94f, 0.88f);
-        trt.offsetMin = Vector2.zero;
-        trt.offsetMax = Vector2.zero;
-
-        var tmp = textGo.AddComponent<TextMeshProUGUI>();
-        tmp.richText = true;
-        tmp.textWrappingMode = TextWrappingModes.Normal;
-        tmp.overflowMode = TextOverflowModes.Overflow;
-        tmp.alignment = TextAlignmentOptions.Midline;
-        tmp.fontSize = UiTypography.Scale(DeviceLayout.IsTabletLike() ? 30 : 26);
-        tmp.lineSpacing = 6f;
-        tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
-        tmp.text = TmpLatex.Process(LocalizationManager.Get("controls.guide_overlay",
-            "<b>Touch controls</b>\n\n<b>Left half</b> — hold to move left\n<b>Right half</b> — hold to move right\nWhile holding, <b>tap with another finger</b> — jump\n\n<size=88%><color=#a8b2d1>Keyboard: Arrow keys move · Space jumps</color></size>"));
-        LocalizationManager.ApplyTextDirection(tmp);
-        ApplyPrimaryUiTypography(tmp, FindPrimaryEquationTmp(), outlineWidth: 0.1f, outlineAlpha: 0.42f);
-
-        float dur = Mathf.Max(0.2f, mobileControlGuideSeconds);
-        float t = 0f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
-        Destroy(go);
     }
 
     /// <summary>

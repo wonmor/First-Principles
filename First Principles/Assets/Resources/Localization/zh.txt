@@ -12,8 +12,6 @@ ui.jump=跳跃
 ui.move=移动
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（键盘：方向键 / 空格）</color></size>
 hud.stage=阶段
-controls.desktop=<color=#7a8399>移动</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>跳跃</color>  <b><color=#ffd978>空格</color></b>
-controls.calculator=<color=#7a8399>图形计算器</color>  <b>输入 f(u)</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>双指缩放</b>  ·  <b>返回</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x)（x>0）· min(x,3)...
 graph.status_enter=回车 / 点击外部绘制图象

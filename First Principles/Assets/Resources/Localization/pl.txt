@@ -25,8 +25,6 @@ ui.jump=Skok
 ui.move=Ruch
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(klawiatura: strzałki / Spacja)</color></size>
 hud.stage=ETAP
-controls.desktop=<color=#7a8399>Ruch</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Skok</color>  <b><color=#ffd978>Spacja</color></b>
-controls.calculator=<color=#7a8399>Kalkulator graficzny</color>  <b>Wpisz f(u)</b>  ·  <b>Trans</b>  ·  <b>Skala</b>  ·  <b>Szczyp</b>  ·  <b>Wstecz</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) dla x>0 · min(x,3)...
 graph.status_enter=Enter / dotknij poza pole, aby narysować

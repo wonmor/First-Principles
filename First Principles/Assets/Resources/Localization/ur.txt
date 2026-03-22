@@ -13,8 +13,6 @@ ui.jump=چھلانگ
 ui.move=حرکت
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(کی بورڈ: تیر / اسپیس)</color></size>
 hud.stage=اسٹیج
-controls.desktop=<color=#7a8399>حرکت</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>چھلانگ</color>  <b><color=#ffd978>اسپیس</color></b>
-controls.calculator=<color=#7a8399>گرافنگ کیلکولیٹر</color>  <b>f(u) لکھیں</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>پنچ</b>  ·  <b>واپس</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) جب x>0 · min(x,3)...
 graph.status_enter=Enter / گراف کے لیے باہر تھپتھپائیں

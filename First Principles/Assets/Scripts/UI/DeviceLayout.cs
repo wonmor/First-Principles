@@ -78,12 +78,12 @@ public static class DeviceLayout
     /// <summary>True in Game when we use left/right screen halves + second-finger jump (no ◀ ▶ Jump strip).</summary>
     public static bool GameplayUsesFullScreenTouchZones => PreferOnScreenGameControls;
 
-    /// <summary>Bottom offset for the small controls hint chip (above graph; no virtual bar when zones are on).</summary>
+    /// <summary>Bottom inset for game UI anchored above the safe area (no on-screen controls strip).</summary>
     public static float TouchHintVerticalOffset =>
         !PreferOnScreenGameControls
             ? 22f
             : GameplayUsesFullScreenTouchZones
-                ? (IsTabletLike() ? 118f : 96f)
+                ? (IsTabletLike() ? 28f : 18f)
                 : (IsTabletLike() ? 212f : 188f);
 
     // Leave vertical room for bottom “Math tips” / “How to play” band + back chip.

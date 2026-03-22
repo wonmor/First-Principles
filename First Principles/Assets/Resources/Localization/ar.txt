@@ -12,8 +12,6 @@ ui.jump=قفز
 ui.move=تحرك
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(لوحة المفاتيح: الأسهم / المسافة)</color></size>
 hud.stage=المرحلة
-controls.desktop=<color=#7a8399>تحرك</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>قفز</color>  <b><color=#ffd978>مسافة</color></b>
-controls.calculator=<color=#7a8399>آلة رسومية</color>  <b>اكتب f(u)</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>قرصة</b>  ·  <b>رجوع</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) عندما x>0 · min(x,3)...
 graph.status_enter=Enter / اضغط خارج الحقل للرسم

@@ -30,10 +30,6 @@ ui.move=Move
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
 hud.stage=STAGE
 hud.points=PTS
-controls.mobile=<color=#7a8399>Left</color> <b><color=#ffd978>hold ◀</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Right</color> <b><color=#ffd978>hold ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>2nd finger</color> <b><color=#ffd978>jump</color></b>  <size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
-controls.guide_overlay=<b>Touch controls</b>\n\n<b>Left half</b> — hold to move left\n<b>Right half</b> — hold to move right\nWhile holding, <b>tap with another finger</b> — jump\n\n<size=88%><color=#a8b2d1>Keyboard: Arrow keys move · Space jumps</color></size>
-controls.desktop=<color=#7a8399>Move</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Jump</color>  <b><color=#ffd978>Space</color></b>
-controls.calculator=<color=#7a8399>Graphing calculator</color>  <b>Type f(u)</b>  ·  <b>Deriv</b>  ·  <b>∫</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>Pinch</b>  ·  <b>Back</b>
 graph.calc_deriv=Deriv
 graph.calc_integral=∫ area
 graph.calc_primitive_prefix=Primitive (guess):

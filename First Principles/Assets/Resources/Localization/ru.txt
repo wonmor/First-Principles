@@ -25,8 +25,6 @@ ui.jump=Прыжок
 ui.move=Движение
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(клавиатура: стрелки / Пробел)</color></size>
 hud.stage=ЭТАП
-controls.desktop=<color=#7a8399>Движение</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Прыжок</color>  <b><color=#ffd978>Пробел</color></b>
-controls.calculator=<color=#7a8399>Граф. калькулятор</color>  <b>Ввод f(u)</b>  ·  <b>Транс</b>  ·  <b>Масштаб</b>  ·  <b>Щипок</b>  ·  <b>Назад</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) при x>0 · min(x,3)...
 graph.status_enter=Enter / тап вне поля для графика

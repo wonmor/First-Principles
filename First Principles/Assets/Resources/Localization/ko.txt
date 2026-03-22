@@ -30,8 +30,6 @@ ui.jump=점프
 ui.move=이동
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(키보드: 방향키 / 스페이스)</color></size>
 hud.stage=스테이지
-controls.desktop=<color=#7a8399>이동</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>점프</color>  <b><color=#ffd978>스페이스</color></b>
-controls.calculator=<color=#7a8399>그래프 계산기</color>  <b>f(u) 입력</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>핀치</b>  ·  <b>뒤로</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) (x>0) · min(x,3)...
 graph.status_enter=Enter / 바깥 탭으로 그래프

@@ -25,8 +25,6 @@ ui.jump=Salta
 ui.move=Muoviti
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(tastiera: frecce / Spazio)</color></size>
 hud.stage=STADIO
-controls.desktop=<color=#7a8399>Muoviti</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Salta</color>  <b><color=#ffd978>Spazio</color></b>
-controls.calculator=<color=#7a8399>Calcolatrice grafica</color>  <b>Digita f(u)</b>  ·  <b>Trasf</b>  ·  <b>Scala</b>  ·  <b>Pizzica</b>  ·  <b>Indietro</b>
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x) · ln(x) per x>0 · min(x,3)...
 graph.status_enter=Invio / tocca fuori per tracciare
