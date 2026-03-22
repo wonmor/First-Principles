@@ -152,8 +152,7 @@ public class LevelManager : MonoBehaviour
         else if (levels.Count > 0 && currentLevelIndex >= 0 && currentLevelIndex < levels.Count)
             RefreshStoryBannerForCurrentMode(levels[currentLevelIndex]);
 
-        if (!graphCalculatorMode)
-            RefreshScoreHud();
+        RefreshScoreHud();
     }
 
     private void RefreshMathConceptsLabelLocalized()
@@ -507,8 +506,14 @@ public class LevelManager : MonoBehaviour
             TightenGraphCalculatorStoryBanner();
         }
 
-        if (stageHudText != null && stageHudText.transform.parent != null)
-            stageHudText.transform.parent.gameObject.SetActive(false);
+        // Keep score on the same panel; hide only STAGE (not meaningful in calculator).
+        if (stageHudText != null)
+            stageHudText.gameObject.SetActive(false);
+        if (scoreHudText != null)
+        {
+            scoreHudText.gameObject.SetActive(true);
+            RefreshScoreHud();
+        }
 
         functionPlotter.transA = 1f;
         functionPlotter.transK = 1f;
@@ -1086,9 +1091,8 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Stage + score live on <c>StageHudPanel</c>; graphing calculator mode deactivates that parent. Other UI
-    /// (equation strip, overlays) can also reparent later and steal draw order — re-activate and bring HUD forward
-    /// so stage and PTS stay visible in platformer mode.
+    /// Stage + score share <c>StageHudPanel</c>. Graphing calculator hides only the stage line; platformer needs
+    /// both visible. Other UI can reparent later — re-activate panel + stage and bring HUD forward.
     /// </summary>
     private void EnsurePlatformerHudPresentation()
     {
@@ -1099,6 +1103,7 @@ public class LevelManager : MonoBehaviour
         {
             var stagePanel = stageHudText.transform.parent.gameObject;
             stagePanel.SetActive(true);
+            stageHudText.gameObject.SetActive(true);
             stagePanel.transform.SetAsLastSibling();
         }
     }
