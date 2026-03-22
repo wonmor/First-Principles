@@ -316,6 +316,7 @@ public class LevelManager : MonoBehaviour
         {
             FitCartesianPlaneForGameplay();
             SyncGameplayLayoutToCartesianPlane();
+            EnsurePlatformerHudPresentation();
         }
     }
 
@@ -1013,6 +1014,7 @@ public class LevelManager : MonoBehaviour
             tmp.characterSpacing = 0.25f;
             ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.5f);
             controlsHintText = tmp;
+            barRt.SetAsLastSibling();
         }
 
         RefreshControlsHintLocalized();
@@ -1156,6 +1158,31 @@ public class LevelManager : MonoBehaviour
         scoreHudText.text =
             $"<color=#9aa3b8><size=78%><b>{label}</b></size></color>\n<b><color=#fde68a>{gameplayScore}</color></b>";
         LocalizationManager.ApplyTextDirection(scoreHudText);
+    }
+
+    /// <summary>
+    /// Stage + score live on <c>StageHudPanel</c>; graphing calculator mode deactivates that parent. Other UI
+    /// (equation strip, overlays) can also reparent later and steal draw order — re-activate and bring HUD forward
+    /// so stage, PTS, and the bottom controls hint stay visible in platformer mode.
+    /// </summary>
+    private void EnsurePlatformerHudPresentation()
+    {
+        if (graphCalculatorMode)
+            return;
+
+        if (stageHudText != null && stageHudText.transform.parent != null)
+        {
+            var stagePanel = stageHudText.transform.parent.gameObject;
+            stagePanel.SetActive(true);
+            stagePanel.transform.SetAsLastSibling();
+        }
+
+        if (controlsHintText != null && controlsHintText.transform.parent != null)
+        {
+            var hintPanel = controlsHintText.transform.parent.gameObject;
+            hintPanel.SetActive(true);
+            hintPanel.transform.SetAsLastSibling();
+        }
     }
 
     /// <summary>Square / UI sprite for flat panels (falls back to a tiny white sprite so Image always draws).</summary>
@@ -3013,6 +3040,7 @@ public class LevelManager : MonoBehaviour
         }
 
         EnsureGameplayTouchZonesAfterLevelReady();
+        EnsurePlatformerHudPresentation();
 
         if (storyText != null)
         {
