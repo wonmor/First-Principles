@@ -393,11 +393,12 @@ public class FunctionPlotter : MonoBehaviour
             }
         }
 
-        // Boss: show classic Mandelbrot set in c-plane behind the grid (1D slice curve on top).
+        // Boss backdrops: Mandelbrot c-plane; Schwarzschild-style black hole (GPU shader).
         if (lineRenderer != null)
         {
             var gridRt = lineRenderer.transform.parent as RectTransform;
             MandelbrotFractalBackdrop.Sync(gridRt, this);
+            BlackHoleGargantuaBackdrop.Sync(gridRt, this);
             PushGraphRevealToRenderers();
         }
     }
