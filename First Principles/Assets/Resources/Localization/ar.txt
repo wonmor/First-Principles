@@ -21,7 +21,7 @@ graph.status_graphed=<color=#8fd9b3>تم الرسم</color>
 graph.line1=<b>وضع آلة الرسوم البيانية</b>
 graph.line2=<size=88%><color=#c4d0e8>اكتب <b>f(u)</b> أدناه (المتغير <b>x</b> في المربع = u الداخلي). ثم:</color></size>
 graph.line3=<size=92%><b>Trans</b> ← {0} · نقرتان <b>+</b> · اضغط مطولًا <b>−</b> · <b>Scale</b> تكبير باللمس / اضغط مطولًا للتصغير · <b>قرصة</b> بإصبعين</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0} &nbsp;k={1} &nbsp;C={2} &nbsp;D={3} &nbsp;&nbsp;x في [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x في [{4},{5}]</color></size>
 graph.param_a=A (مقياس عمودي)
 graph.param_k=k (مقياس أفقي)
 graph.param_c=C (إزاحة عمودية)

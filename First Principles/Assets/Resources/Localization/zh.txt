@@ -21,7 +21,7 @@ graph.status_graphed=<color=#8fd9b3>已绘制</color>
 graph.line1=<b>图形计算器模式</b>
 graph.line2=<size=88%><color=#c4d0e8>在下方输入 <b>f(u)</b>（框内变量 <b>x</b> 为内层 u）。然后：</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} · 双击 <b>+</b> · 长按 <b>−</b> · <b>Scale</b> 点按放大 / 长按缩小 · 双指 <b>捏合</b></size>
-graph.line4=<size=88%><color=#a8b2d1>A={0} &nbsp;k={1} &nbsp;C={2} &nbsp;D={3} &nbsp;&nbsp;x 在 [{4},{5}] 内</color></size>
+graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x 在 [{4},{5}] 内</color></size>
 graph.param_a=A（纵向缩放）
 graph.param_k=k（横向缩放）
 graph.param_c=C（纵向平移）

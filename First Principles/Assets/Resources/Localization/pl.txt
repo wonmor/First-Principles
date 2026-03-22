@@ -34,7 +34,7 @@ graph.status_graphed=<color=#8fd9b3>Narysowano</color>
 graph.line1=<b>Tryb kalkulatora graficznego</b>
 graph.line2=<size=88%><color=#c4d0e8>Wpisz <b>f(u)</b> poniżej (zmienna <b>x</b> w polu = wewnętrzne u). Potem:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} · podwójne dotknięcie <b>+</b> · przytrzymaj <b>−</b> · <b>Skala</b> przybliż / przytrzymaj oddal · <b>szczyp</b> dwoma palcami</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0} &nbsp;k={1} &nbsp;C={2} &nbsp;D={3} &nbsp;&nbsp;x w [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x w [{4},{5}]</color></size>
 graph.param_a=A (skala pionowa)
 graph.param_k=k (skala pozioma)
 graph.param_c=C (przesunięcie pionowe)

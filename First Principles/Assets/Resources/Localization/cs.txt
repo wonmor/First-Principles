@@ -34,7 +34,7 @@ graph.status_graphed=<color=#8fd9b3>Vykresleno</color>
 graph.line1=<b>Režim grafické kalkulačky</b>
 graph.line2=<size=88%><color=#c4d0e8>Napište <b>f(u)</b> níže (proměnná <b>x</b> v poli = vnitřní u). Pak:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} · dvojité klepnutí <b>+</b> · podržte <b>−</b> · <b>Měřítko</b> přiblížení / podržte oddálení · <b>špetka</b> dvěma prsty</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0} &nbsp;k={1} &nbsp;C={2} &nbsp;D={3} &nbsp;&nbsp;x v [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x v [{4},{5}]</color></size>
 graph.param_a=A (svislé měřítko)
 graph.param_k=k (vodorovné měřítko)
 graph.param_c=C (svislý posun)

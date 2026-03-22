@@ -34,7 +34,7 @@ graph.status_graphed=<color=#8fd9b3>Построено</color>
 graph.line1=<b>Режим графического калькулятора</b>
 graph.line2=<size=88%><color=#c4d0e8>Введите <b>f(u)</b> ниже (переменная <b>x</b> в поле = внутреннее u). Затем:</color></size>
 graph.line3=<size=92%><b>Транс</b> → {0} · двойной тап <b>+</b> · удерживайте <b>−</b> · <b>Масштаб</b> увеличить / удерживайте уменьшить · <b>щипок</b> двумя пальцами</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0} &nbsp;k={1} &nbsp;C={2} &nbsp;D={3} &nbsp;&nbsp;x ∈ [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
 graph.param_a=A (вертикальный масштаб)
 graph.param_k=k (горизонтальный масштаб)
 graph.param_c=C (вертикальный сдвиг)

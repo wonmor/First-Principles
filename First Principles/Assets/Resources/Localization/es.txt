@@ -21,7 +21,7 @@ graph.status_graphed=<color=#8fd9b3>Graficado</color>
 graph.line1=<b>Modo calculadora gráfica</b>
 graph.line2=<size=88%><color=#c4d0e8>Escribe <b>f(u)</b> abajo (la variable <b>x</b> en el cuadro = u interior). Luego:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} · doble toque <b>+</b> · mantén <b>−</b> · <b>Escala</b> acercar / mantén alejar · <b>pellizco</b> con dos dedos</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0} &nbsp;k={1} &nbsp;C={2} &nbsp;D={3} &nbsp;&nbsp;x en [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x en [{4},{5}]</color></size>
 graph.param_a=A (escala vertical)
 graph.param_k=k (escala horizontal)
 graph.param_c=C (desplazamiento vertical)
