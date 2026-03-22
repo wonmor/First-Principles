@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// Central place for **screen-dependent layout policy** used by HUD, level select, touch bar, CanvasScaler tuning.
 /// <list type="bullet">
-/// <item><description><see cref="PreferOnScreenGameControls"/> — show touch gameplay chrome.</description></item>
+/// <item><description><see cref="PreferOnScreenGameControls"/> — use full-screen touch zones + guide (no virtual button strip).</description></item>
 /// <item><description><see cref="IsTabletLike"/> — dp-based; avoids treating phones as tablets.</description></item>
 /// <item><description><see cref="ApplySafeAreaAnchors"/> — normalized <see cref="Screen.safeArea"/> → RectTransform anchors.</description></item>
 /// </list>
@@ -75,7 +75,16 @@ public static class DeviceLayout
 
     public static float TouchControlBarHeight => IsTabletLike() ? 188f : 168f;
 
-    public static float TouchHintVerticalOffset => IsTabletLike() ? 212f : 188f;
+    /// <summary>True in Game when we use left/right screen halves + swipe (no ◀ ▶ Jump strip).</summary>
+    public static bool GameplayUsesFullScreenTouchZones => PreferOnScreenGameControls;
+
+    /// <summary>Bottom offset for the small controls hint chip (above graph; no virtual bar when zones are on).</summary>
+    public static float TouchHintVerticalOffset =>
+        !PreferOnScreenGameControls
+            ? 22f
+            : GameplayUsesFullScreenTouchZones
+                ? (IsTabletLike() ? 118f : 96f)
+                : (IsTabletLike() ? 212f : 188f);
 
     // Leave vertical room for bottom “Math tips” / “How to play” band + back chip.
     public static Vector2 LevelSelectScrollAnchorMin =>

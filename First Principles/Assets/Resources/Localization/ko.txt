@@ -17,6 +17,7 @@ level_select.cat.finale=심화 & 보스
 level_select.cat.transforms=변환
 level_select.cat.final_boss=최종 보스
 level_select.cat.spring_physics=스프링·단진동
+level_select.cat.big_o=빅오 표기법
 ui.math_tips=수학 팁 모음
 ui.back_menu=메뉴로
 ui.graphing_calculator_mode=그래프 계산기
@@ -29,7 +30,6 @@ ui.jump=점프
 ui.move=이동
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(키보드: 방향키 / 스페이스)</color></size>
 hud.stage=스테이지
-controls.mobile=<color=#7a8399>이동</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>점프</color>  <b><color=#ffd978>탭</color></b>  <size=90%><color=#5c6577>(키보드: 방향키 / 스페이스)</color></size>
 controls.desktop=<color=#7a8399>이동</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>점프</color>  <b><color=#ffd978>스페이스</color></b>
 controls.calculator=<color=#7a8399>그래프 계산기</color>  <b>f(u) 입력</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>핀치</b>  ·  <b>뒤로</b>
 graph.label_fu=f(u) =
@@ -98,5 +98,14 @@ level.45=보스: 황금비 나선 (로그 극좌표)
 level.46=변환: 푸리에 — sinc 스펙트럼
 level.47=변환: 라플라스 — 지수 감쇠
 level.48=보스: 만델브로 — 피날레 (프랙탈 탈출 단면)
-level.49=보스: 로렌츠 나비 — 피날레 (이상한 끌개)
-level.50=물리 C: 스프링–질점 SHM (훅의 법칙, 비감쇠)
+level.49=보스: 로렌츠 어트랙터 — 카오스 이론 (이상한 끌개)
+level.50=보스: 블랙홀 — 중력 우물 (1/r 단면)
+level.51=물리 C: 스프링–질점 SHM (훅의 법칙, 비감쇠)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

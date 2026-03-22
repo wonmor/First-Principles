@@ -12,7 +12,6 @@ ui.jump=قفز
 ui.move=تحرك
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(لوحة المفاتيح: الأسهم / المسافة)</color></size>
 hud.stage=المرحلة
-controls.mobile=<color=#7a8399>تحرك</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>قفز</color>  <b><color=#ffd978>مس</color></b>  <size=90%><color=#5c6577>(لوحة المفاتيح: الأسهم / المسافة)</color></size>
 controls.desktop=<color=#7a8399>تحرك</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>قفز</color>  <b><color=#ffd978>مسافة</color></b>
 controls.calculator=<color=#7a8399>آلة رسومية</color>  <b>اكتب f(u)</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>قرصة</b>  ·  <b>رجوع</b>
 graph.label_fu=f(u) =
@@ -80,5 +79,14 @@ level.45=زعيم: لولب النسبة الذهبية (قطبي لوغاريت
 level.46=تحويلات: فورييه — طيف sinc
 level.47=تحويلات: لابلاس — تضاؤل أسي
 level.48=زعيم: ماندلبروت — الختام (شريحة هروب كسيرية)
-level.49=زعيم: فراشة لورينز — الختام (جذاب غريب)
-level.50=فيزياء C: نابض–كتلة حركة توافقية (قانون هوك، بلا تخميد)
+level.49=زعيم: جاذب لورينز — نظرية الفوضى (جذاب غريب)
+level.50=زعيم: ثقب أسود — بئر جاذبية (مقطع 1/r)
+level.51=فيزياء C: نابض–كتلة حركة توافقية (قانون هوك، بلا تخميد)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

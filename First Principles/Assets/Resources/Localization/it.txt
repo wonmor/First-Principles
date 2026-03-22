@@ -11,6 +11,7 @@ level_select.cat.finale=Avanzati e boss
 level_select.cat.transforms=Trasformate
 level_select.cat.final_boss=Boss finale
 level_select.cat.spring_physics=Molla e SHM
+level_select.cat.big_o=Notazione Big O
 ui.math_tips=Suggerimenti di matematica
 ui.back_menu=Torna al menu
 ui.graphing_calculator_mode=Calcolatrice grafica
@@ -24,7 +25,6 @@ ui.jump=Salta
 ui.move=Muoviti
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(tastiera: frecce / Spazio)</color></size>
 hud.stage=STADIO
-controls.mobile=<color=#7a8399>Muoviti</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Salta</color>  <b><color=#ffd978>tocco</color></b>  <size=90%><color=#5c6577>(tastiera: frecce / Spazio)</color></size>
 controls.desktop=<color=#7a8399>Muoviti</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Salta</color>  <b><color=#ffd978>Spazio</color></b>
 controls.calculator=<color=#7a8399>Calcolatrice grafica</color>  <b>Digita f(u)</b>  ·  <b>Trasf</b>  ·  <b>Scala</b>  ·  <b>Pizzica</b>  ·  <b>Indietro</b>
 graph.label_fu=f(u) =
@@ -100,5 +100,14 @@ level.45=BOSS: spirale aurea (polare logaritmica)
 level.46=Trasformate: Fourier — sinc (spettro)
 level.47=Trasformate: Laplace — decadimento esponenziale
 level.48=BOSS: Mandelbrot — finale (sezione escape frattale)
-level.49=BOSS: farfalla di Lorenz — finale (attrattore strano)
-level.50=Fisica C: molla–massa SHM (legge di Hooke, non smorzato)
+level.49=BOSS: attrattore di Lorenz — teoria del caos (attrattore strano)
+level.50=BOSS: buco nero — pozzo gravitazionale (sezione 1/r)
+level.51=Fisica C: molla–massa SHM (legge di Hooke, non smorzato)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

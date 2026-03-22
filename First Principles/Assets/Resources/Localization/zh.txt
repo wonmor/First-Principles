@@ -12,7 +12,6 @@ ui.jump=跳跃
 ui.move=移动
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（键盘：方向键 / 空格）</color></size>
 hud.stage=阶段
-controls.mobile=<color=#7a8399>移动</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>跳跃</color>  <b><color=#ffd978>点按</color></b>  <size=90%><color=#5c6577>（键盘：方向键 / 空格）</color></size>
 controls.desktop=<color=#7a8399>移动</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>跳跃</color>  <b><color=#ffd978>空格</color></b>
 controls.calculator=<color=#7a8399>图形计算器</color>  <b>输入 f(u)</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>双指缩放</b>  ·  <b>返回</b>
 graph.label_fu=f(u) =
@@ -80,5 +79,14 @@ level.45=BOSS：黄金比例螺旋（对数极坐标）
 level.46=变换：傅里叶 — sinc 频谱
 level.47=变换：拉普拉斯 — 指数衰减
 level.48=BOSS：曼德博 — 终章（分形逃逸截面）
-level.49=BOSS：洛伦兹蝴蝶 — 终章（奇异吸引子）
-level.50=物理C：弹簧–质点简谐振动（胡克定律，无阻尼）
+level.49=BOSS：洛伦兹吸引子 — 混沌理论（奇异吸引子）
+level.50=BOSS：黑洞 — 引力势阱（1/r 切片）
+level.51=物理C：弹簧–质点简谐振动（胡克定律，无阻尼）
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

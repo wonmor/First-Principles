@@ -110,9 +110,27 @@ public static class StageRoleplayLibrary
         // 48
         "<b>Fractal exile, encore.</b> You return to Mandelbrot’s coastline for the last word—each iterate still votes on escape, and the boundary remembers every branch you dared to name.",
         // 49
-        "<b>Strange butterfly.</b> Lorenz’s wings beat on a thread of time: the curve you ride is sensitive, restless, forever retuning—small shifts in the unseen become storms in the visible trace.",
+        "<b>Chaos theory.</b> Lorenz’s wings beat on a thread of time: the curve you ride is sensitive, restless, forever retuning—small shifts in the unseen become storms in the visible trace.",
         // 50
-        "<b>Spring cadet.</b> Hooke’s law pulls you home to equilibrium — each crest is stored spring energy, each crossing is the quiet where velocity wins; undamped, the tune never dies, only repeats."
+        "<b>Event horizon clerk.</b> The graph pretends to be a softened well—potential diving toward a point that eats straight lines. Tread the shoulder: steep slopes mean the derivative has opinions.",
+        // 51
+        "<b>Spring cadet.</b> Hooke’s law pulls you home to equilibrium — each crest is stored spring energy, each crossing is the quiet where velocity wins; undamped, the tune never dies, only repeats.",
+        // 52
+        "<b>Constant-time courier.</b> O(1) is the myth that distance doesn’t matter—your path stays level while the input scrolls sideways. Enjoy the flatness; it’s rare in the wild.",
+        // 53
+        "<b>Binary search monk.</b> O(log n) whispers: halve, halve, halve. The curve climbs so politely you almost trust infinite data—almost.",
+        // 54
+        "<b>Root scout.</b> O(√n) is the compromise growth—faster than log, slower than linear. You’re walking a power law with a gentle exponent.",
+        // 55
+        "<b>Linear pilgrim.</b> O(n) is honesty: one pass, proportional work. The ramp doesn’t cheat; it just keeps asking for more steps.",
+        // 56
+        "<b>Sort priest.</b> O(n log n) is the church of merge sorts and balanced trees—more than linear, less than quadratic, forever arguing about constants in the basement.",
+        // 57
+        "<b>Nested-loop detective.</b> O(n²) means someone doubled a walk. Feel the parabola: small n forgives you; large n sends invoices.",
+        // 58
+        "<b>Cubic alchemist.</b> O(n³) is triple trouble—dense, blunt, expensive. The graph rockets to remind you why we invent better algorithms.",
+        // 59
+        "<b>Subset gambler.</b> O(2ⁿ) is the house always winning: every extra unit doubles the shadow workload. Pray for pruning, memoization, or a smaller universe."
     };
 
     /// <summary>Must match <see cref="GameLevelCatalog.LevelCount"/>.</summary>

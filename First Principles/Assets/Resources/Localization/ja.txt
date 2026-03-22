@@ -12,7 +12,6 @@ ui.jump=ジャンプ
 ui.move=移動
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（キーボード：矢印／スペース）</color></size>
 hud.stage=ステージ
-controls.mobile=<color=#7a8399>移動</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>ジャンプ</color>  <b><color=#ffd978>タップ</color></b>  <size=90%><color=#5c6577>（キーボード：矢印／スペース）</color></size>
 controls.desktop=<color=#7a8399>移動</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>ジャンプ</color>  <b><color=#ffd978>スペース</color></b>
 controls.calculator=<color=#7a8399>グラフ電卓</color>  <b>f(u) を入力</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>ピンチ</b>  ·  <b>戻る</b>
 graph.label_fu=f(u) =
@@ -80,5 +79,14 @@ level.45=BOSS：黄金螺旋（対数・極座標）
 level.46=変換：フーリエ — sincスペクトラム
 level.47=変換：ラプラス — 指数減衰
 level.48=BOSS：マンデルブロ — フィナーレ（フラクタル脱出断面）
-level.49=BOSS：ローレンツの蝶 — フィナーレ（ストレンジアトラクター）
-level.50=物理C：ばね–質点の単振動（フックの法則、減衰なし）
+level.49=BOSS：ローレンツアトラクター — カオス理論（ストレンジアトラクター）
+level.50=BOSS：ブラックホール — 重力の井戸（1/r 断面）
+level.51=物理C：ばね–質点の単振動（フックの法則、減衰なし）
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

@@ -256,21 +256,45 @@ public class PlayerControllerUI2D : MonoBehaviour
 
         posGrid = nextPos;
 
-        ClampHorizontalToPlayBounds();
+        ClampPositionToPlayBounds();
 
         TickDerivativeBackgroundTint(dt);
 
         ApplyVisualPosition();
     }
 
-    /// <summary>Hard horizontal limits so the avatar stays over the padded playfield (screen/safe + touch bar).</summary>
-    private void ClampHorizontalToPlayBounds()
+    /// <summary>Hard AABB limits so the avatar stays inside the padded playfield (safe area + touch bar insets).</summary>
+    private void ClampPositionToPlayBounds()
     {
         if (world == null || !world.hasPlayBounds)
             return;
 
         float halfW = playerWidthGrid * 0.5f;
-        posGrid.x = Mathf.Clamp(posGrid.x, world.playBounds.XMin + halfW, world.playBounds.XMax - halfW);
+        float halfH = playerHeightGrid * 0.5f;
+        var b = world.playBounds;
+        posGrid.x = Mathf.Clamp(posGrid.x, b.XMin + halfW, b.XMax - halfW);
+        posGrid.y = Mathf.Clamp(posGrid.y, b.YMin + halfH, b.YMax - halfH);
+    }
+
+    /// <summary>After rotation or Cartesian plane resize: refresh pixel scale, play-bound grid inset, and clamp.</summary>
+    public void ApplyResponsivePlaneLayout(RectTransform plane, Vector2Int gridSize)
+    {
+        if (world == null || plane == null || gridSize.x < 1 || gridSize.y < 1)
+            return;
+
+        float uw = plane.rect.width / gridSize.x;
+        float uh = plane.rect.height / gridSize.y;
+        SetGridToPixelUnits(uw, uh);
+
+        if (world.hasPlayBounds)
+        {
+            world.playBounds = GameplayPlayBounds.Compute(plane, gridSize);
+            world.RefreshFinishFromPlayBounds();
+            SetDeathMinYGrid(world.playBounds.YMin - 0.4f);
+        }
+
+        ClampPositionToPlayBounds();
+        ApplyVisualPosition();
     }
 
     /// <summary>Air jump only while overlapping f′ and not already used until you leave the band.</summary>

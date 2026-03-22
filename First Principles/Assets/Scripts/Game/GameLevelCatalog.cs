@@ -85,8 +85,17 @@ public static class GameLevelCatalog
         "Transforms: Fourier — sinc spectrum (rect ↔ sinc)",
         "Transforms: Laplace — causal exponential decay",
         "BOSS: Mandelbrot — finale (fractal escape slice)",
-        "BOSS: Lorenz butterfly — finale (strange attractor)",
-        "Physics C: spring–mass SHM (Hooke's law, undamped)"
+        "BOSS: Lorenz attractor — Chaos Theory (strange attractor)",
+        "BOSS: Black hole — gravity well (1/r slice)",
+        "Physics C: spring–mass SHM (Hooke's law, undamped)",
+        "Big O: O(1) — constant time",
+        "Big O: O(log n) — logarithmic growth",
+        "Big O: O(√n) — sublinear root growth",
+        "Big O: O(n) — linear growth",
+        "Big O: O(n log n) — n log n growth",
+        "Big O: O(n²) — quadratic growth",
+        "Big O: O(n³) — cubic growth",
+        "Big O: O(2ⁿ) — exponential (base 2)"
     };
 
     public static int LevelCount => DisplayNames.Length;
@@ -103,8 +112,9 @@ public static class GameLevelCatalog
         new LevelSelectCategory("level_select.cat.aerospace", "Aerospace", 34, 40),
         new LevelSelectCategory("level_select.cat.finale", "Advanced & boss", 41, 45),
         new LevelSelectCategory("level_select.cat.transforms", "Transforms", 46, 47),
-        new LevelSelectCategory("level_select.cat.final_boss", "Final boss", 48, 49),
-        new LevelSelectCategory("level_select.cat.spring_physics", "Spring & SHM", 50, 50),
+        new LevelSelectCategory("level_select.cat.spring_physics", "Spring & SHM", 51, 51),
+        new LevelSelectCategory("level_select.cat.big_o", "Big O notation", 52, 59),
+        new LevelSelectCategory("level_select.cat.final_boss", "Final boss", 48, 50),
     };
 
     /// <summary>First index of the contiguous <b>Aerospace:</b> block (must match <see cref="LevelManager"/> sample levels).</summary>

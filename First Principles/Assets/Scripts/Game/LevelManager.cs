@@ -41,6 +41,9 @@ public class LevelManager : MonoBehaviour
     private DerivRendererUI derivRenderer;
     private GridRendererUI gridRenderer;
     private RectTransform cartesianPlaneRect;
+    /// <summary>Scene-authored Cartesian plane size (fallback 1820×980); used to scale down on narrow portrait screens.</summary>
+    private Vector2 _cartesianGameplayDesignSize = new Vector2(1820f, 980f);
+    private Vector2 _lastSyncedCartesianRectSize = new Vector2(-1f, -1f);
 
     private GraphObstacleGenerator obstacleGenerator;
     private PlayerControllerUI2D playerController;
@@ -81,6 +84,9 @@ public class LevelManager : MonoBehaviour
     [Header("Spawn spotlight")]
     [Tooltip("Total time from level ready until controls unlock from spotlight (fade in + hold + fade out).")]
     [SerializeField] private float spawnSpotlightTotalSeconds = 1.5f;
+
+    [Tooltip("Full-screen touch control instructions (mobile only), shown before spawn spotlight.")]
+    [SerializeField] private float mobileControlGuideSeconds = 1.5f;
 
     [Tooltip("Optional; if null, loads Resources/UI_SpotlightDim then Shader.Find.")]
     [SerializeField] private Shader spawnSpotlightShader;
@@ -241,6 +247,13 @@ public class LevelManager : MonoBehaviour
         if (cartesianPlaneRect == null)
             cartesianPlaneRect = curveRenderer.GetComponent<RectTransform>();
 
+        if (cartesianPlaneRect != null)
+        {
+            Vector2 sd = cartesianPlaneRect.sizeDelta;
+            if (sd.sqrMagnitude > 10_000f)
+                _cartesianGameplayDesignSize = sd;
+        }
+
         obstacleGenerator = GetComponent<GraphObstacleGenerator>();
         if (obstacleGenerator == null)
             obstacleGenerator = gameObject.AddComponent<GraphObstacleGenerator>();
@@ -259,7 +272,7 @@ public class LevelManager : MonoBehaviour
         EnsureRiemannRenderer();
         var mainCanvas = FindAnyObjectByType<Canvas>();
         if (mainCanvas != null && !graphCalculatorMode)
-            MobileTouchControls.EnsureForGameCanvas(mainCanvas.transform);
+            GameplayScreenTouchZones.EnsureForGameCanvas(mainCanvas.transform);
 
         // Wire callbacks.
         playerController.SetDeathCallback(RestartCurrentLevel);
@@ -267,6 +280,91 @@ public class LevelManager : MonoBehaviour
         if (derivRenderer != null)
             playerController.BindDerivativeRenderer(derivRenderer);
         ConfigureGameBackButtonDestination();
+
+        if (!graphCalculatorMode)
+            FitCartesianPlaneForGameplay();
+    }
+
+    /// <summary>
+    /// Scales the fixed-design Cartesian plane to fit the grid background (portrait phones, notches, touch HUD).
+    /// </summary>
+    private void FitCartesianPlaneForGameplay()
+    {
+        if (graphCalculatorMode || cartesianPlaneRect == null)
+            return;
+
+        var parent = cartesianPlaneRect.parent as RectTransform;
+        if (parent == null)
+            return;
+
+        float pw = parent.rect.width;
+        float ph = parent.rect.height;
+        if (pw < 2f || ph < 2f)
+            return;
+
+        bool mobile = DeviceLayout.PreferOnScreenGameControls;
+        float hPad = mobile ? 8f : 14f;
+        float topReserve = mobile ? 172f : 138f;
+        float bottomReserve = mobile ? DeviceLayout.TouchHintVerticalOffset + 32f : 70f;
+
+        float maxW = Mathf.Max(64f, pw - hPad * 2f);
+        float maxH = Mathf.Max(64f, ph - topReserve - bottomReserve);
+
+        float baseW = Mathf.Max(1f, _cartesianGameplayDesignSize.x);
+        float baseH = Mathf.Max(1f, _cartesianGameplayDesignSize.y);
+        float s = Mathf.Min(1f, maxW / baseW, maxH / baseH);
+
+        Vector2 newSize = new Vector2(baseW * s, baseH * s);
+        float yNudge = mobile ? (bottomReserve - topReserve) * 0.2f : 0f;
+
+        cartesianPlaneRect.anchorMin = new Vector2(0.5f, 0.5f);
+        cartesianPlaneRect.anchorMax = new Vector2(0.5f, 0.5f);
+        cartesianPlaneRect.pivot = new Vector2(0.5f, 0.5f);
+
+        if ((cartesianPlaneRect.sizeDelta - newSize).sqrMagnitude < 0.25f &&
+            Mathf.Abs(cartesianPlaneRect.anchoredPosition.y - yNudge) < 0.5f)
+            return;
+
+        cartesianPlaneRect.sizeDelta = newSize;
+        cartesianPlaneRect.anchoredPosition = new Vector2(0f, yNudge);
+    }
+
+    private void SyncGameplayLayoutToCartesianPlane()
+    {
+        if (graphCalculatorMode || cartesianPlaneRect == null || gridRenderer == null ||
+            obstacleGenerator == null || playerController == null)
+            return;
+
+        Vector2 sz = cartesianPlaneRect.rect.size;
+        var gridSize = gridRenderer.gridSize;
+
+        if (obstaclesRoot != null)
+        {
+            obstaclesRoot.sizeDelta = sz;
+            float uw = sz.x / gridSize.x;
+            float uh = sz.y / gridSize.y;
+            obstacleGenerator.SetLayout(obstaclesRoot, gridSize, uw, uh);
+            obstacleGenerator.RefreshObstaclePixelLayout();
+        }
+
+        playerController.ApplyResponsivePlaneLayout(cartesianPlaneRect, gridSize);
+    }
+
+    private void LateUpdate()
+    {
+        if (graphCalculatorMode)
+            return;
+        if (cartesianPlaneRect == null || gridRenderer == null || obstacleGenerator == null || playerController == null)
+            return;
+
+        FitCartesianPlaneForGameplay();
+
+        Vector2 sz = cartesianPlaneRect.rect.size;
+        if ((sz - _lastSyncedCartesianRectSize).sqrMagnitude < 0.01f)
+            return;
+
+        _lastSyncedCartesianRectSize = sz;
+        SyncGameplayLayoutToCartesianPlane();
     }
 
     /// <summary>
@@ -369,7 +467,8 @@ public class LevelManager : MonoBehaviour
         functionPlotter.SetEquationExtraSuffix("");
         functionPlotter.SetCustomExpression("x^2");
         functionPlotter.autoScaleVertical = false;
-        functionPlotter.autoScaleHorizontal = false;
+        // Stretch [xStart,xEnd] across the grid so pinch / Scale update _autoMidX/_autoScaleX; axis ticks track (LabelManager).
+        functionPlotter.autoScaleHorizontal = true;
 
         if (curveRenderer != null)
         {
@@ -816,6 +915,11 @@ public class LevelManager : MonoBehaviour
         var tmp = textGo.AddComponent<TextMeshProUGUI>();
         tmp.text = LocalizationManager.Get("ui.math_concepts", "Math concepts");
         tmp.fontSize = UiTypography.Scale(tablet ? 30 : 27);
+        tmp.enableAutoSizing = true;
+        tmp.fontSizeMin = UiTypography.Scale(17);
+        tmp.fontSizeMax = UiTypography.Scale(tablet ? 30 : 27);
+        tmp.textWrappingMode = TextWrappingModes.Normal;
+        tmp.overflowMode = TextOverflowModes.Truncate;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = new Color(0.92f, 0.97f, 1f, 1f);
@@ -2199,8 +2303,8 @@ public class LevelManager : MonoBehaviour
             power: 1,
             baseN: 2,
             story:
-                "<b>True finale — Lorenz butterfly</b> — the <color=#a8b2d1>horizontal axis</color> is a long stretch of <color=#86efac>simulation time</color>; height tracks the classic Lorenz <color=#7dd3fc>x(t)</color> with σ=10, ρ=28, β=8/3.\n\n" +
-                "Watch how the attractor <b>keeps retuning</b>: the same law, sensitive dependence, a path that never quite repeats — the <color=#fda4af>butterfly effect</color> made legible as motion.\n\n" +
+                "<b>True finale — Chaos Theory</b> — the <color=#a8b2d1>horizontal axis</color> is a long stretch of <color=#86efac>simulation time</color>; height tracks the classic Lorenz <color=#7dd3fc>x(t)</color> with σ=10, ρ=28, β=8/3.\n\n" +
+                "Watch how the attractor <b>keeps retuning</b>: the same law, sensitive dependence, a path that never quite repeats — <color=#fda4af>chaos theory</color> made legible as motion.\n\n" +
                 "<size=92%><color=#a8b2d1>Normalized after burn-in so the wings fill your grid; the curve scrolls through phase so the stage feels alive.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
@@ -2212,6 +2316,31 @@ public class LevelManager : MonoBehaviour
             levelXEnd: lorenzBossX1
         ));
 
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[50],
+            FunctionType.PhysicsGravityWellInverseSqrt,
+            curveColor: new Color(0.55f, 0.72f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.45f, 0.35f, 1f),
+            transA: 4.2f,
+            transK: 0.82f,
+            transC: 1.35f,
+            transD: 0.38f,
+            power: 1,
+            baseN: 2,
+            story:
+                "<b>BOSS: Black hole — gravity well</b> — the curve is a <color=#7dd3fc>softened 1/r</color> slice: depth spikes toward the center, then relaxes into a gentle far-field shoulder.\n\n" +
+                "It is a <b>teaching stand-in</b> for how gravitational potential tightens near mass — not a full GR embedding, but the right <color=#fda4af>“falling in”</color> intuition on a 1D graph.\n\n" +
+                "<size=92%><color=#a8b2d1>ε from <b>D</b> keeps the well finite so the derivative game stays fair; ride the rim, respect the steep core.</color></size>",
+            derivativePopTriggerCountOverride: 4,
+            applyGridTheming: true,
+            gridCenter: new Color(0.06f, 0.08f, 0.22f, 0.48f),
+            gridOutside: new Color(0.04f, 0.06f, 0.14f, 0.14f),
+            storyPauseSecondsOverride: 3f,
+            graphStep: 0.1f,
+            levelXStart: -12f,
+            levelXEnd: 12f
+        ));
+
         var springMassColors = new[]
         {
             new Color(0.42f, 0.95f, 0.68f, 1f),
@@ -2220,7 +2349,7 @@ public class LevelManager : MonoBehaviour
         };
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[50],
+            GameLevelCatalog.DisplayNames[51],
             FunctionType.SpringMassUndamped,
             curveColor: new Color(0.38f, 0.92f, 0.74f, 1f),
             derivativeColor: new Color(1f, 0.48f, 0.52f, 1f),
@@ -2243,6 +2372,167 @@ public class LevelManager : MonoBehaviour
             graphStep: 0.085f,
             levelXStart: -14f,
             levelXEnd: 14f
+        ));
+
+        // --- Big O notation (algorithms): u = k(x−D) plays the role of input size n on the graph ---
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[52],
+            FunctionType.Power,
+            curveColor: new Color(0.65f, 0.85f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.78f, 0.45f, 1f),
+            transA: 1.85f,
+            transK: 0.12f,
+            transC: -0.35f,
+            transD: 0f,
+            power: 0,
+            baseN: 2,
+            story:
+                "<b>Big O: O(1)</b> — constant time: the work doesn’t grow with input size. Here <color=#7dd3fc>u⁰ = 1</color>, so height stays flat as <i>u</i> (our stand-in for <i>n</i>) marches.\n\n" +
+                "<size=92%><color=#a8b2d1>Hash lookups and array indexing are classic O(1) <i>when the model fits</i> — the graph is the calm horizontal proof.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.11f,
+            levelXStart: -12f,
+            levelXEnd: 12f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[53],
+            FunctionType.NaturalLog,
+            curveColor: new Color(0.5f, 0.92f, 0.78f, 1f),
+            derivativeColor: new Color(0.98f, 0.55f, 0.82f, 1f),
+            transA: 1.05f,
+            transK: 0.38f,
+            transC: -2.35f,
+            transD: 0f,
+            power: 1,
+            baseN: 2,
+            story:
+                "<b>Big O: O(log n)</b> — each step shrinks the problem by a constant factor (binary search, balanced trees). <color=#86efac>ln u</color> climbs gently forever.\n\n" +
+                "<size=92%><color=#a8b2d1>Domain needs <i>u</i> &gt; 0 — we sample away from zero so the law stays finite on the grid.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.1f,
+            levelXStart: 0.45f,
+            levelXEnd: 16f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[54],
+            FunctionType.SquareRoot,
+            curveColor: new Color(0.72f, 0.78f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.62f, 0.48f, 1f),
+            transA: 1.15f,
+            transK: 0.36f,
+            transC: -2.05f,
+            transD: 0f,
+            power: 1,
+            baseN: 2,
+            story:
+                "<b>Big O: O(√n)</b> — sublinear growth: think nested loops that only walk up to √n, or some number-theory sieves. <color=#7dd3fc>√u</color> bends upward but bows to log in the long run.\n\n" +
+                "<size=92%><color=#a8b2d1>We keep <i>u</i> ≥ 0 so the square root stays real.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.095f,
+            levelXStart: 0f,
+            levelXEnd: 15f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[55],
+            FunctionType.Power,
+            curveColor: new Color(0.55f, 0.9f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.5f, 0.65f, 1f),
+            transA: 0.34f,
+            transK: 0.5f,
+            transC: -2.12f,
+            transD: 0f,
+            power: 1,
+            baseN: 2,
+            story:
+                "<b>Big O: O(n)</b> — scan the input once: summing a list, finding a max, a single loop. <color=#86efac>u¹</color> is the straight-ahead ramp.\n\n" +
+                "<size=92%><color=#a8b2d1>Slope (derivative) stays in the same growth class — still linear in this stylized picture.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.1f,
+            levelXStart: -9f,
+            levelXEnd: 9f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[56],
+            FunctionType.BigONLogN,
+            curveColor: new Color(0.48f, 0.82f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.58f, 0.78f, 1f),
+            transA: 0.22f,
+            transK: 0.48f,
+            transC: -2.45f,
+            transD: 0f,
+            power: 1,
+            baseN: 2,
+            story:
+                "<b>Big O: O(n log n)</b> — the sweet spot for sorting lower bounds (comparison sorts) and many divide steps. <color=#7dd3fc>u ln u</color> pulls away from linear but loses to n².\n\n" +
+                "<size=92%><color=#a8b2d1>We clamp the small‑u end so ln doesn’t sing on zero — same idea as “n big enough” in proofs.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.095f,
+            levelXStart: 0.5f,
+            levelXEnd: 14f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[57],
+            FunctionType.Power,
+            curveColor: new Color(0.6f, 0.72f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.52f, 0.42f, 1f),
+            transA: 0.042f,
+            transK: 0.46f,
+            transC: -2f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Big O: O(n²)</b> — nested loops, many pairwise checks, naive matrix setups. <color=#fda4af>u²</color> accelerates — the derivative warns you early.\n\n" +
+                "<size=92%><color=#a8b2d1>When you see the parabola in complexity class, look for a double walk over data.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.09f,
+            levelXStart: -7.5f,
+            levelXEnd: 7.5f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[58],
+            FunctionType.Power,
+            curveColor: new Color(0.52f, 0.68f, 0.98f, 1f),
+            derivativeColor: new Color(1f, 0.48f, 0.55f, 1f),
+            transA: 0.0055f,
+            transK: 0.34f,
+            transC: -1.55f,
+            transD: 0f,
+            power: 3,
+            baseN: 2,
+            story:
+                "<b>Big O: O(n³)</b> — triple loops, naive Floyd–Warshall mood, dense cubic work. <color=#fbbf24>u³</color> rockets faster than n² — small constants don’t save you forever.\n\n" +
+                "<size=92%><color=#a8b2d1>Good algorithms often <b>avoid</b> this exponent; the graph shows why.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.085f,
+            levelXStart: -6f,
+            levelXEnd: 6f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[59],
+            FunctionType.Exponential,
+            curveColor: new Color(0.58f, 0.95f, 0.72f, 1f),
+            derivativeColor: new Color(1f, 0.45f, 0.88f, 1f),
+            transA: 0.075f,
+            transK: 0.42f,
+            transC: -1.15f,
+            transD: 0f,
+            power: 1,
+            baseN: 2,
+            story:
+                "<b>Big O: O(2ⁿ)</b> — exhaustive subsets, brute-force SAT-ish nightmares. <color=#86efac>2ᵘ</color> explodes; we keep the window modest so the grid survives.\n\n" +
+                "<size=92%><color=#a8b2d1>Memoization, pruning, and smarter structure exist precisely because this curve leaves polite bounds.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            graphStep: 0.11f,
+            levelXStart: -5.5f,
+            levelXEnd: 3.5f
         ));
     }
 
@@ -2498,12 +2788,18 @@ public class LevelManager : MonoBehaviour
         if (showIntro)
             yield return RunEnumerated(RunStageIntroCoroutine(def));
 
+        if (DeviceLayout.PreferOnScreenGameControls && runSpawnSpotlight && playerController != null)
+            yield return RunEnumerated(RunMobileControlGuideRoutine());
+
         if (runSpawnSpotlight && playerController != null)
             yield return RunEnumerated(RunSpawnSpotlightRoutine());
 
         // Match original behaviour: player can move while the top story banner fades.
         if (playerController != null)
+        {
+            MobileInputBridge.ClearTouchRouting();
             playerController.SetInputLocked(false);
+        }
 
         if (storyText != null)
         {
@@ -2522,6 +2818,63 @@ public class LevelManager : MonoBehaviour
 
         while (inner.MoveNext())
             yield return inner.Current;
+    }
+
+    /// <summary>
+    /// Mobile: full-screen instruction card before spawn spotlight (input still locked).
+    /// </summary>
+    private IEnumerator RunMobileControlGuideRoutine()
+    {
+        var canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+            yield break;
+
+        var safe = MobileUiRoots.GetSafeContentParent(canvas.transform) as RectTransform;
+        Transform parent = safe != null ? safe.transform : canvas.transform;
+
+        var go = new GameObject("MobileControlGuideOverlay", typeof(RectTransform));
+        var rt = go.GetComponent<RectTransform>();
+        rt.SetParent(parent, false);
+        rt.SetAsLastSibling();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        var dim = go.AddComponent<Image>();
+        dim.color = new Color(0.04f, 0.05f, 0.12f, 0.92f);
+        dim.raycastTarget = true;
+
+        var textGo = new GameObject("GuideText", typeof(RectTransform));
+        var trt = textGo.GetComponent<RectTransform>();
+        trt.SetParent(go.transform, false);
+        trt.anchorMin = new Vector2(0.06f, 0.12f);
+        trt.anchorMax = new Vector2(0.94f, 0.88f);
+        trt.offsetMin = Vector2.zero;
+        trt.offsetMax = Vector2.zero;
+
+        var tmp = textGo.AddComponent<TextMeshProUGUI>();
+        tmp.richText = true;
+        tmp.textWrappingMode = TextWrappingModes.Normal;
+        tmp.overflowMode = TextOverflowModes.Overflow;
+        tmp.alignment = TextAlignmentOptions.Midline;
+        tmp.fontSize = UiTypography.Scale(DeviceLayout.IsTabletLike() ? 30 : 26);
+        tmp.lineSpacing = 6f;
+        tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
+        tmp.text = TmpLatex.Process(LocalizationManager.Get("controls.guide_overlay",
+            "<b>Touch controls</b>\n\n<b>Left half</b> — hold to move left\n<b>Right half</b> — hold to move right\n<b>Swipe up</b> anywhere — jump\n\n<size=88%><color=#a8b2d1>Keyboard: Arrow keys move · Space jumps</color></size>"));
+        LocalizationManager.ApplyTextDirection(tmp);
+        ApplyPrimaryUiTypography(tmp, FindPrimaryEquationTmp(), outlineWidth: 0.1f, outlineAlpha: 0.42f);
+
+        float dur = Mathf.Max(0.2f, mobileControlGuideSeconds);
+        float t = 0f;
+        while (t < dur)
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        Destroy(go);
     }
 
     /// <summary>
@@ -2840,6 +3193,8 @@ public class LevelManager : MonoBehaviour
         if (obstacleGenerator == null || playerController == null)
             yield break;
 
+        FitCartesianPlaneForGameplay();
+
         var gridSize = gridRenderer.gridSize;
 
         var unitWidth = cartesianPlaneRect.rect.width / (float)gridSize.x;
@@ -2867,8 +3222,11 @@ public class LevelManager : MonoBehaviour
         else
             playerController.SetDeathMinYGrid(deathMinYGrid);
 
+        playerController.SetGridToPixelUnits(unitWidth, unitHeight);
         playerController.SetWorld(world);
         playerController.ResetToSpawn(world, grantStrongFirstGroundJump);
+
+        _lastSyncedCartesianRectSize = cartesianPlaneRect.rect.size;
     }
 
     private IEnumerator FadeStoryTextRoutine()

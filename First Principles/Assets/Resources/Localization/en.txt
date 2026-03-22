@@ -12,6 +12,7 @@ level_select.cat.finale=Advanced & boss
 level_select.cat.transforms=Transforms
 level_select.cat.final_boss=Final boss
 level_select.cat.spring_physics=Spring & SHM
+level_select.cat.big_o=Big O notation
 ui.math_tips=Math tips & snippets
 ui.back_menu=Back to Menu
 ui.graphing_calculator_mode=Graphing\ncalculator
@@ -25,7 +26,8 @@ ui.jump=Jump
 ui.move=Move
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
 hud.stage=STAGE
-controls.mobile=<color=#7a8399>Move</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Jump</color>  <b><color=#ffd978>tap</color></b>  <size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
+controls.mobile=<color=#7a8399>Left</color> <b><color=#ffd978>hold ◀</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Right</color> <b><color=#ffd978>hold ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Swipe up</color> <b><color=#ffd978>jump</color></b>  <size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
+controls.guide_overlay=<b>Touch controls</b>\n\n<b>Left half</b> — hold to move left\n<b>Right half</b> — hold to move right\n<b>Swipe up</b> anywhere — jump\n\n<size=88%><color=#a8b2d1>Keyboard: Arrow keys move · Space jumps</color></size>
 controls.desktop=<color=#7a8399>Move</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Jump</color>  <b><color=#ffd978>Space</color></b>
 controls.calculator=<color=#7a8399>Graphing calculator</color>  <b>Type f(u)</b>  ·  <b>Deriv</b>  ·  <b>∫</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>Pinch</b>  ·  <b>Back</b>
 graph.calc_deriv=Deriv
@@ -112,5 +114,14 @@ level.45=BOSS: golden ratio spiral (logarithmic polar)
 level.46=Transforms: Fourier — sinc spectrum (rect ↔ sinc)
 level.47=Transforms: Laplace — causal exponential decay
 level.48=BOSS: Mandelbrot — finale (fractal escape slice)
-level.49=BOSS: Lorenz butterfly — finale (strange attractor)
-level.50=Physics C: spring–mass SHM (Hooke's law, undamped)
+level.49=BOSS: Lorenz attractor — Chaos Theory (strange attractor)
+level.50=BOSS: Black hole — gravity well (1/r slice)
+level.51=Physics C: spring–mass SHM (Hooke's law, undamped)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

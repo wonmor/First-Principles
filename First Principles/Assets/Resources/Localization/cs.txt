@@ -11,6 +11,7 @@ level_select.cat.finale=Pokročilé a boss
 level_select.cat.transforms=Transformace
 level_select.cat.final_boss=Finální boss
 level_select.cat.spring_physics=Pružina a SHM
+level_select.cat.big_o=Notace Big O
 ui.math_tips=Tipy k matematice
 ui.back_menu=Zpět do menu
 ui.graphing_calculator_mode=Grafická kalkulačka
@@ -24,7 +25,6 @@ ui.jump=Skok
 ui.move=Pohyb
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(klávesnice: šipky / Mezerník)</color></size>
 hud.stage=FÁZE
-controls.mobile=<color=#7a8399>Pohyb</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Skok</color>  <b><color=#ffd978>klepnutí</color></b>  <size=90%><color=#5c6577>(klávesnice: šipky / Mezerník)</color></size>
 controls.desktop=<color=#7a8399>Pohyb</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Skok</color>  <b><color=#ffd978>Mezerník</color></b>
 controls.calculator=<color=#7a8399>Grafická kalkulačka</color>  <b>Zadejte f(u)</b>  ·  <b>Trans</b>  ·  <b>Měřítko</b>  ·  <b>Špetka</b>  ·  <b>Zpět</b>
 graph.label_fu=f(u) =
@@ -100,5 +100,14 @@ level.45=BOSS: zlatá spirála (logaritmická polární)
 level.46=Transformace: Fourier — sinc (spektrum)
 level.47=Transformace: Laplace — exponenciální pokles
 level.48=BOSS: Mandelbrot — finále (fraktálový únikový řez)
-level.49=BOSS: Lorenzův motýl — finále (podivný atraktor)
-level.50=Fyzika C: pružina–hmota SHM (Hookeův zákon, bez tlumení)
+level.49=BOSS: Lorenzův atraktor — teorie chaosu (podivný atraktor)
+level.50=BOSS: černá díra — gravitační jáma (řez ∝ 1/r)
+level.51=Fyzika C: pružina–hmota SHM (Hookeův zákon, bez tlumení)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

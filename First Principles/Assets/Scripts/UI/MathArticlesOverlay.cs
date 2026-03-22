@@ -116,8 +116,9 @@ public static class MathArticlesOverlay
         var scroll = scrollGo.AddComponent<ScrollRect>();
         scroll.horizontal = false;
         scroll.vertical = true;
-        scroll.movementType = ScrollRect.MovementType.Clamped;
-        scroll.scrollSensitivity = tablet ? 40f : 25f;
+        scroll.movementType = ScrollRect.MovementType.Elastic;
+        scroll.elasticity = 0.12f;
+        scroll.scrollSensitivity = DeviceLayout.LevelSelectScrollSensitivity;
 
         var viewportGo = new GameObject("Viewport");
         var viewportRt = viewportGo.AddComponent<RectTransform>();
@@ -144,10 +145,6 @@ public static class MathArticlesOverlay
 
         scroll.content = contentRt;
 
-        var contentSize = contentGo.AddComponent<ContentSizeFitter>();
-        contentSize.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        contentSize.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
         var tmpGo = new GameObject("ArticleText");
         var tmpRt = tmpGo.AddComponent<RectTransform>();
         tmpRt.SetParent(contentRt, false);
@@ -165,22 +162,17 @@ public static class MathArticlesOverlay
         body.alignment = TextAlignmentOptions.TopLeft;
         body.color = new Color(0.92f, 0.93f, 0.96f, 1f);
         body.textWrappingMode = TextWrappingModes.Normal;
+        body.overflowMode = TextOverflowModes.Overflow;
         body.richText = true;
         body.margin = new Vector4(12f, 12f, 12f, 12f);
         CopyFont(body);
         ApplyArticleReadingLayout(body);
 
-        var fitter = tmpGo.AddComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
         var le = tmpGo.AddComponent<LayoutElement>();
         le.minWidth = 1f;
 
-        body.ForceMeshUpdate(true);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
         Canvas.ForceUpdateCanvases();
-        scroll.verticalNormalizedPosition = 1f;
+        SyncArticleScrollLayout(body, scroll);
 
         root.transform.SetAsLastSibling();
     }
@@ -209,11 +201,10 @@ public static class MathArticlesOverlay
         if (articleBodyTmp == null)
             return;
         articleBodyTmp.text = LearningArticleLibrary.GetLevelSelectArticleRichText();
+        ApplyArticleReadingLayout(articleBodyTmp);
         LocalizationManager.ApplyTextDirection(articleBodyTmp);
-        articleBodyTmp.ForceMeshUpdate(true);
-        var contentRt = articleBodyTmp.rectTransform.parent as RectTransform;
-        if (contentRt != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
+        var scroll = articleBodyTmp.GetComponentInParent<ScrollRect>();
+        SyncArticleScrollLayout(articleBodyTmp, scroll);
     }
 
     private static void RefreshArticleBodyAndLayout(Transform overlayRoot)
@@ -229,6 +220,50 @@ public static class MathArticlesOverlay
         var scroll = scrollTr != null ? scrollTr.GetComponent<ScrollRect>() : null;
         if (scroll != null)
             scroll.verticalNormalizedPosition = 1f;
+    }
+
+    /// <summary>
+    /// TMP + layout groups often under-report height; drive content height from <see cref="TMP_Text.GetPreferredValues"/> so the <see cref="ScrollRect"/> can scroll long articles.
+    /// </summary>
+    private static void SyncArticleScrollLayout(TextMeshProUGUI body, ScrollRect scroll)
+    {
+        if (body == null)
+            return;
+
+        body.overflowMode = TextOverflowModes.Overflow;
+        body.enableWordWrapping = true;
+
+        var tmpRt = body.rectTransform;
+        var contentRt = tmpRt.parent as RectTransform;
+        var viewportRt = contentRt != null ? contentRt.parent as RectTransform : null;
+        if (contentRt == null || viewportRt == null)
+            return;
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(viewportRt);
+
+        // Content must be at least viewport-tall so width is valid on first layout pass.
+        float viewportW = Mathf.Max(1f, viewportRt.rect.width);
+        float viewportH = Mathf.Max(1f, viewportRt.rect.height);
+        if (contentRt.sizeDelta.y < viewportH)
+            contentRt.sizeDelta = new Vector2(0f, viewportH);
+
+        Canvas.ForceUpdateCanvases();
+        float innerW = Mathf.Max(48f, contentRt.rect.width - 48f);
+        body.ForceMeshUpdate(true);
+        Vector2 pref = body.GetPreferredValues(innerW, 0f);
+        float textH = Mathf.Max(pref.y, 1f);
+        const float verticalPad = 20f;
+        tmpRt.sizeDelta = new Vector2(-40f, textH);
+        contentRt.sizeDelta = new Vector2(0f, Mathf.Max(viewportH, textH + verticalPad));
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(viewportRt);
+        if (scroll != null)
+        {
+            Canvas.ForceUpdateCanvases();
+            scroll.verticalNormalizedPosition = 1f;
+        }
     }
 
     private static void RefreshCloseLabel()

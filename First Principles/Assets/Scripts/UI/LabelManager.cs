@@ -6,7 +6,7 @@ using TMPro;
 /// Spawns TMP axis labels from <see cref="GridRendererUI"/> extents.
 /// Y-axis numbers track <see cref="FunctionPlotter.AxisTickOffsetToMathY"/> when vertical auto-fit is on.
 /// X-axis numbers track <see cref="FunctionPlotter.AxisTickOffsetToMathX"/> and refresh when the plot window
-/// (zoom / pinch), <b>Trans</b> (<c>k</c>, <c>D</c>), or mode changes — calculator ticks show inner <c>u</c>.
+/// (zoom / pinch), horizontal auto-fit pivots, <b>Trans</b> (<c>k</c>, <c>D</c>), or mode changes — calculator ticks show inner <c>u</c>.
 /// </summary>
 public class LabelManager : MonoBehaviour
 {
@@ -210,6 +210,26 @@ public class LabelManager : MonoBehaviour
                 continue;
             xLabels[i].text = FormatXTick(plotter, _xTickOffsetsFromCenter[i]);
         }
+    }
+
+    /// <summary>
+    /// Re-read tick strings from the current <see cref="FunctionPlotter"/> mapping (e.g. after pinch / Scale in graphing calculator).
+    /// Syncs cached pivots so <see cref="LateUpdate"/> does not lag one frame.
+    /// </summary>
+    public void RefreshAllTickLabels()
+    {
+        var plotter = FindAnyObjectByType<FunctionPlotter>();
+        if (plotter != null)
+        {
+            _lastAutoMid = plotter.VerticalAxisLabelPivot;
+            _lastAutoScale = plotter.VerticalAxisLabelScale;
+            _lastAutoMidX = plotter.HorizontalAxisLabelPivot;
+            _lastAutoScaleX = plotter.HorizontalAxisLabelScale;
+            CacheHorizontalAxisState(plotter);
+        }
+
+        RefreshXAxisLabelText();
+        RefreshYAxisLabelText();
     }
 
     static string FormatXTick(FunctionPlotter plotter, float tickOffsetFromCenter)

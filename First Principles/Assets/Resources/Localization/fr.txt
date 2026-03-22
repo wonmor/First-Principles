@@ -12,7 +12,6 @@ ui.jump=Saut
 ui.move=Déplacer
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(clavier : flèches / Espace)</color></size>
 hud.stage=NIVEAU
-controls.mobile=<color=#7a8399>Déplacer</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Saut</color>  <b><color=#ffd978>tapoter</color></b>  <size=90%><color=#5c6577>(clavier : flèches / Espace)</color></size>
 controls.desktop=<color=#7a8399>Déplacer</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Saut</color>  <b><color=#ffd978>Espace</color></b>
 controls.calculator=<color=#7a8399>Calculatrice graphique</color>  <b>Saisir f(u)</b>  ·  <b>Trans</b>  ·  <b>Échelle</b>  ·  <b>Pincer</b>  ·  <b>Retour</b>
 graph.label_fu=f(u) =
@@ -80,5 +79,14 @@ level.45=BOSS : spirale d’or (polaire logarithmique)
 level.46=Transformations : Fourier — sinc (spectre)
 level.47=Transformations : Laplace — décroissance exponentielle
 level.48=BOSS : Mandelbrot — finale (tranche d’échappement fractale)
-level.49=BOSS : papillon de Lorenz — finale (attracteur étrange)
-level.50=Physique C : ressort–masse SHM (loi de Hooke, non amorti)
+level.49=BOSS : attracteur de Lorenz — théorie du chaos (attracteur étrange)
+level.50=BOSS : trou noir — puits de gravité (tranche 1/r)
+level.51=Physique C : ressort–masse SHM (loi de Hooke, non amorti)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

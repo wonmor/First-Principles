@@ -13,7 +13,6 @@ ui.jump=چھلانگ
 ui.move=حرکت
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(کی بورڈ: تیر / اسپیس)</color></size>
 hud.stage=اسٹیج
-controls.mobile=<color=#7a8399>حرکت</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>چھلانگ</color>  <b><color=#ffd978>تھپتھی</color></b>  <size=90%><color=#5c6577>(کی بورڈ: تیر / اسپیس)</color></size>
 controls.desktop=<color=#7a8399>حرکت</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>چھلانگ</color>  <b><color=#ffd978>اسپیس</color></b>
 controls.calculator=<color=#7a8399>گرافنگ کیلکولیٹر</color>  <b>f(u) لکھیں</b>  ·  <b>Trans</b>  ·  <b>Scale</b>  ·  <b>پنچ</b>  ·  <b>واپس</b>
 graph.label_fu=f(u) =
@@ -82,5 +81,14 @@ level.45=بوس: سنہری تناسب سنئلی (لوگ قطبی)
 level.46=تبدیل: فوریے — سینک سپیکٹرم
 level.47=تبدیل: لاپلاس — نماتی زوال
 level.48=بوس: مینڈلبرو — اختتام (فرکٹل فرار سلائس)
-level.49=بوس: لورینز تیتلی — اختتام (عجیب اٹریکٹر)
-level.50=فزکس C: سپرنگ–عنصر جرم SHM (ہوک کا قانون، ڈیمپنگ کے بغیر)
+level.49=بوس: لورینز اٹریکٹر — کیس تھیوری (عجیب اٹریکٹر)
+level.50=باس: بلیک ہول — کشش ثقل کنواں (1/r سلائس)
+level.51=فزکس C: سپرنگ–عنصر جرم SHM (ہوک کا قانون، ڈیمپنگ کے بغیر)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

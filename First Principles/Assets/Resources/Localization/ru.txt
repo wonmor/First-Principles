@@ -11,6 +11,7 @@ level_select.cat.finale=Сложные и босс
 level_select.cat.transforms=Преобразования
 level_select.cat.final_boss=Финальный босс
 level_select.cat.spring_physics=Пружина и ГС
+level_select.cat.big_o=О-нотация
 ui.math_tips=Советы по математике
 ui.back_menu=В меню
 ui.graphing_calculator_mode=Графический калькулятор
@@ -24,7 +25,6 @@ ui.jump=Прыжок
 ui.move=Движение
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(клавиатура: стрелки / Пробел)</color></size>
 hud.stage=ЭТАП
-controls.mobile=<color=#7a8399>Движение</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Прыжок</color>  <b><color=#ffd978>тап</color></b>  <size=90%><color=#5c6577>(клавиатура: стрелки / Пробел)</color></size>
 controls.desktop=<color=#7a8399>Движение</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Прыжок</color>  <b><color=#ffd978>Пробел</color></b>
 controls.calculator=<color=#7a8399>Граф. калькулятор</color>  <b>Ввод f(u)</b>  ·  <b>Транс</b>  ·  <b>Масштаб</b>  ·  <b>Щипок</b>  ·  <b>Назад</b>
 graph.label_fu=f(u) =
@@ -100,5 +100,14 @@ level.45=БОСС: золотая спираль (логарифмическая
 level.46=Преобразования: Фурье — sinc-спектр
 level.47=Преобразования: Лаплас — затухание
 level.48=БОСС: Мандельброт — финал (фрактальный срез побега)
-level.49=БОСС: эффект бабочки Лоренца — финал (странный аттрактор)
-level.50=Физика C: пружина–масса ГС (закон Гука, без затухания)
+level.49=БОСС: аттрактор Лоренца — теория хаоса (странный аттрактор)
+level.50=БОСС: чёрная дыра — гравитационная яма (сечение 1/r)
+level.51=Физика C: пружина–масса ГС (закон Гука, без затухания)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)

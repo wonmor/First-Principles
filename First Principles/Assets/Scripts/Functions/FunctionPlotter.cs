@@ -131,7 +131,7 @@ public class FunctionPlotter : MonoBehaviour
         }
 
         float dur = Mathf.Max(0.05f, graphRevealDurationSeconds);
-        // Lorenz butterfly already animates via _lorenzPhaseScroll; horizontal alpha reveal uses grid-x and
+        // Lorenz / chaos-theory stage already animates via _lorenzPhaseScroll; horizontal alpha reveal uses grid-x and
         // can zero the whole polyline when revealX sits on gx0 (progress 0 → all vertices faded).
         if (functionType == FunctionType.ChaosLorenzButterflyX)
             _graphRevealT01 = 1f;
@@ -201,6 +201,8 @@ public class FunctionPlotter : MonoBehaviour
 
     public void RefreshDeriv()
     {
+        if (derivRenderer == null)
+            return;
         derivRenderer.enabled = false;
         derivRenderer.enabled = true;
     }
@@ -382,9 +384,13 @@ public class FunctionPlotter : MonoBehaviour
         else if (differentiate == false)
         {
             dPoints.Clear();
-
-            // Refresh ONLY the derivative graph & hide on the UI
-            RefreshDeriv();
+            // Do not call RefreshDeriv() here — it re-enabled the Graphic every frame while stale
+            // points could remain on DerivRendererUI (list is only aliased to dPoints when differentiate is true).
+            if (derivRenderer != null)
+            {
+                derivRenderer.points.Clear();
+                derivRenderer.enabled = false;
+            }
         }
 
         // Boss: show classic Mandelbrot set in c-plane behind the grid (1D slice curve on top).
@@ -591,8 +597,14 @@ public class FunctionPlotter : MonoBehaviour
             FunctionType.TransformFourierSinc => TransformFourierSincY(u, transA, transC),
             FunctionType.TransformLaplaceCausalDecay => TransformLaplaceCausalDecayY(u, transA, transC, baseN),
 
-            // Final boss: Lorenz x(t) slice (normalized), “butterfly” chaotic sensitivity.
+            // Final boss: Lorenz x(t) slice (normalized); chaos theory / sensitive dependence.
             FunctionType.ChaosLorenzButterflyX => ChaosLorenzButterflyYEval(u, transA, transC),
+
+            // Boss: Newtonian-style potential slice Φ ∝ −1/√(r²+ε²) (softened 1/r “gravity well”).
+            FunctionType.PhysicsGravityWellInverseSqrt => GravityWellInverseSqrtY(u, transA, transC, transD),
+
+            // CS / algorithms: growth shape n ln n for n>0 (u plays the role of n on the horizontal axis).
+            FunctionType.BigONLogN => BigONLogNY(u, transA, transC),
 
             _ => 0f
         };
@@ -741,6 +753,19 @@ public class FunctionPlotter : MonoBehaviour
             return float.NaN;
         float t = Mathf.Repeat(u + _lorenzPhaseScroll, tMax);
         return a * LorenzAttractorSamples.SampleNormalizedX(t) + c;
+    }
+
+    static float GravityWellInverseSqrtY(float u, float a, float c, float softFromD)
+    {
+        float eps = Mathf.Max(0.08f, Mathf.Abs(softFromD));
+        float r2 = u * u + eps * eps;
+        return a * (-1f / Mathf.Sqrt(r2)) + c;
+    }
+
+    static float BigONLogNY(float u, float a, float c)
+    {
+        float n = Mathf.Max(u, 0.02f);
+        return a * (n * Mathf.Log(n)) + c;
     }
 
     /// <summary>y = k + √(R² − u²) for |u|≤R; outside domain uses k so samples stay finite (flat shoulder).</summary>
@@ -1026,8 +1051,18 @@ public class FunctionPlotter : MonoBehaviour
             }
             case FunctionType.ChaosLorenzButterflyX:
                 equationText.text =
-                    $@"<b>\(\text{{Butterfly effect}}\)</b> — Lorenz \(x(t)\), \(\sigma=10,\rho=28,\beta=8/3\), \(u={k}(x-{d})\approx t\)\n" +
+                    $@"<b>\(\text{{Chaos theory}}\)</b> — Lorenz \(x(t)\), \(\sigma=10,\rho=28,\beta=8/3\), \(u={k}(x-{d})\approx t\)\n" +
                     $@"<size=88%><color=#a8b2d1>Tiny initial changes diverge on the attractor — this curve is a <b>time slice</b> of that chaos, normalized to read on the grid.</color></size>";
+                break;
+            case FunctionType.PhysicsGravityWellInverseSqrt:
+                equationText.text =
+                    $@"<b>\(\text{{Gravity well}}\)</b> slice \(f \propto -1/\sqrt{{u^{2}+\varepsilon^{2}}}+C,\; u={k}(x-{d}),\; \varepsilon\sim |{d}|\)\n" +
+                    $@"<size=88%><color=#a8b2d1>Softened \(1/r\) potential — steep near the center, flattens away; a readable stand-in for “falling into” a deep well.</color></size>";
+                break;
+            case FunctionType.BigONLogN:
+                equationText.text =
+                    $@"<b>\(O(n\log n)\)</b> growth mood: \(f \propto u\ln u + C,\; u=\max({k}(x-{d}),\text{{small}})\)\n" +
+                    $@"<size=88%><color=#a8b2d1>Classic merge-sort / balanced-tree flavor: work grows a bit faster than linear, slower than quadratic.</color></size>";
                 break;
             case FunctionType.CustomExpression:
             {
@@ -1202,8 +1237,14 @@ public enum FunctionType
     /// <summary>Causal \(H(t)\,e^{-st}\) — Laplace-table exponential decay for \(t\ge 0\); \(s\sim \texttt{baseN}/100\).</summary>
     TransformLaplaceCausalDecay,
 
-    /// <summary>Final boss: Lorenz attractor \(x(t)\) (normalized), butterfly / sensitive dependence visualization.</summary>
-    ChaosLorenzButterflyX
+    /// <summary>Final boss: Lorenz attractor \(x(t)\) (normalized); chaos theory / sensitive dependence visualization.</summary>
+    ChaosLorenzButterflyX,
+
+    /// <summary>Boss: softened \(1/r\) gravitational potential slice (deep well at \(u=0\)).</summary>
+    PhysicsGravityWellInverseSqrt,
+
+    /// <summary>CS: \(O(n\log n)\) growth shape via \(u\ln u\) (positive branch).</summary>
+    BigONLogN
 }
 
 /* 

@@ -12,7 +12,6 @@ ui.jump=Saltar
 ui.move=Mover
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(teclado: flechas / Espacio)</color></size>
 hud.stage=FASE
-controls.mobile=<color=#7a8399>Mover</color>  <b><color=#ffd978>◀ ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Saltar</color>  <b><color=#ffd978>tocar</color></b>  <size=90%><color=#5c6577>(teclado: flechas / Espacio)</color></size>
 controls.desktop=<color=#7a8399>Mover</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Saltar</color>  <b><color=#ffd978>Espacio</color></b>
 controls.calculator=<color=#7a8399>Calculadora gráfica</color>  <b>Escribir f(u)</b>  ·  <b>Trans</b>  ·  <b>Escala</b>  ·  <b>Pellizco</b>  ·  <b>Atrás</b>
 graph.label_fu=f(u) =
@@ -80,5 +79,14 @@ level.45=JEFE: espiral áurea (polar logarítmica)
 level.46=Transformadas: Fourier — sinc (espectro)
 level.47=Transformadas: Laplace — decaimiento exponencial
 level.48=JEFE: Mandelbrot — final (corte de escape fractal)
-level.49=JEFE: mariposa de Lorenz — final (atractor extraño)
-level.50=Física C: resorte–masa SHM (ley de Hooke, sin amortiguación)
+level.49=JEFE: atractor de Lorenz — teoría del caos (atractor extraño)
+level.50=JEFE: agujero negro — pozo gravitatorio (corte 1/r)
+level.51=Física C: resorte–masa SHM (ley de Hooke, sin amortiguación)
+level.52=Big O: O(1) — constant time
+level.53=Big O: O(log n) — logarithmic growth
+level.54=Big O: O(√n) — sublinear root growth
+level.55=Big O: O(n) — linear growth
+level.56=Big O: O(n log n) — n log n growth
+level.57=Big O: O(n²) — quadratic growth
+level.58=Big O: O(n³) — cubic growth
+level.59=Big O: O(2ⁿ) — exponential (base 2)
