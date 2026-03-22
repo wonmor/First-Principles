@@ -20,11 +20,12 @@ public static class MobileInputBridge
         return true;
     }
 
-    /// <summary>Clears swipe/jump queue and axis holds after onboarding overlays or before unlocking control.</summary>
+    /// <summary>Clears jump queue, axis holds, and auxiliary touch ids after overlays or before unlocking control.</summary>
     public static void ClearTouchRouting()
     {
         JumpQueued = false;
         MobileHoldAxis.Clear();
+        GameplayScreenTouchZones.ClearAuxiliaryPointerState();
     }
 }
 

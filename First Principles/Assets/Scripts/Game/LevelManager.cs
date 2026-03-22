@@ -282,7 +282,10 @@ public class LevelManager : MonoBehaviour
         ConfigureGameBackButtonDestination();
 
         if (!graphCalculatorMode)
+        {
             FitCartesianPlaneForGameplay();
+            SyncGameplayLayoutToCartesianPlane();
+        }
     }
 
     /// <summary>
@@ -304,8 +307,22 @@ public class LevelManager : MonoBehaviour
 
         bool mobile = DeviceLayout.PreferOnScreenGameControls;
         float hPad = mobile ? 8f : 14f;
-        float topReserve = mobile ? 172f : 138f;
-        float bottomReserve = mobile ? DeviceLayout.TouchHintVerticalOffset + 32f : 70f;
+        float aspectTall = ph / Mathf.Max(1f, pw);
+        float topReserve;
+        float bottomReserve;
+        if (mobile)
+        {
+            // Portrait height fraction so graph + axes scale together on tall phones (not only TMP labels).
+            float tallBlend = Mathf.Clamp01((aspectTall - 1.35f) / 0.82f);
+            topReserve = Mathf.Clamp(ph * Mathf.Lerp(0.102f, 0.086f, tallBlend), 120f, 205f);
+            float hintFloor = DeviceLayout.TouchHintVerticalOffset + 26f;
+            bottomReserve = Mathf.Clamp(ph * Mathf.Lerp(0.128f, 0.112f, tallBlend), hintFloor, 255f);
+        }
+        else
+        {
+            topReserve = 138f;
+            bottomReserve = 70f;
+        }
 
         float maxW = Mathf.Max(64f, pw - hPad * 2f);
         float maxH = Mathf.Max(64f, ph - topReserve - bottomReserve);
@@ -315,7 +332,7 @@ public class LevelManager : MonoBehaviour
         float s = Mathf.Min(1f, maxW / baseW, maxH / baseH);
 
         Vector2 newSize = new Vector2(baseW * s, baseH * s);
-        float yNudge = mobile ? (bottomReserve - topReserve) * 0.2f : 0f;
+        float yNudge = mobile ? (bottomReserve - topReserve) * 0.18f : 0f;
 
         cartesianPlaneRect.anchorMin = new Vector2(0.5f, 0.5f);
         cartesianPlaneRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -329,11 +346,46 @@ public class LevelManager : MonoBehaviour
         cartesianPlaneRect.anchoredPosition = new Vector2(0f, yNudge);
     }
 
+    /// <summary>
+    /// Authoring used a fixed 1820×980 grid rect; after <see cref="FitCartesianPlaneForGameplay"/> the Cartesian plane
+    /// shrinks on phones — stretch grid + curve renderers to fill it so axes, graphs, and obstacle math line up.
+    /// </summary>
+    private void StretchGameplayGridStackToCartesianPlane()
+    {
+        if (gridRenderer == null || cartesianPlaneRect == null)
+            return;
+
+        var gridRt = gridRenderer.rectTransform;
+        gridRt.anchorMin = Vector2.zero;
+        gridRt.anchorMax = Vector2.one;
+        gridRt.pivot = new Vector2(0.5f, 0.5f);
+        gridRt.offsetMin = Vector2.zero;
+        gridRt.offsetMax = Vector2.zero;
+        gridRt.anchoredPosition = Vector2.zero;
+
+        for (int i = 0; i < gridRt.childCount; i++)
+        {
+            var lineRt = gridRt.GetChild(i) as RectTransform;
+            if (lineRt == null)
+                continue;
+            lineRt.anchorMin = Vector2.zero;
+            lineRt.anchorMax = Vector2.one;
+            lineRt.pivot = new Vector2(0f, 0f);
+            lineRt.offsetMin = Vector2.zero;
+            lineRt.offsetMax = Vector2.zero;
+            lineRt.anchoredPosition = Vector2.zero;
+        }
+
+        gridRenderer.SetVerticesDirty();
+    }
+
     private void SyncGameplayLayoutToCartesianPlane()
     {
         if (graphCalculatorMode || cartesianPlaneRect == null || gridRenderer == null ||
             obstacleGenerator == null || playerController == null)
             return;
+
+        StretchGameplayGridStackToCartesianPlane();
 
         Vector2 sz = cartesianPlaneRect.rect.size;
         var gridSize = gridRenderer.gridSize;
@@ -2849,7 +2901,7 @@ public class LevelManager : MonoBehaviour
         tmp.lineSpacing = 6f;
         tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
         tmp.text = TmpLatex.Process(LocalizationManager.Get("controls.guide_overlay",
-            "<b>Touch controls</b>\n\n<b>Left half</b> — hold to move left\n<b>Right half</b> — hold to move right\n<b>Swipe up</b> anywhere — jump\n\n<size=88%><color=#a8b2d1>Keyboard: Arrow keys move · Space jumps</color></size>"));
+            "<b>Touch controls</b>\n\n<b>Left half</b> — hold to move left\n<b>Right half</b> — hold to move right\nWhile holding, <b>tap with another finger</b> — jump\n\n<size=88%><color=#a8b2d1>Keyboard: Arrow keys move · Space jumps</color></size>"));
         LocalizationManager.ApplyTextDirection(tmp);
         ApplyPrimaryUiTypography(tmp, FindPrimaryEquationTmp(), outlineWidth: 0.1f, outlineAlpha: 0.42f);
 

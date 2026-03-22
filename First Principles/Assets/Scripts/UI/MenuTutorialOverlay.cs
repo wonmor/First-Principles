@@ -208,7 +208,7 @@ public static class MenuTutorialOverlay
             "Move along the graph, use platforms (green), avoid red hazards, and reach the bright exit on the right.\n\n" +
             "<b>Controls</b>\n" +
             "• <b>Move</b> — arrows / WASD, or on a phone hold the <b>left</b> / <b>right half</b> of the screen.\n" +
-            "• <b>Jump</b> — Space, or <b>swipe up</b> on a phone. You jump from solid platforms.\n\n" +
+            "• <b>Jump</b> — Space, or on a phone <b>tap with a second finger</b> while holding left/right. You jump from solid platforms.\n\n" +
             "<b>The two curves</b>\n" +
             "• <color=#c4b5fd>Main curve</color> — the function you walk on.\n" +
             "• <color=#fdba74>Derivative \\(f'\\)</color> — slope information; it’s drawn as a second line.\n\n" +

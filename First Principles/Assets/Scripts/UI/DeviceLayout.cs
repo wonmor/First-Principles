@@ -75,7 +75,7 @@ public static class DeviceLayout
 
     public static float TouchControlBarHeight => IsTabletLike() ? 188f : 168f;
 
-    /// <summary>True in Game when we use left/right screen halves + swipe (no ◀ ▶ Jump strip).</summary>
+    /// <summary>True in Game when we use left/right screen halves + second-finger jump (no ◀ ▶ Jump strip).</summary>
     public static bool GameplayUsesFullScreenTouchZones => PreferOnScreenGameControls;
 
     /// <summary>Bottom offset for the small controls hint chip (above graph; no virtual bar when zones are on).</summary>

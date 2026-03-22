@@ -40,6 +40,8 @@ public class LabelManager : MonoBehaviour
     private float _lastTransD = float.NaN;
     private FunctionType _lastFunctionTypeForXAxis = (FunctionType)(-1);
 
+    private Vector2 _lastGridPixelSize = Vector2.zero;
+
     private void Awake()
     {
         gridRenderer = FindAnyObjectByType<GridRendererUI>();
@@ -48,6 +50,16 @@ public class LabelManager : MonoBehaviour
     private void Start()
     {
         GenerateLabels();
+        if (gridRenderer != null)
+            _lastGridPixelSize = RectSize(gridRenderer.rectTransform);
+    }
+
+    private static Vector2 RectSize(RectTransform rt)
+    {
+        if (rt == null)
+            return Vector2.zero;
+        var r = rt.rect;
+        return new Vector2(r.width, r.height);
     }
 
     private void LateUpdate()
@@ -55,6 +67,17 @@ public class LabelManager : MonoBehaviour
         var plotter = FindAnyObjectByType<FunctionPlotter>();
         if (plotter == null)
             return;
+
+        if (gridRenderer != null)
+        {
+            Vector2 gridPx = RectSize(gridRenderer.rectTransform);
+            if (gridPx.x > 16f && gridPx.y > 16f &&
+                (gridPx - _lastGridPixelSize).sqrMagnitude > 36f)
+            {
+                _lastGridPixelSize = gridPx;
+                GenerateLabels();
+            }
+        }
 
         float mid = plotter.VerticalAxisLabelPivot;
         float sc = plotter.VerticalAxisLabelScale;

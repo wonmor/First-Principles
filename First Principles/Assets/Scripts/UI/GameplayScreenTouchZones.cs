@@ -4,16 +4,16 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// Game scene: invisible full-screen touch layer (first under safe-area HUD). Hold <b>left half</b> → move left,
-/// hold <b>right half</b> → move right; release with a dominant <b>upward swipe</b> → jump. Replaces virtual ◀ ▶ Jump buttons.
+/// Game scene: invisible full-screen touch layer. Hold <b>left half</b> → move left, hold <b>right half</b> → move right.
+/// While holding movement, put down a <b>second finger</b> anywhere → jump (one shot per touch-down).
 /// </summary>
 public class GameplayScreenTouchZones : MonoBehaviour,
     IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
 {
     private static GameplayScreenTouchZones _instance;
 
-    private readonly Dictionary<int, Vector2> _pointerDownScreen = new Dictionary<int, Vector2>();
     private readonly Dictionary<int, int> _pointerSide = new Dictionary<int, int>();
+    private readonly HashSet<int> _jumpOnlyPointerIds = new HashSet<int>();
 
     public static void EnsureForGameCanvas(Transform canvasTransform)
     {
@@ -21,9 +21,6 @@ public class GameplayScreenTouchZones : MonoBehaviour,
             return;
 
         DestroyLegacyButtonBar(canvasTransform);
-
-        if (_instance != null)
-            return;
 
         Transform existing = canvasTransform.Find("GameplayScreenTouchZonesRoot");
         if (existing == null)
@@ -33,30 +30,113 @@ public class GameplayScreenTouchZones : MonoBehaviour,
                 existing = safe.Find("GameplayScreenTouchZonesRoot");
         }
 
+        RectTransform rt;
         if (existing != null)
         {
+            rt = existing as RectTransform;
             _instance = existing.GetComponent<GameplayScreenTouchZones>();
+            if (_instance == null)
+                _instance = existing.gameObject.AddComponent<GameplayScreenTouchZones>();
+        }
+        else
+        {
+            var parentRt = MobileUiRoots.GetSafeContentParent(canvasTransform) ?? canvasTransform as RectTransform;
+            if (parentRt == null)
+                return;
+
+            var go = new GameObject("GameplayScreenTouchZonesRoot", typeof(RectTransform));
+            rt = go.GetComponent<RectTransform>();
+            rt.SetParent(parentRt, false);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            var img = go.AddComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0f);
+            img.raycastTarget = true;
+
+            _instance = go.AddComponent<GameplayScreenTouchZones>();
+        }
+
+        // Must sit above the full-screen graph stack (GraphicRaycaster hits top-first). Under _SafeContent
+        // as first sibling put this layer *behind* GraphContainer — touches never reached gameplay.
+        ReparentTouchLayerAboveGraph(canvasTransform, rt);
+    }
+
+    /// <summary>
+    /// Inserts the touch catcher just above <c>Graph</c> inside <c>GraphContainer</c> so Footer/HUD stays on top.
+    /// </summary>
+    static void ReparentTouchLayerAboveGraph(Transform canvasTransform, RectTransform touchRt)
+    {
+        if (touchRt == null || canvasTransform == null)
+            return;
+
+        var graphContainer = FindDeepChildByName(canvasTransform, "GraphContainer") as RectTransform;
+        if (graphContainer == null)
+        {
+            var fallback = MobileUiRoots.GetSafeContentParent(canvasTransform) ?? canvasTransform as RectTransform;
+            if (fallback == null)
+                return;
+            touchRt.SetParent(fallback, false);
+            touchRt.anchorMin = Vector2.zero;
+            touchRt.anchorMax = Vector2.one;
+            touchRt.offsetMin = Vector2.zero;
+            touchRt.offsetMax = Vector2.zero;
+            int gc = -1;
+            for (int i = 0; i < fallback.childCount; i++)
+            {
+                if (fallback.GetChild(i).name == "GraphContainer")
+                {
+                    gc = i;
+                    break;
+                }
+            }
+
+            if (gc >= 0)
+            {
+                int fallbackMaxSibling = Mathf.Max(0, fallback.childCount - 1);
+                touchRt.SetSiblingIndex(Mathf.Clamp(gc + 1, 0, fallbackMaxSibling));
+            }
+            else
+                touchRt.SetAsLastSibling();
             return;
         }
 
-        var parentRt = MobileUiRoots.GetSafeContentParent(canvasTransform) ?? canvasTransform as RectTransform;
-        if (parentRt == null)
-            return;
+        touchRt.SetParent(graphContainer, false);
+        touchRt.anchorMin = Vector2.zero;
+        touchRt.anchorMax = Vector2.one;
+        touchRt.offsetMin = Vector2.zero;
+        touchRt.offsetMax = Vector2.zero;
 
-        var go = new GameObject("GameplayScreenTouchZonesRoot", typeof(RectTransform));
-        var rt = go.GetComponent<RectTransform>();
-        rt.SetParent(parentRt, false);
-        rt.SetAsFirstSibling();
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        int graphIdx = 0;
+        for (int i = 0; i < graphContainer.childCount; i++)
+        {
+            if (graphContainer.GetChild(i).name == "Graph")
+            {
+                graphIdx = i;
+                break;
+            }
+        }
 
-        var img = go.AddComponent<Image>();
-        img.color = new Color(0f, 0f, 0f, 0f);
-        img.raycastTarget = true;
+        int graphMaxSibling = Mathf.Max(0, graphContainer.childCount - 1);
+        touchRt.SetSiblingIndex(Mathf.Clamp(graphIdx + 1, 0, graphMaxSibling));
+    }
 
-        _instance = go.AddComponent<GameplayScreenTouchZones>();
+    static Transform FindDeepChildByName(Transform root, string name)
+    {
+        if (root == null)
+            return null;
+        if (root.name == name)
+            return root;
+        for (int i = 0; i < root.childCount; i++)
+        {
+            var c = FindDeepChildByName(root.GetChild(i), name);
+            if (c != null)
+                return c;
+        }
+
+        return null;
     }
 
     private static void DestroyLegacyButtonBar(Transform canvasTransform)
@@ -80,17 +160,19 @@ public class GameplayScreenTouchZones : MonoBehaviour,
         MobileInputBridge.ClearTouchRouting();
     }
 
-    private static float MinSwipeUpPixels()
-    {
-        float dpi = Screen.dpi > 1f ? Screen.dpi : 163f;
-        return Mathf.Clamp(48f * (dpi / 160f), 40f, 100f);
-    }
-
     public void OnPointerDown(PointerEventData eventData)
     {
         int id = eventData.pointerId;
+
+        // Second finger while already steering: jump (do not stack another left/right hold).
+        if (_pointerSide.Count >= 1)
+        {
+            MobileInputBridge.QueueJump();
+            _jumpOnlyPointerIds.Add(id);
+            return;
+        }
+
         Vector2 pos = eventData.position;
-        _pointerDownScreen[id] = pos;
         float mid = Screen.width * 0.5f;
         int side = pos.x < mid ? -1 : 1;
         _pointerSide[id] = side;
@@ -101,29 +183,30 @@ public class GameplayScreenTouchZones : MonoBehaviour,
     }
 
     public void OnPointerUp(PointerEventData eventData) =>
-        EndPointer(eventData.pointerId, evaluateSwipeJump: true, eventData.position);
+        EndPointer(eventData.pointerId);
 
     public void OnPointerExit(PointerEventData eventData) =>
-        EndPointer(eventData.pointerId, evaluateSwipeJump: false, eventData.position);
+        EndPointer(eventData.pointerId);
 
-    private void EndPointer(int pointerId, bool evaluateSwipeJump, Vector2 releasePosition)
+    private void EndPointer(int pointerId)
     {
+        if (_jumpOnlyPointerIds.Remove(pointerId))
+            return;
+
         if (!_pointerSide.TryGetValue(pointerId, out int side))
             return;
 
-        if (evaluateSwipeJump && _pointerDownScreen.TryGetValue(pointerId, out Vector2 down))
-        {
-            Vector2 delta = releasePosition - down;
-            float minUp = MinSwipeUpPixels();
-            if (delta.y > minUp && delta.y > Mathf.Abs(delta.x) * 0.55f)
-                MobileInputBridge.QueueJump();
-        }
-
-        _pointerDownScreen.Remove(pointerId);
         if (side < 0)
             MobileHoldAxis.ReleaseLeft();
         else
             MobileHoldAxis.ReleaseRight();
         _pointerSide.Remove(pointerId);
+    }
+
+    /// <summary>Clears jump-only pointer bookkeeping when <see cref="MobileInputBridge.ClearTouchRouting"/> runs.</summary>
+    internal static void ClearAuxiliaryPointerState()
+    {
+        if (_instance != null)
+            _instance._jumpOnlyPointerIds.Clear();
     }
 }
