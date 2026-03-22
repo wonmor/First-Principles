@@ -14,7 +14,9 @@ public static class LearningArticleLibrary
     public static string GetLevelSelectArticleRichText()
     {
         string raw = LoadRawArticleForCurrentLanguage();
-        return TmpLatex.Process(raw);
+        string processed = TmpLatex.Process(raw);
+        // MathArticle/*.txt used XML-style &amp; for "&"; TMP does not decode entities.
+        return processed.Replace("&amp;", "&");
     }
 
     private static string LoadRawArticleForCurrentLanguage()

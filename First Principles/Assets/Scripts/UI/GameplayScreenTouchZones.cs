@@ -10,6 +10,8 @@ using UnityEngine.UI;
 public class GameplayScreenTouchZones : MonoBehaviour,
     IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
 {
+    public const string RootObjectName = "GameplayScreenTouchZonesRoot";
+
     private static GameplayScreenTouchZones _instance;
 
     private readonly Dictionary<int, int> _pointerSide = new Dictionary<int, int>();
@@ -22,13 +24,8 @@ public class GameplayScreenTouchZones : MonoBehaviour,
 
         DestroyLegacyButtonBar(canvasTransform);
 
-        Transform existing = canvasTransform.Find("GameplayScreenTouchZonesRoot");
-        if (existing == null)
-        {
-            var safe = canvasTransform.Find(MobileUiRoots.SafeContentName);
-            if (safe != null)
-                existing = safe.Find("GameplayScreenTouchZonesRoot");
-        }
+        // Deep find: after ReparentTouchLayerAboveGraph the root lives under GraphContainer, not a direct canvas child.
+        Transform existing = FindDeepChildByName(canvasTransform, RootObjectName);
 
         RectTransform rt;
         if (existing != null)
@@ -44,7 +41,7 @@ public class GameplayScreenTouchZones : MonoBehaviour,
             if (parentRt == null)
                 return;
 
-            var go = new GameObject("GameplayScreenTouchZonesRoot", typeof(RectTransform));
+            var go = new GameObject(RootObjectName, typeof(RectTransform));
             rt = go.GetComponent<RectTransform>();
             rt.SetParent(parentRt, false);
             rt.anchorMin = Vector2.zero;
@@ -64,6 +61,27 @@ public class GameplayScreenTouchZones : MonoBehaviour,
         // Must sit above the full-screen graph stack (GraphicRaycaster hits top-first). Under _SafeContent
         // as first sibling put this layer *behind* GraphContainer — touches never reached gameplay.
         ReparentTouchLayerAboveGraph(canvasTransform, rt);
+    }
+
+    /// <summary>
+    /// Full-screen touch layer is created whenever mobile gameplay prefers it, but disabled in graphing calculator
+    /// so the same scene path always has the object (avoids missing controls after Menu → calculator → level).
+    /// </summary>
+    public static void SetActiveForGameplayMode(bool gameplayMovementEnabled)
+    {
+        if (_instance != null)
+        {
+            if (_instance.gameObject.activeSelf != gameplayMovementEnabled)
+                _instance.gameObject.SetActive(gameplayMovementEnabled);
+            return;
+        }
+
+        var canvas = Object.FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+            return;
+        var t = FindDeepChildByName(canvas.transform, RootObjectName);
+        if (t != null && t.gameObject.activeSelf != gameplayMovementEnabled)
+            t.gameObject.SetActive(gameplayMovementEnabled);
     }
 
     /// <summary>

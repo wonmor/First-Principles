@@ -94,10 +94,18 @@ public static class GameLevelCatalog
         "Big O: O(n log n) — n log n growth",
         "Big O: O(n²) — quadratic growth",
         "Big O: O(n³) — cubic growth",
-        "Big O: O(2ⁿ) — exponential (base 2)"
+        "Big O: O(2ⁿ) — exponential (base 2)",
+        // Placeholder: listed in Level Select but not built in LevelManager yet (see IsComingSoonLevel).
+        "Astrophysics: Hohmann transfer"
     };
 
     public static int LevelCount => DisplayNames.Length;
+
+    /// <summary>Level index reserved for a future stage; <see cref="LevelSelectController"/> shows “coming soon” instead of loading Game.</summary>
+    public const int HohmannTransferComingSoonLevelIndex = 59;
+
+    public static bool IsComingSoonLevel(int index) =>
+        index == HohmannTransferComingSoonLevelIndex;
 
     /// <summary>
     /// Grouped picker on the Level Select scene (indices must match <see cref="DisplayNames"/> / <see cref="LevelManager"/>).
@@ -109,6 +117,7 @@ public static class GameLevelCatalog
         new LevelSelectCategory("level_select.cat.engineering", "Engineering", 14, 16),
         new LevelSelectCategory("level_select.cat.ap_bc", "AP Calculus BC & Physics C", 17, 34),
         new LevelSelectCategory("level_select.cat.aerospace", "Aerospace", 35, 41),
+        new LevelSelectCategory("level_select.cat.astrophysics", "Astrophysics", 59, 59),
         new LevelSelectCategory("level_select.cat.economics", "Economics", 42, 43),
         new LevelSelectCategory("level_select.cat.transforms", "Transforms", 44, 45),
         new LevelSelectCategory("level_select.cat.spring_physics", "Spring & SHM", 50, 50),

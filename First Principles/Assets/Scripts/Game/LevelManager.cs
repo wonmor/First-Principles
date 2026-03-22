@@ -54,6 +54,7 @@ public class LevelManager : MonoBehaviour
 
     private TextMeshProUGUI storyText;
     private TextMeshProUGUI stageHudText;
+    private TextMeshProUGUI scoreHudText;
     private TextMeshProUGUI controlsHintText;
     private int lastStageHudKey = int.MinValue;
     private Sprite cachedHudPanelSprite;
@@ -66,6 +67,12 @@ public class LevelManager : MonoBehaviour
     /// <summary>Runtime-built list of stages (also representable as LevelDefinition assets).</summary>
     private readonly List<LevelDefinition> levels = new List<LevelDefinition>();
     private int currentLevelIndex;
+
+    private const int GameplayStartingScore = 100;
+    private const int DerivativeTouchPenaltyPoints = 5;
+
+    /// <summary>Touch f′ penalty score (starts at <see cref="GameplayStartingScore"/> each level).</summary>
+    private int gameplayScore = GameplayStartingScore;
 
     /// <summary>How many stage boundary thresholds the player has already crossed (derivative pops).</summary>
     private int nextStageIndex;
@@ -132,9 +139,26 @@ public class LevelManager : MonoBehaviour
         RefreshStageHudLocalizedForce();
 
         if (graphCalculatorMode)
+        {
             RefreshStoryBannerForCurrentMode(null);
+            TightenGraphCalculatorStoryBanner();
+            var canvas = FindAnyObjectByType<Canvas>();
+            var safe = canvas != null ? MobileUiRoots.GetSafeContentParent(canvas.transform) as RectTransform : null;
+            var calcParent = safe != null ? safe : canvas?.transform as RectTransform;
+            float bridge = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset : 22f;
+            float transRow = bridge + 74f;
+            float eqBottom = GraphCalculatorEquationPanelBottomY(transRow);
+            if (functionPlotter != null && calcParent != null)
+                GraphCalculatorEquationPanel.Ensure(calcParent, functionPlotter, FindPrimaryEquationTmp(), eqBottom, 108f);
+            var paramTmp = GameObject.Find("GraphicCalculatorParamHint")?.GetComponent<TextMeshProUGUI>();
+            LayoutGraphCalculatorParamHintBelowStory(paramTmp, storyText != null ? storyText.rectTransform : null,
+                DeviceLayout.IsTabletLike() ? 144f : 132f, 10f);
+        }
         else if (levels.Count > 0 && currentLevelIndex >= 0 && currentLevelIndex < levels.Count)
             RefreshStoryBannerForCurrentMode(levels[currentLevelIndex]);
+
+        if (!graphCalculatorMode)
+            RefreshScoreHud();
     }
 
     private void RefreshControlsHintLocalized()
@@ -177,6 +201,7 @@ public class LevelManager : MonoBehaviour
     {
         lastStageHudKey = int.MinValue;
         RefreshStageHud();
+        RefreshScoreHud();
     }
 
     private void RefreshStoryBannerForCurrentMode(LevelDefinition def)
@@ -188,7 +213,7 @@ public class LevelManager : MonoBehaviour
         {
             storyText.text = TmpLatex.Process(LocalizationManager.Get("graph.calculator_intro",
                 "<b>Graphing calculator mode</b>\n" +
-                "<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> &amp; <b>pinch</b> zoom the window.</size>"));
+                "<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> · <b>pinch</b> zoom the window.</size>"));
             LocalizationManager.ApplyTextDirection(storyText);
             return;
         }
@@ -271,12 +296,18 @@ public class LevelManager : MonoBehaviour
             HideLegacyGraphTuningButtons();
         EnsureRiemannRenderer();
         var mainCanvas = FindAnyObjectByType<Canvas>();
-        if (mainCanvas != null && !graphCalculatorMode)
+        // Always create the layer on phones/tablets; disable in graphing calculator so a later level load
+        // (or any code that re-runs Ensure) does not depend on "first scene entry was platformer".
+        if (mainCanvas != null && DeviceLayout.PreferOnScreenGameControls)
+        {
             GameplayScreenTouchZones.EnsureForGameCanvas(mainCanvas.transform);
+            GameplayScreenTouchZones.SetActiveForGameplayMode(!graphCalculatorMode);
+        }
 
         // Wire callbacks.
         playerController.SetDeathCallback(RestartCurrentLevel);
         playerController.SetFinishCallback(AdvanceLevel);
+        playerController.SetDerivativeLineGrazeScoringCallback(OnDerivativeLineGrazePenalty);
         if (derivRenderer != null)
             playerController.BindDerivativeRenderer(derivRenderer);
         ConfigureGameBackButtonDestination();
@@ -501,6 +532,7 @@ public class LevelManager : MonoBehaviour
             RefreshStoryBannerForCurrentMode(null);
             storyText.color = new Color(1f, 1f, 1f, 0.94f);
             storyText.fontStyle = FontStyles.Bold;
+            TightenGraphCalculatorStoryBanner();
         }
 
         if (stageHudText != null && stageHudText.transform.parent != null)
@@ -547,12 +579,13 @@ public class LevelManager : MonoBehaviour
         var hintParent = safe != null ? safe : canvas?.transform as RectTransform;
         float bridgeControls = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset : 22f;
         float transRowBottom = bridgeControls + 74f;
+        float equationPanelBottomY = GraphCalculatorEquationPanelBottomY(transRowBottom);
 
         var equationStyleRef = FindPrimaryEquationTmp();
         if (equationStyleRef != null)
             equationStyleRef.fontStyle = FontStyles.Bold;
 
-        GraphCalculatorEquationPanel.Ensure(hintParent, functionPlotter, equationStyleRef, transRowBottom + 110f, 108f);
+        GraphCalculatorEquationPanel.Ensure(hintParent, functionPlotter, equationStyleRef, equationPanelBottomY, 108f);
 
         var transGo = GameObject.Find("TransButton");
         var scaleGo = GameObject.Find("ScaleButton");
@@ -563,24 +596,18 @@ public class LevelManager : MonoBehaviour
         if (legacyHint != null)
             legacyHint.name = "GraphicCalculatorParamHint";
 
+        bool tabletHint = DeviceLayout.IsTabletLike();
         if (hintParent != null && GameObject.Find("GraphicCalculatorParamHint") == null)
         {
             var hintGo = new GameObject("GraphicCalculatorParamHint");
             var hrt = hintGo.AddComponent<RectTransform>();
             hrt.SetParent(hintParent, false);
-            hrt.anchorMin = new Vector2(0.5f, 0f);
-            hrt.anchorMax = new Vector2(0.5f, 0f);
-            hrt.pivot = new Vector2(0.5f, 0f);
-            bool tablet = DeviceLayout.IsTabletLike();
-            float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset + 312f : 318f;
-            hrt.anchoredPosition = new Vector2(0f, up);
-            hrt.sizeDelta = new Vector2(tablet ? 1040f : 960f, tablet ? 144f : 132f);
 
             paramHint = hintGo.AddComponent<TextMeshProUGUI>();
             paramHint.richText = true;
             paramHint.textWrappingMode = TextWrappingModes.Normal;
             paramHint.overflowMode = TextOverflowModes.Overflow;
-            paramHint.fontSize = UiTypography.Scale(tablet ? 31 : 27);
+            paramHint.fontSize = UiTypography.Scale(tabletHint ? 31 : 27);
             paramHint.alignment = TextAlignmentOptions.Top;
             paramHint.color = new Color(0.9f, 0.93f, 0.98f, 0.96f);
             ApplyPrimaryUiTypography(paramHint, FindPrimaryEquationTmp(), outlineWidth: 0.12f, outlineAlpha: 0.45f);
@@ -603,6 +630,9 @@ public class LevelManager : MonoBehaviour
                 paramHint.fontStyle = FontStyles.Bold;
             }
         }
+
+        LayoutGraphCalculatorParamHintBelowStory(paramHint, storyText != null ? storyText.rectTransform : null,
+            tabletHint ? 144f : 132f, 10f);
 
         ApplyGraphCalculatorControlButtonTypography(transGo);
         ApplyGraphCalculatorControlButtonTypography(scaleGo);
@@ -647,6 +677,46 @@ public class LevelManager : MonoBehaviour
                 UiTypography.ApplyDefaultFontAsset(tmp);
             tmp.fontStyle = FontStyles.Bold;
         }
+    }
+
+    /// <summary>Shrink the tall story placeholder so the intro sits at the top; height follows TMP preferred size.</summary>
+    void TightenGraphCalculatorStoryBanner()
+    {
+        if (storyText == null)
+            return;
+
+        storyText.alignment = TextAlignmentOptions.Top;
+        Canvas.ForceUpdateCanvases();
+        storyText.ForceMeshUpdate();
+        float w = storyText.rectTransform.rect.width;
+        if (w < 48f)
+            w = Mathf.Max(320f, Screen.safeArea.width * 0.88f);
+        Vector2 pv = storyText.GetPreferredValues(storyText.text, w, 0f);
+        float h = Mathf.Clamp(pv.y + 14f, 52f, 280f);
+        storyText.rectTransform.sizeDelta = new Vector2(0f, h);
+    }
+
+    /// <summary>Bottom Y for the f(u) panel so it sits just above the Deriv / ∫ row (matches <see cref="GraphCalculatorAnalysisControls.BuildToolButtons"/>).</summary>
+    float GraphCalculatorEquationPanelBottomY(float transRowBottomY)
+    {
+        bool tablet = DeviceLayout.IsTabletLike();
+        return GraphCalculatorAnalysisControls.DerivativeIntegralRowTopFromBottom(transRowBottomY, tablet) + 12f;
+    }
+
+    /// <summary>Places the Trans / Scale hint under the intro banner (calculator mode).</summary>
+    static void LayoutGraphCalculatorParamHintBelowStory(TextMeshProUGUI hint, RectTransform storyRt, float blockHeight, float gap)
+    {
+        if (hint == null || storyRt == null)
+            return;
+
+        RectTransform hrt = hint.rectTransform;
+        hrt.SetParent(storyRt.parent, false);
+        hrt.anchorMin = storyRt.anchorMin;
+        hrt.anchorMax = storyRt.anchorMax;
+        hrt.pivot = new Vector2(0.5f, 1f);
+        hrt.sizeDelta = new Vector2(0f, blockHeight);
+        hrt.anchoredPosition = new Vector2(storyRt.anchoredPosition.x,
+            storyRt.anchoredPosition.y - storyRt.sizeDelta.y - gap);
     }
 
     private static void LayoutCalculatorToolButtons(GameObject transGo, GameObject scaleGo, float anchoredBottomY)
@@ -828,7 +898,8 @@ public class LevelManager : MonoBehaviour
             panelRt.pivot = new Vector2(0f, 1f);
             float topPad = DeviceLayout.PreferOnScreenGameControls ? 12f : 20f;
             panelRt.anchoredPosition = new Vector2(18f, -topPad);
-            panelRt.sizeDelta = new Vector2(440f, 88f);
+            bool wideHud = DeviceLayout.IsTabletLike();
+            panelRt.sizeDelta = new Vector2(wideHud ? 620f : 560f, wideHud ? 92f : 88f);
             RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(2f, -3f), 0.26f);
 
             var panelBg = panelGo.AddComponent<Image>();
@@ -856,10 +927,10 @@ public class LevelManager : MonoBehaviour
             var textGo = new GameObject("StageHud");
             var textRt = textGo.AddComponent<RectTransform>();
             textRt.SetParent(panelGo.transform, false);
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
+            textRt.anchorMin = new Vector2(0f, 0f);
+            textRt.anchorMax = new Vector2(0.54f, 1f);
             textRt.offsetMin = new Vector2(18f, 12f);
-            textRt.offsetMax = new Vector2(-16f, -14f);
+            textRt.offsetMax = new Vector2(-6f, -14f);
 
             var tmp = textGo.AddComponent<TextMeshProUGUI>();
             tmp.richText = true;
@@ -877,54 +948,74 @@ public class LevelManager : MonoBehaviour
             tmp.text = FormatStageHudLine(1, 1);
 
             stageHudText = tmp;
+
+            var scoreGo = new GameObject("ScoreHud");
+            var scoreRt = scoreGo.AddComponent<RectTransform>();
+            scoreRt.SetParent(panelGo.transform, false);
+            scoreRt.anchorMin = new Vector2(0.52f, 0f);
+            scoreRt.anchorMax = new Vector2(1f, 1f);
+            scoreRt.offsetMin = new Vector2(4f, 12f);
+            scoreRt.offsetMax = new Vector2(-18f, -14f);
+            var scoreTmp = scoreGo.AddComponent<TextMeshProUGUI>();
+            scoreTmp.richText = true;
+            scoreTmp.textWrappingMode = TextWrappingModes.Normal;
+            scoreTmp.overflowMode = TextOverflowModes.Overflow;
+            scoreTmp.fontSize = UiTypography.Scale(28);
+            scoreTmp.enableAutoSizing = true;
+            scoreTmp.fontSizeMin = UiTypography.Scale(16);
+            scoreTmp.fontSizeMax = UiTypography.Scale(30);
+            scoreTmp.alignment = TextAlignmentOptions.MidlineRight;
+            scoreTmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
+            scoreTmp.lineSpacing = -4f;
+            ApplyPrimaryUiTypography(scoreTmp, equationStyle, outlineWidth: 0.16f, outlineAlpha: 0.55f);
+            scoreHudText = scoreTmp;
+            RefreshScoreHud();
         }
 
         CreateMathConceptsButtonIfNeeded(canvas, equationStyle);
 
-        if (!graphCalculatorMode)
+        // Build hint for every mode so graphing calculator → platformer does not skip creation on first HUD pass.
+        if (controlsHintText == null)
         {
-            if (controlsHintText == null)
-            {
-                bool tabletUi = DeviceLayout.IsTabletLike();
-                var barGo = new GameObject("ControlsHintPanel");
-                var barRt = barGo.AddComponent<RectTransform>();
-                var safe = MobileUiRoots.GetSafeContentParent(canvas.transform);
-                barRt.SetParent(safe != null ? safe : canvas.transform, false);
-                barRt.anchorMin = new Vector2(0.5f, 0f);
-                barRt.anchorMax = new Vector2(0.5f, 0f);
-                barRt.pivot = new Vector2(0.5f, 0f);
-                float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset : 22f;
-                barRt.anchoredPosition = new Vector2(0f, up);
-                barRt.sizeDelta = new Vector2(tabletUi ? 900f : 760f, tabletUi ? 60f : 56f);
+            bool tabletUi = DeviceLayout.IsTabletLike();
+            var barGo = new GameObject("ControlsHintPanel");
+            var barRt = barGo.AddComponent<RectTransform>();
+            var safe = MobileUiRoots.GetSafeContentParent(canvas.transform);
+            barRt.SetParent(safe != null ? safe : canvas.transform, false);
+            barRt.anchorMin = new Vector2(0.5f, 0f);
+            barRt.anchorMax = new Vector2(0.5f, 0f);
+            barRt.pivot = new Vector2(0.5f, 0f);
+            float up = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchHintVerticalOffset : 22f;
+            barRt.anchoredPosition = new Vector2(0f, up);
+            barRt.sizeDelta = new Vector2(tabletUi ? 900f : 760f, tabletUi ? 60f : 56f);
 
-                var barBg = barGo.AddComponent<Image>();
-                barBg.sprite = panelSprite;
-                barBg.color = new Color(0.08f, 0.09f, 0.13f, 0.85f);
-                barBg.raycastTarget = false;
-                barBg.type = panelSprite != null && panelSprite.border.sqrMagnitude > 0.001f ? Image.Type.Sliced : Image.Type.Simple;
+            var barBg = barGo.AddComponent<Image>();
+            barBg.sprite = panelSprite;
+            barBg.color = new Color(0.08f, 0.09f, 0.13f, 0.85f);
+            barBg.raycastTarget = false;
+            barBg.type = panelSprite != null && panelSprite.border.sqrMagnitude > 0.001f ? Image.Type.Sliced : Image.Type.Simple;
 
-                var textGo = new GameObject("ControlsHint");
-                var textRt = textGo.AddComponent<RectTransform>();
-                textRt.SetParent(barGo.transform, false);
-                textRt.anchorMin = Vector2.zero;
-                textRt.anchorMax = Vector2.one;
-                textRt.offsetMin = new Vector2(20f, 8f);
-                textRt.offsetMax = new Vector2(-20f, -8f);
+            var textGo = new GameObject("ControlsHint");
+            var textRt = textGo.AddComponent<RectTransform>();
+            textRt.SetParent(barGo.transform, false);
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = new Vector2(20f, 8f);
+            textRt.offsetMax = new Vector2(-20f, -8f);
 
-                var tmp = textGo.AddComponent<TextMeshProUGUI>();
-                tmp.richText = true;
-                tmp.textWrappingMode = TextWrappingModes.Normal;
-                tmp.overflowMode = TextOverflowModes.Overflow;
-                tmp.fontSize = UiTypography.Scale(24);
-                tmp.alignment = TextAlignmentOptions.Midline;
-                tmp.color = new Color(0.82f, 0.85f, 0.92f, 0.92f);
-                tmp.characterSpacing = 0.25f;
-                ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.5f);
-                controlsHintText = tmp;
-            }
-
-            RefreshControlsHintLocalized();
+            var tmp = textGo.AddComponent<TextMeshProUGUI>();
+            tmp.richText = true;
+            tmp.textWrappingMode = TextWrappingModes.Normal;
+            tmp.overflowMode = TextOverflowModes.Overflow;
+            tmp.fontSize = UiTypography.Scale(24);
+            tmp.alignment = TextAlignmentOptions.Midline;
+            tmp.color = new Color(0.82f, 0.85f, 0.92f, 0.92f);
+            tmp.characterSpacing = 0.25f;
+            ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.5f);
+            controlsHintText = tmp;
         }
+
+        RefreshControlsHintLocalized();
     }
 
     /// <summary>Top-right control: opens <see cref="MathArticlesOverlay"/> (same body as level-select math tips).</summary>
@@ -1041,6 +1132,30 @@ public class LevelManager : MonoBehaviour
         lastStageHudKey = key;
         stageHudText.text = FormatStageHudLine(stage, total);
         LocalizationManager.ApplyTextDirection(stageHudText);
+    }
+
+    void ResetGameplayScoreForNewLevel()
+    {
+        gameplayScore = GameplayStartingScore;
+        RefreshScoreHud();
+    }
+
+    void OnDerivativeLineGrazePenalty()
+    {
+        if (graphCalculatorMode)
+            return;
+        gameplayScore = Mathf.Max(0, gameplayScore - DerivativeTouchPenaltyPoints);
+        RefreshScoreHud();
+    }
+
+    void RefreshScoreHud()
+    {
+        if (scoreHudText == null)
+            return;
+        string label = LocalizationManager.Get("hud.points", "PTS");
+        scoreHudText.text =
+            $"<color=#9aa3b8><size=78%><b>{label}</b></size></color>\n<b><color=#fde68a>{gameplayScore}</color></b>";
+        LocalizationManager.ApplyTextDirection(scoreHudText);
     }
 
     /// <summary>Square / UI sprite for flat panels (falls back to a tiny white sprite so Image always draws).</summary>
@@ -2688,6 +2803,9 @@ public class LevelManager : MonoBehaviour
         if (levels.Count == 0 || functionPlotter == null)
             return;
 
+        if (!graphCalculatorMode)
+            ResetGameplayScoreForNewLevel();
+
         currentLevelIndex = Mathf.Clamp(index, 0, levels.Count - 1);
         nextStageIndex = 0;
         lastStageHudKey = int.MinValue;
@@ -2742,6 +2860,9 @@ public class LevelManager : MonoBehaviour
 
         curveRenderer.color = def.curveColor;
         derivRenderer.color = def.derivativeColor;
+        derivRenderer.thickness = DerivRendererUI.DefaultThicknessPixels;
+        if (popAnimator != null)
+            popAnimator.SyncRestThicknessFromTarget();
 
         if (def.functionType == FunctionType.AeroDragPolarTriple)
         {
@@ -2807,10 +2928,58 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Stops full-screen overlays that can survive <see cref="StopCoroutine"/> (same scene) and block touch raycasts.
+    /// </summary>
+    private void TearDownInterruptedLevelFlowUi()
+    {
+        if (stageIntroRoot != null)
+        {
+            if (stageIntroCanvasGroup != null)
+            {
+                stageIntroCanvasGroup.blocksRaycasts = false;
+                stageIntroCanvasGroup.interactable = false;
+            }
+
+            stageIntroRoot.SetActive(false);
+        }
+
+        var canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+            return;
+
+        var safe = MobileUiRoots.GetSafeContentParent(canvas.transform);
+        Transform parent = safe != null ? safe : canvas.transform;
+        for (int i = parent.childCount - 1; i >= 0; i--)
+        {
+            var c = parent.GetChild(i);
+            if (c.name == "MobileControlGuideOverlay")
+                Destroy(c.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Re-creates / re-parents the full-screen touch catcher after layout so it stays above the graph stack.
+    /// </summary>
+    private void EnsureGameplayTouchZonesAfterLevelReady()
+    {
+        if (graphCalculatorMode || !DeviceLayout.PreferOnScreenGameControls)
+            return;
+
+        var canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+            return;
+
+        GameplayScreenTouchZones.EnsureForGameCanvas(canvas.transform);
+        GameplayScreenTouchZones.SetActiveForGameplayMode(true);
+    }
+
+    /// <summary>
     /// Builds platforms after plot refresh; then optional roleplay “page”, then the ordinary story banner fade.
     /// </summary>
     private IEnumerator LoadLevelFullRoutine(LevelDefinition def)
     {
+        TearDownInterruptedLevelFlowUi();
+
         if (playerController != null)
             playerController.SetInputLocked(true);
 
@@ -2842,6 +3011,8 @@ public class LevelManager : MonoBehaviour
             MobileInputBridge.ClearTouchRouting();
             playerController.SetInputLocked(false);
         }
+
+        EnsureGameplayTouchZonesAfterLevelReady();
 
         if (storyText != null)
         {

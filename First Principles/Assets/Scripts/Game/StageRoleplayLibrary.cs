@@ -128,7 +128,9 @@ public static class StageRoleplayLibrary
         // 57
         "<b>Cubic alchemist.</b> O(n³) is triple trouble—dense, blunt, expensive. The graph rockets to remind you why we invent better algorithms.",
         // 58
-        "<b>Subset gambler.</b> O(2ⁿ) is the house always winning: every extra unit doubles the shadow workload. Pray for pruning, memoization, or a smaller universe."
+        "<b>Subset gambler.</b> O(2ⁿ) is the house always winning: every extra unit doubles the shadow workload. Pray for pruning, memoization, or a smaller universe.",
+        // 59 — catalog slot only until Hohmann stage ships; intro not shown while level is “coming soon”.
+        "<b>Trajectory officer (preview).</b> A Hohmann transfer stitches two circular orbits with two tangential burns—minimum-energy class when the geometry cooperates. The graph for this act is still on the pad."
     };
 
     /// <summary>Must match <see cref="GameLevelCatalog.LevelCount"/>.</summary>

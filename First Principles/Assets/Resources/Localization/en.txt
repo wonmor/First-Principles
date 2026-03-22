@@ -8,6 +8,7 @@ level_select.cat.integration=Multivar & integration
 level_select.cat.engineering=Engineering
 level_select.cat.ap_bc=AP Calculus BC & Physics C
 level_select.cat.aerospace=Aerospace
+level_select.cat.astrophysics=Astrophysics
 level_select.cat.economics=Economics
 level_select.cat.transforms=Transforms
 level_select.cat.final_boss=Final boss
@@ -21,11 +22,14 @@ ui.language=Language
 ui.tap_change_language=Tap to change
 ui.stage_intro_hint=Tap anywhere to continue
 ui.close=Close
+ui.coming_soon=Coming soon!
+ui.coming_soon_tap=Tap anywhere to close
 ui.math_concepts=Math concepts
 ui.jump=Jump
 ui.move=Move
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
 hud.stage=STAGE
+hud.points=PTS
 controls.mobile=<color=#7a8399>Left</color> <b><color=#ffd978>hold ◀</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Right</color> <b><color=#ffd978>hold ▶</color></b>  <color=#5c6577>·</color>  <color=#7a8399>2nd finger</color> <b><color=#ffd978>jump</color></b>  <size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
 controls.guide_overlay=<b>Touch controls</b>\n\n<b>Left half</b> — hold to move left\n<b>Right half</b> — hold to move right\nWhile holding, <b>tap with another finger</b> — jump\n\n<size=88%><color=#a8b2d1>Keyboard: Arrow keys move · Space jumps</color></size>
 controls.desktop=<color=#7a8399>Move</color>  <b><color=#ffd978>←</color></b>  <b><color=#ffd978>→</color></b>  <color=#5c6577>·</color>  <color=#7a8399>Jump</color>  <b><color=#ffd978>Space</color></b>
@@ -52,7 +56,7 @@ graph.polar.param_k=k (θ scale)
 graph.polar.param_c=C (r shift)
 graph.polar.param_d=D (θ phase / axis shift)
 graph.polar.line4=<size=88%><color=#a8b2d1>A={0} &nbsp;k={1} &nbsp;C={2} &nbsp;D={3} &nbsp;&nbsp;θ∈[{4},{5}]</color></size>
-graph.calculator_intro=<b>Graphing calculator mode</b>\n<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> &amp; <b>pinch</b> zoom the window.</size>
+graph.calculator_intro=<b>Graphing calculator mode</b>\n<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> · <b>pinch</b> zoom the window.</size>
 # Prepended to story text for every Aerospace stage (indices 35–41).
 aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>Drag polar refresher</color></b> (every <b>Aerospace</b> stage)\n<size=92%><b>Parasitic (zero-lift) drag</b> — skin friction, form drag, interference lumped as <b>C<sub>D0</sub></b> in the parabolic model (roughly <i>not</i> the part that grows with lift).\n<b>Induced drag</b> — the cost of making lift: trailing vortices add ~ <b>K C<sub>L</sub>²</b> (higher C<sub>L</sub> / tighter turns → more induced).\n<b>Overall drag polar</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: an upward-opening parabola in C<sub>L</sub>; min-drag <b>C<sub>L</sub></b> sits between “too slow / high α” and “too fast / low α” for real missions.</size>
 menu.tutorial_button=How to play
@@ -124,3 +128,4 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+level.59=Astrophysics: Hohmann transfer

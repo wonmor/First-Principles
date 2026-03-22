@@ -59,6 +59,8 @@ public class PlayerControllerUI2D : MonoBehaviour
 
     private Action deathCallback;
     private Action finishCallback;
+    /// <summary>Invoked on the first frame the avatar enters the f′ proximity band (with hit feedback).</summary>
+    private Action derivativeLineGrazeScoringCallback;
 
     /// <summary>When true (e.g. stage intro overlay), physics/input integration is skipped so the avatar stays frozen.</summary>
     private bool inputLocked;
@@ -170,6 +172,11 @@ public class PlayerControllerUI2D : MonoBehaviour
     public void SetFinishCallback(Action finishCallback)
     {
         this.finishCallback = finishCallback;
+    }
+
+    public void SetDerivativeLineGrazeScoringCallback(Action callback)
+    {
+        derivativeLineGrazeScoringCallback = callback;
     }
 
     /// <summary>Integrate movement, resolve collisions, invoke death/finish callbacks.</summary>
@@ -322,6 +329,7 @@ public class PlayerControllerUI2D : MonoBehaviour
 
         if (touching && !wasTouchingDerivativeLine)
         {
+            derivativeLineGrazeScoringCallback?.Invoke();
             PlayDerivativeLineHitFeedback();
             PulseDerivativeBackgroundTint();
         }

@@ -340,4 +340,15 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
         derivButton = null;
         integralButton = null;
     }
+
+    /// <summary>
+    /// Top edge of the Deriv / ∫ row in the same bottom‑anchored space as <see cref="BuildToolButtons"/>
+    /// (<c>anchoredPosition.y</c> + button height).
+    /// </summary>
+    public static float DerivativeIntegralRowTopFromBottom(float transRowBottomY, bool tablet)
+    {
+        float h = tablet ? 108f : 100f;
+        float row2Bottom = transRowBottomY + h + 10f;
+        return row2Bottom + h * 0.92f;
+    }
 }
