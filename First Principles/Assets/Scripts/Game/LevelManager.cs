@@ -469,6 +469,7 @@ public class LevelManager : MonoBehaviour
         functionPlotter.autoScaleVertical = false;
         // Stretch [xStart,xEnd] across the grid so pinch / Scale update _autoMidX/_autoScaleX; axis ticks track (LabelManager).
         functionPlotter.autoScaleHorizontal = true;
+        functionPlotter.showWindTunnelBackdrop = false;
 
         if (curveRenderer != null)
         {
@@ -1919,251 +1920,8 @@ public class LevelManager : MonoBehaviour
             storyPauseSecondsOverride: 2.65f
         ));
 
-        // ---- Aerospace engineering & aerodynamics (indices 34–40) -----------------------------
-
         levels.Add(MakeLevel(
             GameLevelCatalog.DisplayNames[34],
-            FunctionType.AeroLiftVsAlpha,
-            curveColor: new Color(0.35f, 0.72f, 1f, 1f),
-            derivativeColor: new Color(1f, 0.58f, 0.3f, 1f),
-            transA: 0.82f,
-            transK: 0.38f,
-            transC: -2.05f,
-            transD: 0f,
-            power: 2,
-            baseN: 2,
-            story:
-                "<b>Lift vs angle of attack</b> — on a wing, <color=#38bdf8>coefficient C_L</color> grows roughly linearly with α in the attached‑flow regime (thin‑airfoil / small‑angle mood).\n\n" +
-                "Past the <b>stall</b> angle the boundary layer separates; lift drops sharply — a nonlinear break your feet feel as the graph stops climbing.\n\n" +
-                "<size=92%><color=#a8b2d1>Real design couples Mach, Reynolds, sweep, twist; this graph is a calculus “shape class” for slope & saturation.</color></size>",
-            derivativePopTriggerCountOverride: 3,
-            applyGridTheming: true,
-            gridCenter: new Color(0.16f, 0.32f, 0.48f, 0.37f),
-            gridOutside: new Color(0.12f, 0.22f, 0.34f, 0.11f),
-            storyPauseSecondsOverride: 2.65f
-        ));
-
-        var dragPolarOverlays = new[]
-        {
-            new Color(0.55f, 0.68f, 0.9f, 0.95f),
-            new Color(0.98f, 0.5f, 0.55f, 0.9f)
-        };
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[35],
-            FunctionType.AeroDragPolarTriple,
-            curveColor: new Color(0.75f, 0.55f, 1f, 1f),
-            derivativeColor: new Color(1f, 0.72f, 0.35f, 1f),
-            transA: 0.072f,
-            transK: 0.42f,
-            transC: -2.02f,
-            transD: 0f,
-            power: 2,
-            baseN: 2,
-            story:
-                "<b>Drag polar — three traces at once</b> — the graph shows <color=#93c5fd><b>parasitic (zero‑lift / profile) drag</b></color> as a flat baseline, <color=#fb7185><b>induced drag</b></color> as the bowl that grows with |C_L|, and <color=#c4b5fd><b>total C_D</b></color> as their sum (walk the thick total — same parabola as before).\n\n" +
-                "Classic identity: <color=#c4b5fd>C_D = C_{D0} + K C_L²</color>; min‑drag C_L is where the marginal induced penalty balances mission speed/α choices.\n\n" +
-                "<size=92%><color=#a8b2d1>Horizontal axis: u ~ C_L. Purple = C_D,tot (platforms); blue = C_D,par; coral = C_D,ind alone (from zero lift).</color></size>",
-            derivativePopTriggerCountOverride: 3,
-            applyGridTheming: true,
-            gridCenter: new Color(0.35f, 0.25f, 0.5f, 0.36f),
-            gridOutside: new Color(0.25f, 0.18f, 0.36f, 0.1f),
-            storyPauseSecondsOverride: 2.65f,
-            dragPolarOverlayColors: dragPolarOverlays
-        ));
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[36],
-            FunctionType.AeroIsothermalDensity,
-            curveColor: new Color(0.45f, 0.88f, 0.72f, 1f),
-            derivativeColor: new Color(0.95f, 0.45f, 0.5f, 1f),
-            transA: 1.05f,
-            transK: 0.32f,
-            transC: -2.28f,
-            transD: -6f,
-            power: 2,
-            baseN: 4,
-            story:
-                "<b>Atmosphere (isothermal cartoon)</b> — pressure and density drop roughly <color=#86efac>exponentially</color> with altitude: p, ρ ~ e^{−h/H} with <b>scale height</b> H (temperature & mean molar mass set the mood in the real ISA).\n\n" +
-                "Aero engineers live in these curves: thrust, Reynolds, Mach, dynamic pressure q = ½ρV² all track ρ(h).\n\n" +
-                "<size=92%><color=#a8b2d1>Plot uses h ≥ 0 on the transformed axis; negative side clips—like launching from sea level only.</color></size>",
-            derivativePopTriggerCountOverride: 3,
-            applyGridTheming: true,
-            gridCenter: new Color(0.18f, 0.42f, 0.34f, 0.36f),
-            gridOutside: new Color(0.13f, 0.3f, 0.24f, 0.1f),
-            storyPauseSecondsOverride: 2.6f
-        ));
-
-        var aeroPhugColors = new[]
-        {
-            new Color(0.5f, 0.78f, 1f, 1f),
-            new Color(1f, 0.55f, 0.4f, 1f),
-            new Color(0.75f, 0.55f, 1f, 1f)
-        };
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[37],
-            FunctionType.DampedOscillator,
-            curveColor: new Color(0.4f, 0.85f, 0.95f, 1f),
-            derivativeColor: new Color(1f, 0.52f, 0.28f, 1f),
-            transA: 0.48f,
-            transK: 0.44f,
-            transC: -1.98f,
-            transD: 0f,
-            power: 4,
-            baseN: 2,
-            story:
-                "<b>Longitudinal dynamics</b> — a rigid aircraft has <color=#7dd3fc>short‑period</color> (quick pitch / heave) and <b>phugoid</b> (slow exchange of altitude & speed) modes.\n\n" +
-                "Linearized state‑space models are eigenvalues & eigenvectors; cartooned here as a <b>damped oscillation</b> — exponential envelope × sine — the same mathematics as mass–spring–damper labs.\n\n" +
-                "<size=92%><color=#a8b2d1>Flight control & autopilot designers tame these modes with feedback; feel the derivative change at crests and troughs.</color></size>",
-            derivativePopTriggerCountOverride: 3,
-            applyGridTheming: true,
-            gridCenter: new Color(0.14f, 0.35f, 0.48f, 0.36f),
-            gridOutside: new Color(0.1f, 0.25f, 0.34f, 0.1f),
-            levelStageColors: aeroPhugColors,
-            storyPauseSecondsOverride: 2.75f
-        ));
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[38],
-            FunctionType.AeroNewtonianSinSquared,
-            curveColor: new Color(1f, 0.45f, 0.42f, 1f),
-            derivativeColor: new Color(0.5f, 0.82f, 1f, 1f),
-            transA: 0.92f,
-            transK: 0.5f,
-            transC: -2.05f,
-            transD: 0f,
-            power: 2,
-            baseN: 2,
-            story:
-                "<b>Newtonian / impact theory mood</b> — in hypersonic teaching models, surface <color=#fca5a5>pressure coefficient</color> scales like sin²α for windward facets (turning momentum of molecules).\n\n" +
-                "Not a replacement for CFD or shock‑expansion — but the right <i>calculus vocabulary</i>: nonlinear trig powering heat‑shield and entry corridor conversations.\n\n" +
-                "<size=92%><color=#a8b2d1>Horizontal axis plays local slope angle; only α ≥ 0 is meaningful on this branch.</color></size>",
-            derivativePopTriggerCountOverride: 3,
-            applyGridTheming: true,
-            gridCenter: new Color(0.48f, 0.22f, 0.2f, 0.35f),
-            gridOutside: new Color(0.34f, 0.15f, 0.14f, 0.1f),
-            storyPauseSecondsOverride: 2.55f
-        ));
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[39],
-            FunctionType.Sine,
-            curveColor: new Color(0.55f, 0.65f, 1f, 1f),
-            derivativeColor: new Color(1f, 0.48f, 0.72f, 1f),
-            transA: 0.42f,
-            transK: 0.55f,
-            transC: -1.95f,
-            transD: 0f,
-            power: 2,
-            baseN: 2,
-            story:
-                "<b>Strouhal number</b> — bluff bodies shed vortices at a characteristic frequency <color=#93c5fd>f ≈ St · U / D</color> (St ≈ 0.2 for cylinders in the textbook band).\n\n" +
-                "That periodicity drives vibrations, noise, and fatigue loading on antennas, cables, and control surfaces in wake turbulence.\n\n" +
-                "<size=92%><color=#a8b2d1>Sine waves are the fingerprint of linearized unsteady aero & flutter thinking — walk the cycle as if reading a hot‑wire trace.</color></size>",
-            derivativePopTriggerCountOverride: 3,
-            applyGridTheming: true,
-            gridCenter: new Color(0.22f, 0.28f, 0.52f, 0.36f),
-            gridOutside: new Color(0.16f, 0.2f, 0.38f, 0.1f),
-            storyPauseSecondsOverride: 2.45f
-        ));
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[40],
-            FunctionType.ExponentialDecay,
-            curveColor: new Color(1f, 0.72f, 0.38f, 1f),
-            derivativeColor: new Color(0.45f, 0.78f, 1f, 1f),
-            transA: 1.05f,
-            transK: 0.072f,
-            transC: -2.22f,
-            transD: 0f,
-            power: 2,
-            baseN: 2,
-            story:
-                "<b>Re‑entry & hypersonic heating mood</b> — heat flux scales with <color=#fde047>dynamic pressure × velocity</color> roughly like ρ V³ in many order‑of‑magnitude chats (models vary!), so as altitude climbs (ρ↓) and speed bleeds off, the <i>threat curve</i> relaxes exponentially in time in simplified histories.\n\n" +
-                "Thermal protection, trajectory shaping, and bank angle modulation all serve to keep material beneath limits — calculus is the language of those trade curves.\n\n" +
-                "<size=92%><color=#a8b2d1>Use this stage as a qualitative decay envelope, not a quantitative SpaceX memo.</color></size>",
-            derivativePopTriggerCountOverride: 3,
-            applyGridTheming: true,
-            gridCenter: new Color(0.42f, 0.3f, 0.18f, 0.35f),
-            gridOutside: new Color(0.3f, 0.22f, 0.12f, 0.1f),
-            storyPauseSecondsOverride: 2.65f
-        ));
-
-        // Economics (41–42) + Mandelbrot (43) + thermo (44) + golden spiral (45); Transforms (46–47); Mandelbrot encore finale (48).
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[41],
-            FunctionType.EconomyDotcomBubbleStylized,
-            curveColor: new Color(0.14f, 0.58f, 0.34f, 1f),
-            derivativeColor: new Color(0.98f, 0.72f, 0.28f, 1f),
-            transA: 2.35f,
-            transK: 0.118f,
-            transC: -2.38f,
-            transD: 0f,
-            power: 2,
-            baseN: 2,
-            story:
-                "<b>Dot‑com bubble — stylized chart walk</b> — equity indices like the broad <color=#86efac>S&amp;P 500</color> (or the racier <color=#7dd3fc>Nasdaq Composite</color>) climbed through the late 1990s, then <color=#fca5a5>gapped down</color> as the 2000–02 tech hangover unwound years of euphoria.\n\n" +
-                "This path is a <b>smooth teaching silhouette</b> — not downloaded tick data — but it catches the storytelling shape: **grind, parabolic enthusiasm, air pocket, slow rebuild**. Slopes and concavity still read like real market moods.\n\n" +
-                "<size=92%><color=#a8b2d1>Educational allegory only; not investment advice or a replica of any index.</color></size>",
-            derivativePopTriggerCountOverride: 4,
-            applyGridTheming: true,
-            gridCenter: new Color(0.18f, 0.32f, 0.22f, 0.38f),
-            gridOutside: new Color(0.12f, 0.22f, 0.15f, 0.11f),
-            storyPauseSecondsOverride: 2.95f,
-            graphStep: 0.09f
-        ));
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[42],
-            FunctionType.EconomySubprime2008Stylized,
-            curveColor: new Color(0.72f, 0.22f, 0.2f, 1f),
-            derivativeColor: new Color(0.52f, 0.78f, 0.95f, 1f),
-            transA: 2.5f,
-            transK: 0.115f,
-            transC: -2.42f,
-            transD: 0f,
-            power: 2,
-            baseN: 2,
-            story:
-                "<b>Global financial crisis — stylized stress curve</b> — US <color=#fde047>housing & mortgage</color> risk, structured credit losses, and institutional fragility fed a <color=#fca5a5>violent repricing</color> in 2007–09 that spilled across banks, money markets, and real economies (familiar names in history books: Lehman’s collapse in Sept 2008 as a flashpoint).\n\n" +
-                "Again: <b>no real GSPC series here</b> — just a qualitative spline with a **crest near complacency**, a **cliff**, and a **long crawl** that matches how people <i>remember</i> the V‑shock conversation.\n\n" +
-                "<size=92%><color=#a8b2d1>Simplified drama for calculus class; markets are vastly richer than one line.</color></size>",
-            derivativePopTriggerCountOverride: 4,
-            applyGridTheming: true,
-            gridCenter: new Color(0.36f, 0.14f, 0.12f, 0.36f),
-            gridOutside: new Color(0.26f, 0.1f, 0.09f, 0.1f),
-            storyPauseSecondsOverride: 3.05f,
-            graphStep: 0.09f
-        ));
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[43],
-            FunctionType.MandelbrotEscapeImSlice,
-            curveColor: new Color(0.25f, 0.98f, 0.62f, 1f),
-            derivativeColor: new Color(0.98f, 0.38f, 0.82f, 1f),
-            transA: -0.743643887f,
-            transK: 0.088f,
-            transC: -2.18f,
-            transD: 0f,
-            power: 80,
-            baseN: 26,
-            story:
-                "<b>Final stage — Mandelbrot set</b> — the <color=#a8b2d1>backdrop</color> is the classic <b>c-plane</b> (Re horizontal, Im vertical) colored by <color=#a7f3d0>smooth escape time</color>; the bright line marks your fixed <color=#86efac>Re(c)</color>. The green curve is the same slice as before: height vs <color=#86efac>Im(c)</color>.\n\n" +
-                "The cardioid and bulbs are the boundary where Julia sets disconnect; zooming that coastline reveals endless filaments (true deep zoom needs a different engine, but the map is real Mandelbrot math).\n\n" +
-                "<size=92%><color=#a8b2d1>Slice iteration uses <b>|Im(c)|</b> (conjugate symmetry). Curve uses fractional escape counts so steps look less “flat” than raw integers.</color></size>",
-            derivativePopTriggerCountOverride: 4,
-            applyGridTheming: true,
-            gridCenter: new Color(0.12f, 0.32f, 0.48f, 0.4f),
-            gridOutside: new Color(0.08f, 0.18f, 0.28f, 0.12f),
-            storyPauseSecondsOverride: 2.9f,
-            graphStep: 0.14f,
-            levelXStart: -16f,
-            levelXEnd: 16f
-        ));
-
-        levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[44],
             FunctionType.ThermoAdiabaticPV,
             curveColor: new Color(0.98f, 0.52f, 0.28f, 1f),
             derivativeColor: new Color(0.45f, 0.82f, 0.98f, 1f),
@@ -2187,33 +1945,233 @@ public class LevelManager : MonoBehaviour
             levelXEnd: 14f
         ));
 
+        // ---- Aerospace engineering & aerodynamics (indices 35–41) -----------------------------
+
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[45],
-            FunctionType.PolarGoldenLogSpiral,
-            curveColor: new Color(0.99f, 0.86f, 0.38f, 1f),
-            derivativeColor: new Color(0.62f, 0.42f, 0.98f, 1f),
-            transA: 2.15f,
-            transK: 1f,
-            transC: -3.08f,
+            GameLevelCatalog.DisplayNames[35],
+            FunctionType.AeroLiftVsAlpha,
+            curveColor: new Color(0.35f, 0.72f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.58f, 0.3f, 1f),
+            transA: 0.82f,
+            transK: 0.38f,
+            transC: -2.05f,
             transD: 0f,
-            power: 1,
-            baseN: 105,
+            power: 2,
+            baseN: 2,
             story:
-                "<b>Secret boss — golden spiral</b> — nature’s favorite growth curve is a <color=#fbbf24>logarithmic spiral</color>: each time angle θ advances steadily, radius scales by a fixed factor tied to the <color=#fde68a>golden ratio φ = (1+√5)/2</color>.\n\n" +
-                "Fibonacci rectangles, nautilus moods, and phyllotaxis in sunflowers all whisper the same proportion — here you walk the graph as <b>r(θ) ∝ φ^{kθ}</b> on a polar-style readout (horizontal = θ, vertical = r).\n\n" +
-                "<size=92%><color=#a8b2d1>Exact classical spirals use arc-length subtleties; this stage is the clean calculus headline: exponential growth in φ as you turn.</color></size>",
-            derivativePopTriggerCountOverride: 4,
+                "<b>Lift vs angle of attack</b> — on a wing, <color=#38bdf8>coefficient C_L</color> grows roughly linearly with α in the attached‑flow regime (thin‑airfoil / small‑angle mood).\n\n" +
+                "Past the <b>stall</b> angle the boundary layer separates; lift drops sharply — a nonlinear break your feet feel as the graph stops climbing.\n\n" +
+                "<size=92%><color=#a8b2d1>Real design couples Mach, Reynolds, sweep, twist; this graph is a calculus “shape class” for slope & saturation.</color></size>",
+            derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
-            gridCenter: new Color(0.42f, 0.34f, 0.14f, 0.38f),
-            gridOutside: new Color(0.22f, 0.17f, 0.08f, 0.12f),
-            storyPauseSecondsOverride: 2.95f,
-            graphStep: 0.075f,
-            levelXStart: -11.5f,
-            levelXEnd: 13.5f
+            gridCenter: new Color(0.16f, 0.32f, 0.48f, 0.37f),
+            gridOutside: new Color(0.12f, 0.22f, 0.34f, 0.11f),
+            storyPauseSecondsOverride: 2.65f,
+            showWindTunnelBackdrop: true
+        ));
+
+        var dragPolarOverlays = new[]
+        {
+            new Color(0.55f, 0.68f, 0.9f, 0.95f),
+            new Color(0.98f, 0.5f, 0.55f, 0.9f)
+        };
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[36],
+            FunctionType.AeroDragPolarTriple,
+            curveColor: new Color(0.75f, 0.55f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.72f, 0.35f, 1f),
+            transA: 0.072f,
+            transK: 0.42f,
+            transC: -2.02f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Drag polar — three traces at once</b> — the graph shows <color=#93c5fd><b>parasitic (zero‑lift / profile) drag</b></color> as a flat baseline, <color=#fb7185><b>induced drag</b></color> as the bowl that grows with |C_L|, and <color=#c4b5fd><b>total C_D</b></color> as their sum (walk the thick total — same parabola as before).\n\n" +
+                "Classic identity: <color=#c4b5fd>C_D = C_{D0} + K C_L²</color>; min‑drag C_L is where the marginal induced penalty balances mission speed/α choices.\n\n" +
+                "<size=92%><color=#a8b2d1>Horizontal axis: u ~ C_L. Purple = C_D,tot (platforms); blue = C_D,par; coral = C_D,ind alone (from zero lift).</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.35f, 0.25f, 0.5f, 0.36f),
+            gridOutside: new Color(0.25f, 0.18f, 0.36f, 0.1f),
+            storyPauseSecondsOverride: 2.65f,
+            dragPolarOverlayColors: dragPolarOverlays,
+            showWindTunnelBackdrop: true
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[46],
+            GameLevelCatalog.DisplayNames[37],
+            FunctionType.AeroIsothermalDensity,
+            curveColor: new Color(0.45f, 0.88f, 0.72f, 1f),
+            derivativeColor: new Color(0.95f, 0.45f, 0.5f, 1f),
+            transA: 1.05f,
+            transK: 0.32f,
+            transC: -2.28f,
+            transD: -6f,
+            power: 2,
+            baseN: 4,
+            story:
+                "<b>Atmosphere (isothermal cartoon)</b> — pressure and density drop roughly <color=#86efac>exponentially</color> with altitude: p, ρ ~ e^{−h/H} with <b>scale height</b> H (temperature & mean molar mass set the mood in the real ISA).\n\n" +
+                "Aero engineers live in these curves: thrust, Reynolds, Mach, dynamic pressure q = ½ρV² all track ρ(h).\n\n" +
+                "<size=92%><color=#a8b2d1>Plot uses h ≥ 0 on the transformed axis; negative side clips—like launching from sea level only.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.18f, 0.42f, 0.34f, 0.36f),
+            gridOutside: new Color(0.13f, 0.3f, 0.24f, 0.1f),
+            storyPauseSecondsOverride: 2.6f,
+            showWindTunnelBackdrop: true
+        ));
+
+        var aeroPhugColors = new[]
+        {
+            new Color(0.5f, 0.78f, 1f, 1f),
+            new Color(1f, 0.55f, 0.4f, 1f),
+            new Color(0.75f, 0.55f, 1f, 1f)
+        };
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[38],
+            FunctionType.DampedOscillator,
+            curveColor: new Color(0.4f, 0.85f, 0.95f, 1f),
+            derivativeColor: new Color(1f, 0.52f, 0.28f, 1f),
+            transA: 0.48f,
+            transK: 0.44f,
+            transC: -1.98f,
+            transD: 0f,
+            power: 4,
+            baseN: 2,
+            story:
+                "<b>Longitudinal dynamics</b> — a rigid aircraft has <color=#7dd3fc>short‑period</color> (quick pitch / heave) and <b>phugoid</b> (slow exchange of altitude & speed) modes.\n\n" +
+                "Linearized state‑space models are eigenvalues & eigenvectors; cartooned here as a <b>damped oscillation</b> — exponential envelope × sine — the same mathematics as mass–spring–damper labs.\n\n" +
+                "<size=92%><color=#a8b2d1>Flight control & autopilot designers tame these modes with feedback; feel the derivative change at crests and troughs.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.14f, 0.35f, 0.48f, 0.36f),
+            gridOutside: new Color(0.1f, 0.25f, 0.34f, 0.1f),
+            levelStageColors: aeroPhugColors,
+            storyPauseSecondsOverride: 2.75f,
+            showWindTunnelBackdrop: true
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[39],
+            FunctionType.AeroNewtonianSinSquared,
+            curveColor: new Color(1f, 0.45f, 0.42f, 1f),
+            derivativeColor: new Color(0.5f, 0.82f, 1f, 1f),
+            transA: 0.92f,
+            transK: 0.5f,
+            transC: -2.05f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Newtonian / impact theory mood</b> — in hypersonic teaching models, surface <color=#fca5a5>pressure coefficient</color> scales like sin²α for windward facets (turning momentum of molecules).\n\n" +
+                "Not a replacement for CFD or shock‑expansion — but the right <i>calculus vocabulary</i>: nonlinear trig powering heat‑shield and entry corridor conversations.\n\n" +
+                "<size=92%><color=#a8b2d1>Horizontal axis plays local slope angle; only α ≥ 0 is meaningful on this branch.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.48f, 0.22f, 0.2f, 0.35f),
+            gridOutside: new Color(0.34f, 0.15f, 0.14f, 0.1f),
+            storyPauseSecondsOverride: 2.55f,
+            showWindTunnelBackdrop: true
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[40],
+            FunctionType.Sine,
+            curveColor: new Color(0.55f, 0.65f, 1f, 1f),
+            derivativeColor: new Color(1f, 0.48f, 0.72f, 1f),
+            transA: 0.42f,
+            transK: 0.55f,
+            transC: -1.95f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Strouhal number</b> — bluff bodies shed vortices at a characteristic frequency <color=#93c5fd>f ≈ St · U / D</color> (St ≈ 0.2 for cylinders in the textbook band).\n\n" +
+                "That periodicity drives vibrations, noise, and fatigue loading on antennas, cables, and control surfaces in wake turbulence.\n\n" +
+                "<size=92%><color=#a8b2d1>Sine waves are the fingerprint of linearized unsteady aero & flutter thinking — walk the cycle as if reading a hot‑wire trace.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.22f, 0.28f, 0.52f, 0.36f),
+            gridOutside: new Color(0.16f, 0.2f, 0.38f, 0.1f),
+            storyPauseSecondsOverride: 2.45f,
+            showWindTunnelBackdrop: true
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[41],
+            FunctionType.ExponentialDecay,
+            curveColor: new Color(1f, 0.72f, 0.38f, 1f),
+            derivativeColor: new Color(0.45f, 0.78f, 1f, 1f),
+            transA: 1.05f,
+            transK: 0.072f,
+            transC: -2.22f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Re‑entry & hypersonic heating mood</b> — heat flux scales with <color=#fde047>dynamic pressure × velocity</color> roughly like ρ V³ in many order‑of‑magnitude chats (models vary!), so as altitude climbs (ρ↓) and speed bleeds off, the <i>threat curve</i> relaxes exponentially in time in simplified histories.\n\n" +
+                "Thermal protection, trajectory shaping, and bank angle modulation all serve to keep material beneath limits — calculus is the language of those trade curves.\n\n" +
+                "<size=92%><color=#a8b2d1>Use this stage as a qualitative decay envelope, not a quantitative SpaceX memo.</color></size>",
+            derivativePopTriggerCountOverride: 3,
+            applyGridTheming: true,
+            gridCenter: new Color(0.42f, 0.3f, 0.18f, 0.35f),
+            gridOutside: new Color(0.3f, 0.22f, 0.12f, 0.1f),
+            storyPauseSecondsOverride: 2.65f,
+            showWindTunnelBackdrop: true
+        ));
+
+        // Economics (42–43); Transforms (44–45); boss block (46–49); spring (50); Big O (51–58).
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[42],
+            FunctionType.EconomyDotcomBubbleStylized,
+            curveColor: new Color(0.14f, 0.58f, 0.34f, 1f),
+            derivativeColor: new Color(0.98f, 0.72f, 0.28f, 1f),
+            transA: 2.35f,
+            transK: 0.118f,
+            transC: -2.38f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Dot‑com bubble — stylized chart walk</b> — equity indices like the broad <color=#86efac>S&amp;P 500</color> (or the racier <color=#7dd3fc>Nasdaq Composite</color>) climbed through the late 1990s, then <color=#fca5a5>gapped down</color> as the 2000–02 tech hangover unwound years of euphoria.\n\n" +
+                "This path is a <b>smooth teaching silhouette</b> — not downloaded tick data — but it catches the storytelling shape: **grind, parabolic enthusiasm, air pocket, slow rebuild**. Slopes and concavity still read like real market moods.\n\n" +
+                "<size=92%><color=#a8b2d1>Educational allegory only; not investment advice or a replica of any index.</color></size>",
+            derivativePopTriggerCountOverride: 4,
+            applyGridTheming: true,
+            gridCenter: new Color(0.18f, 0.32f, 0.22f, 0.38f),
+            gridOutside: new Color(0.12f, 0.22f, 0.15f, 0.11f),
+            storyPauseSecondsOverride: 2.95f,
+            graphStep: 0.09f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[43],
+            FunctionType.EconomySubprime2008Stylized,
+            curveColor: new Color(0.72f, 0.22f, 0.2f, 1f),
+            derivativeColor: new Color(0.52f, 0.78f, 0.95f, 1f),
+            transA: 2.5f,
+            transK: 0.115f,
+            transC: -2.42f,
+            transD: 0f,
+            power: 2,
+            baseN: 2,
+            story:
+                "<b>Global financial crisis — stylized stress curve</b> — US <color=#fde047>housing & mortgage</color> risk, structured credit losses, and institutional fragility fed a <color=#fca5a5>violent repricing</color> in 2007–09 that spilled across banks, money markets, and real economies (familiar names in history books: Lehman’s collapse in Sept 2008 as a flashpoint).\n\n" +
+                "Again: <b>no real GSPC series here</b> — just a qualitative spline with a **crest near complacency**, a **cliff**, and a **long crawl** that matches how people <i>remember</i> the V‑shock conversation.\n\n" +
+                "<size=92%><color=#a8b2d1>Simplified drama for calculus class; markets are vastly richer than one line.</color></size>",
+            derivativePopTriggerCountOverride: 4,
+            applyGridTheming: true,
+            gridCenter: new Color(0.36f, 0.14f, 0.12f, 0.36f),
+            gridOutside: new Color(0.26f, 0.1f, 0.09f, 0.1f),
+            storyPauseSecondsOverride: 3.05f,
+            graphStep: 0.09f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[44],
             FunctionType.TransformFourierSinc,
             curveColor: new Color(0.42f, 0.78f, 1f, 1f),
             derivativeColor: new Color(1f, 0.55f, 0.85f, 1f),
@@ -2238,7 +2196,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[47],
+            GameLevelCatalog.DisplayNames[45],
             FunctionType.TransformLaplaceCausalDecay,
             curveColor: new Color(0.55f, 0.95f, 0.65f, 1f),
             derivativeColor: new Color(0.98f, 0.72f, 0.38f, 1f),
@@ -2263,7 +2221,32 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[48],
+            GameLevelCatalog.DisplayNames[46],
+            FunctionType.PolarGoldenLogSpiral,
+            curveColor: new Color(0.99f, 0.86f, 0.38f, 1f),
+            derivativeColor: new Color(0.62f, 0.42f, 0.98f, 1f),
+            transA: 2.15f,
+            transK: 1f,
+            transC: -3.08f,
+            transD: 0f,
+            power: 1,
+            baseN: 105,
+            story:
+                "<b>Secret boss — golden spiral</b> — nature’s favorite growth curve is a <color=#fbbf24>logarithmic spiral</color>: each time angle θ advances steadily, radius scales by a fixed factor tied to the <color=#fde68a>golden ratio φ = (1+√5)/2</color>.\n\n" +
+                "Fibonacci rectangles, nautilus moods, and phyllotaxis in sunflowers all whisper the same proportion — here you walk the graph as <b>r(θ) ∝ φ^{kθ}</b> on a polar-style readout (horizontal = θ, vertical = r).\n\n" +
+                "<size=92%><color=#a8b2d1>Exact classical spirals use arc-length subtleties; this stage is the clean calculus headline: exponential growth in φ as you turn.</color></size>",
+            derivativePopTriggerCountOverride: 4,
+            applyGridTheming: true,
+            gridCenter: new Color(0.42f, 0.34f, 0.14f, 0.38f),
+            gridOutside: new Color(0.22f, 0.17f, 0.08f, 0.12f),
+            storyPauseSecondsOverride: 2.95f,
+            graphStep: 0.075f,
+            levelXStart: -11.5f,
+            levelXEnd: 13.5f
+        ));
+
+        levels.Add(MakeLevel(
+            GameLevelCatalog.DisplayNames[47],
             FunctionType.MandelbrotEscapeImSlice,
             curveColor: new Color(0.25f, 0.98f, 0.62f, 1f),
             derivativeColor: new Color(0.98f, 0.38f, 0.82f, 1f),
@@ -2276,7 +2259,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>True finale — Mandelbrot encore</b> — the <color=#a8b2d1>backdrop</color> is again the classic <b>c-plane</b> (Re horizontal, Im vertical) colored by <color=#a7f3d0>smooth escape time</color>; your path follows the same slice: height vs <color=#86efac>Im(c)</color> at fixed <color=#86efac>Re(c)</color>.\n\n" +
                 "This is the <b>final boss gate</b>: every step still reads Julia–Mandelbrot folklore — bulbs, filaments, and the cardioid where behavior flips.\n\n" +
-                "<size=92%><color=#a8b2d1>Same slice recipe as the mid-finale: fractional escape counts + <b>|Im|</b> symmetry. Welcome back to the boundary.</color></size>",
+                "<size=92%><color=#a8b2d1>Fractional escape counts + <b>|Im|</b> symmetry on this slice — the Mandelbrot coastline in one graph.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.12f, 0.32f, 0.48f, 0.4f),
@@ -2292,7 +2275,7 @@ public class LevelManager : MonoBehaviour
         float lorenzBossK = LorenzAttractorSamples.TimeMax / Mathf.Max(lorenzBossX1 - lorenzBossX0, 0.01f);
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[49],
+            GameLevelCatalog.DisplayNames[48],
             FunctionType.ChaosLorenzButterflyX,
             curveColor: new Color(0.42f, 0.86f, 1f, 1f),
             derivativeColor: new Color(1f, 0.52f, 0.88f, 1f),
@@ -2317,7 +2300,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[50],
+            GameLevelCatalog.DisplayNames[49],
             FunctionType.PhysicsGravityWellInverseSqrt,
             curveColor: new Color(0.55f, 0.72f, 1f, 1f),
             derivativeColor: new Color(1f, 0.45f, 0.35f, 1f),
@@ -2349,7 +2332,7 @@ public class LevelManager : MonoBehaviour
         };
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[51],
+            GameLevelCatalog.DisplayNames[50],
             FunctionType.SpringMassUndamped,
             curveColor: new Color(0.38f, 0.92f, 0.74f, 1f),
             derivativeColor: new Color(1f, 0.48f, 0.52f, 1f),
@@ -2376,7 +2359,7 @@ public class LevelManager : MonoBehaviour
 
         // --- Big O notation (algorithms): u = k(x−D) plays the role of input size n on the graph ---
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[52],
+            GameLevelCatalog.DisplayNames[51],
             FunctionType.Power,
             curveColor: new Color(0.65f, 0.85f, 1f, 1f),
             derivativeColor: new Color(1f, 0.78f, 0.45f, 1f),
@@ -2396,7 +2379,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[53],
+            GameLevelCatalog.DisplayNames[52],
             FunctionType.NaturalLog,
             curveColor: new Color(0.5f, 0.92f, 0.78f, 1f),
             derivativeColor: new Color(0.98f, 0.55f, 0.82f, 1f),
@@ -2416,7 +2399,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[54],
+            GameLevelCatalog.DisplayNames[53],
             FunctionType.SquareRoot,
             curveColor: new Color(0.72f, 0.78f, 1f, 1f),
             derivativeColor: new Color(1f, 0.62f, 0.48f, 1f),
@@ -2436,7 +2419,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[55],
+            GameLevelCatalog.DisplayNames[54],
             FunctionType.Power,
             curveColor: new Color(0.55f, 0.9f, 1f, 1f),
             derivativeColor: new Color(1f, 0.5f, 0.65f, 1f),
@@ -2456,7 +2439,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[56],
+            GameLevelCatalog.DisplayNames[55],
             FunctionType.BigONLogN,
             curveColor: new Color(0.48f, 0.82f, 1f, 1f),
             derivativeColor: new Color(1f, 0.58f, 0.78f, 1f),
@@ -2476,7 +2459,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[57],
+            GameLevelCatalog.DisplayNames[56],
             FunctionType.Power,
             curveColor: new Color(0.6f, 0.72f, 1f, 1f),
             derivativeColor: new Color(1f, 0.52f, 0.42f, 1f),
@@ -2496,7 +2479,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[58],
+            GameLevelCatalog.DisplayNames[57],
             FunctionType.Power,
             curveColor: new Color(0.52f, 0.68f, 0.98f, 1f),
             derivativeColor: new Color(1f, 0.48f, 0.55f, 1f),
@@ -2516,7 +2499,7 @@ public class LevelManager : MonoBehaviour
         ));
 
         levels.Add(MakeLevel(
-            GameLevelCatalog.DisplayNames[59],
+            GameLevelCatalog.DisplayNames[58],
             FunctionType.Exponential,
             curveColor: new Color(0.58f, 0.95f, 0.72f, 1f),
             derivativeColor: new Color(1f, 0.45f, 0.88f, 1f),
@@ -2567,7 +2550,8 @@ public class LevelManager : MonoBehaviour
         float? levelXStart = null,
         float? levelXEnd = null,
         Color[] dragPolarOverlayColors = null,
-        float? riemannPlatformCoverage = null)
+        float? riemannPlatformCoverage = null,
+        bool showWindTunnelBackdrop = false)
     {
         var def = ScriptableObject.CreateInstance<LevelDefinition>();
         def.levelName = name;
@@ -2639,6 +2623,8 @@ public class LevelManager : MonoBehaviour
             };
         }
 
+        def.showWindTunnelBackdrop = showWindTunnelBackdrop;
+
         return def;
     }
 
@@ -2685,6 +2671,7 @@ public class LevelManager : MonoBehaviour
         functionPlotter.power = def.power;
         functionPlotter.baseN = def.baseN;
         functionPlotter.differentiate = true;
+        functionPlotter.showWindTunnelBackdrop = def.showWindTunnelBackdrop;
 
         if (def.showRiemannVisualization)
         {

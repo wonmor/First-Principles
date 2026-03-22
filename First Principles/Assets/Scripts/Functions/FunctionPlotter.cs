@@ -47,6 +47,9 @@ public class FunctionPlotter : MonoBehaviour
 
     public bool differentiate = false;
 
+    [Tooltip("Level mode: wind-tunnel GPU backdrop (set from LevelDefinition for aerospace stages).")]
+    public bool showWindTunnelBackdrop = false;
+
     [Tooltip("Level mode: vertically scale f and f′ so the band fits the grid (flat curves read clearly).")]
     public bool autoScaleVertical = true;
 
@@ -393,12 +396,14 @@ public class FunctionPlotter : MonoBehaviour
             }
         }
 
-        // Boss backdrops: Mandelbrot c-plane; Schwarzschild-style black hole (GPU shader).
+        // Stage backdrops: Mandelbrot; black hole; golden φ-spiral; wind tunnel (aerospace).
         if (lineRenderer != null)
         {
             var gridRt = lineRenderer.transform.parent as RectTransform;
             MandelbrotFractalBackdrop.Sync(gridRt, this);
             BlackHoleGargantuaBackdrop.Sync(gridRt, this);
+            GoldenSpiralBackdrop.Sync(gridRt, this);
+            WindTunnelBackdrop.Sync(gridRt, this);
             PushGraphRevealToRenderers();
         }
     }

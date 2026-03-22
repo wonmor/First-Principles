@@ -2,28 +2,25 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // -----------------------------------------------------------------------------
-// BlackHoleGargantuaBackdrop — Schwarzschild photon paths on the GPU (boss stage)
+// GoldenSpiralBackdrop — logarithmic φ-spiral field behind the graph (boss stage)
 // -----------------------------------------------------------------------------
-// Fragment shader integrates u'' + u = 3 M u² (equatorial null geodesics) with
-// conserved impact parameter b; procedural accretion disk + photon ring for a
-// Gargantua-like mood. Sync hides the layer off-stage to avoid cost.
+// Shown when FunctionType is PolarGoldenLogSpiral; GPU-only, matches stage theme.
 // -----------------------------------------------------------------------------
 
-/// <summary>
-/// Runtime child under the graph <see cref="Grid"/>; toggled from <see cref="FunctionPlotter"/>.
-/// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(RawImage))]
-public sealed class BlackHoleGargantuaBackdrop : MonoBehaviour
+public sealed class GoldenSpiralBackdrop : MonoBehaviour
 {
-    public const string ChildName = "_BlackHoleGargantuaBackdrop";
+    public const string ChildName = "_GoldenSpiralBackdrop";
 
     static readonly int IdTimeLive = Shader.PropertyToID("_TimeLive");
     static readonly int IdAspect = Shader.PropertyToID("_Aspect");
+    static readonly int IdColor = Shader.PropertyToID("_Color");
+
+    static readonly Color GoldenTint = new Color(1f, 0.88f, 0.52f, 0.5f);
 
     RawImage _raw;
     Material _mat;
-    int _paramHash = int.MinValue;
 
     void Awake()
     {
@@ -44,14 +41,13 @@ public sealed class BlackHoleGargantuaBackdrop : MonoBehaviour
         _mat.SetFloat(IdTimeLive, Time.time);
     }
 
-    /// <summary>Creates / hides the child on <paramref name="gridPanel"/>; drives shader params when visible.</summary>
     public static void Sync(RectTransform gridPanel, FunctionPlotter fp)
     {
         if (gridPanel == null || fp == null)
             return;
 
         Transform existing = gridPanel.Find(ChildName);
-        if (fp.functionType != FunctionType.PhysicsGravityWellInverseSqrt)
+        if (fp.functionType != FunctionType.PolarGoldenLogSpiral)
         {
             if (existing != null)
                 existing.gameObject.SetActive(false);
@@ -61,7 +57,7 @@ public sealed class BlackHoleGargantuaBackdrop : MonoBehaviour
         GameObject go;
         if (existing == null)
         {
-            go = new GameObject(ChildName, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage), typeof(BlackHoleGargantuaBackdrop));
+            go = new GameObject(ChildName, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage), typeof(GoldenSpiralBackdrop));
             go.transform.SetParent(gridPanel, false);
             var rt = go.GetComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
@@ -79,9 +75,9 @@ public sealed class BlackHoleGargantuaBackdrop : MonoBehaviour
         go.SetActive(true);
         go.transform.SetAsFirstSibling();
 
-        var backdrop = go.GetComponent<BlackHoleGargantuaBackdrop>();
+        var backdrop = go.GetComponent<GoldenSpiralBackdrop>();
         if (backdrop == null)
-            backdrop = go.AddComponent<BlackHoleGargantuaBackdrop>();
+            backdrop = go.AddComponent<GoldenSpiralBackdrop>();
         backdrop.Drive(fp);
     }
 
@@ -90,12 +86,12 @@ public sealed class BlackHoleGargantuaBackdrop : MonoBehaviour
         if (_mat != null)
             return;
 
-        Shader sh = Resources.Load<Shader>("UI_BlackHoleGargantuaBackdrop");
+        Shader sh = Resources.Load<Shader>("UI_GoldenSpiralBackdrop");
         if (sh == null)
-            sh = Shader.Find("UI/BlackHoleGargantuaBackdrop");
+            sh = Shader.Find("UI/GoldenSpiralBackdrop");
         if (sh == null)
         {
-            Debug.LogWarning("BlackHoleGargantuaBackdrop: shader UI_BlackHoleGargantuaBackdrop not found (place under Resources).");
+            Debug.LogWarning("GoldenSpiralBackdrop: shader UI_GoldenSpiralBackdrop not found (place under Resources).");
             return;
         }
 
@@ -118,34 +114,9 @@ public sealed class BlackHoleGargantuaBackdrop : MonoBehaviour
             rtDrive.offsetMax = Vector2.zero;
         }
 
-        Rect r = rtDrive.rect;
-        float aspect = r.height > 1e-3f ? Mathf.Max(0.2f, r.width / r.height) : 1.7f;
-
-        // Map level softening |D| → shader mass scale (gameplay uses softened 1/r well).
-        float mass = Mathf.Lerp(0.75f, 1.35f, Mathf.Clamp01(Mathf.Abs(fp.transD) / 0.5f));
-        float bMin = 3.1f * mass;
-        float bMax = 13.5f * mass + Mathf.Abs(fp.transA) * 0.08f;
-
-        int h;
-        unchecked
-        {
-            h = 17;
-            h = h * 31 + fp.transA.GetHashCode();
-            h = h * 31 + fp.transD.GetHashCode();
-            h = h * 31 + aspect.GetHashCode();
-            h = h * 31 + mass.GetHashCode();
-        }
-
+        float aspect = rtDrive.rect.height > 1e-3f ? Mathf.Max(0.2f, rtDrive.rect.width / rtDrive.rect.height) : 1.7f;
         _mat.SetFloat(IdAspect, aspect);
-        _mat.SetFloat("_Mass", mass);
-        _mat.SetFloat("_BMin", bMin);
-        _mat.SetFloat("_BMax", bMax);
-        _mat.SetFloat("_CamDist", 14f + Mathf.Clamp(fp.transA, 0f, 8f) * 0.12f);
-
-        if (h != _paramHash)
-        {
-            _paramHash = h;
-            _mat.SetFloat("_DiskBright", 2.2f + Mathf.Clamp01(fp.transK - 0.5f) * 0.6f);
-        }
+        _mat.SetFloat(IdTimeLive, Time.time);
+        _mat.SetColor(IdColor, GoldenTint);
     }
 }
