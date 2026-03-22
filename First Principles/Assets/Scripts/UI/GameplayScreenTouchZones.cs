@@ -59,6 +59,8 @@ public class GameplayScreenTouchZones : MonoBehaviour,
             _instance = go.AddComponent<GameplayScreenTouchZones>();
         }
 
+        _instance.EnsureRaycastGraphic();
+
         // Must sit above the full-screen graph stack (GraphicRaycaster hits top-first). Under _SafeContent
         // as first sibling put this layer *behind* GraphContainer — touches never reached gameplay.
         ReparentTouchLayerAboveGraph(canvasTransform, rt);
@@ -153,6 +155,23 @@ public class GameplayScreenTouchZones : MonoBehaviour,
             UnityEngine.Object.Destroy(t.gameObject);
     }
 
+    private void Awake()
+    {
+        EnsureRaycastGraphic();
+    }
+
+    private void EnsureRaycastGraphic()
+    {
+        var img = GetComponent<Image>();
+        if (img == null)
+        {
+            img = gameObject.AddComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0f);
+        }
+
+        img.raycastTarget = true;
+    }
+
     private void OnDestroy()
     {
         if (_instance == this)
@@ -203,10 +222,16 @@ public class GameplayScreenTouchZones : MonoBehaviour,
         _pointerSide.Remove(pointerId);
     }
 
-    /// <summary>Clears jump-only pointer bookkeeping when <see cref="MobileInputBridge.ClearTouchRouting"/> runs.</summary>
+    /// <summary>
+    /// Clears pointer bookkeeping when <see cref="MobileInputBridge.ClearTouchRouting"/> runs.
+    /// Must match <see cref="MobileHoldAxis.Clear"/> — otherwise <c>_pointerSide.Count &gt;= 1</c> stays true while axis is 0
+    /// and every new touch is misclassified as a second-finger jump (movement appears dead).
+    /// </summary>
     internal static void ClearAuxiliaryPointerState()
     {
-        if (_instance != null)
-            _instance._jumpOnlyPointerIds.Clear();
+        if (_instance == null)
+            return;
+        _instance._jumpOnlyPointerIds.Clear();
+        _instance._pointerSide.Clear();
     }
 }

@@ -60,6 +60,9 @@ public class FunctionPlotter : MonoBehaviour
     [Tooltip("Level mode: horizontally scale the domain window [xStart,xEnd] so it fills most of the grid.")]
     public bool autoScaleHorizontal = true;
 
+    [Tooltip("Graphing calculator: match vertical scale to horizontal zoom so one grid column and one row span the same plotter x/y units (pinch/Scale zoom x and y together). Ignored for polar plot styles.")]
+    public bool lockVerticalPlotScaleToHorizontalWindow = false;
+
     [Tooltip("Fraction of half the grid width (from center) used by the fitted x-window.")]
     [Range(0.38f, 0.92f)]
     public float horizontalFillFraction = 0.74f;
@@ -153,7 +156,8 @@ public class FunctionPlotter : MonoBehaviour
     {
         int a = HashCode.Combine(functionType, xStart, xEnd, step, transA, transK);
         int b = HashCode.Combine(transC, transD, power, baseN, customExpression ?? "");
-        int c = HashCode.Combine(autoScaleVertical, autoScaleHorizontal, verticalFillFraction, horizontalFillFraction);
+        int c = HashCode.Combine(autoScaleVertical, autoScaleHorizontal, lockVerticalPlotScaleToHorizontalWindow,
+            verticalFillFraction, horizontalFillFraction);
         return HashCode.Combine(a, b, c);
     }
 
@@ -427,6 +431,12 @@ public class FunctionPlotter : MonoBehaviour
         // Fit primarily to f(x) (and drag-polar overlays) so flat teaching curves fill the grid; f′ uses the same map.
         ComputeVerticalAutoFit(lineRenderer.gridSize.y, fLo, fHi);
         ComputeHorizontalAutoFit(lineRenderer.gridSize.x, xStart, xEnd);
+
+        if (lockVerticalPlotScaleToHorizontalWindow && !IsPolarPlotStyle(functionType))
+        {
+            _autoMid = 0f;
+            _autoScale = _autoScaleX;
+        }
 
         // --- Pass 2: build polylines with display mapping ---
         for (float i = xStart; i <= xEnd; i += step)

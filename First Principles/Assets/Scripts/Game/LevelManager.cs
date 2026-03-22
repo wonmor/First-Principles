@@ -521,6 +521,8 @@ public class LevelManager : MonoBehaviour
         functionPlotter.autoScaleVertical = false;
         // Stretch [xStart,xEnd] across the grid so pinch / Scale update _autoMidX/_autoScaleX; axis ticks track (LabelManager).
         functionPlotter.autoScaleHorizontal = true;
+        // Pinch / Scale: same plotter units per grid row as per column (square math window).
+        functionPlotter.lockVerticalPlotScaleToHorizontalWindow = true;
         functionPlotter.showWindTunnelBackdrop = false;
 
         if (curveRenderer != null)
@@ -2714,6 +2716,7 @@ public class LevelManager : MonoBehaviour
         functionPlotter.verticalFillFraction = def.graphVerticalFillFraction;
         functionPlotter.autoScaleHorizontal = def.autoFitGraphHorizontal;
         functionPlotter.horizontalFillFraction = def.graphHorizontalFillFraction;
+        functionPlotter.lockVerticalPlotScaleToHorizontalWindow = false;
 
         functionPlotter.transA = def.transA;
         functionPlotter.transK = def.transK;
