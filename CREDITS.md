@@ -4,11 +4,11 @@ Use this file for **in-app parity**, **App Store Connect** (description / promot
 
 ## Developers
 
-**GAME GENESIS** ([itch.io](https://game-genesis.itch.io) · [Rayan Kaissi](https://github.com/rkaissi/)) × **ORCH AEROSPACE** ([orchaerospace.com](https://orchaerospace.com) · [John Wonmo Seong](https://github.com/wonmor))
+**ORCH AEROSPACE** ([orchaerospace.com](https://orchaerospace.com) · [John Wonmo Seong](https://github.com/wonmor)) × **GAME GENESIS** ([itch.io](https://game-genesis.itch.io) · [Rayan Kaissi](https://github.com/rkaissi/))
 
 **Proud graduates of Garth Webb Secondary School, Oakville.**
 
-**Copyright © 2022-2026** Game Genesis (Rayan Kaissi), Orch Aerospace (John Wonmo Seong). All rights reserved.
+**Copyright © 2022-2026** Orch Aerospace (John Wonmo Seong), Game Genesis (Rayan Kaissi). All rights reserved.
 
 ## Development & support
 
