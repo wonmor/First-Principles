@@ -32,7 +32,7 @@ Use this file for **in-app parity**, **App Store Connect** (description / promot
 | **Nanum Gothic (font)** | Copyright as listed in Nanum Gothic. Licensed under **SIL OFL 1.1** — see `First Principles/Assets/Resources/Fonts/LICENSE-NanumGothic-OFL.txt`. Used as a **fallback** for Korean (and Latin coverage) alongside **Noto** fonts under `Assets/Resources/Fonts/`. |
 | **Noto Sans** (Arabic, Devanagari, Bengali, Nastaliq Urdu, SC, JP, KR, etc.) | Copyright © Google Inc. **SIL OFL 1.1** — see `First Principles/Assets/Resources/Fonts/LICENSE-Noto-OFL.txt`. Runtime TextMesh Pro fallbacks. |
 | **Outfit (font, optional)** | Copyright © The Outfit Project Authors. **SIL OFL 1.1** — `First Principles/Assets/Fonts/Outfit-OFL.txt`. Optional alternate UI face via **Apply Outfit for all TextMesh Pro**. |
-| **Nunito (font)** | Bundled SDF asset under `Assets/Fonts/` (legacy / alternate). |
+| **Nunito (font)** | Bundled SDF asset under `First Principles/Assets/Resources/Fonts/` (Menu/Game + runtime-built UI load the same face via `Resources`). |
 
 For other assets under `Assets/`, check any `LICENSE`, `*.txt`, or `Third Party Notices` files next to those assets.
 
