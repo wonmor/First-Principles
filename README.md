@@ -5,6 +5,12 @@ Credits: **ORCH AEROSPACE** ([orchaerospace.com](https://orchaerospace.com) · [
 
 ---
 
+| iOS and iPadOS |
+|:-:|
+| [<img src="https://github.com/wonmor/Atomizer-Swift-Challenge/blob/bb3e156b76ce46eeed402345667d51c843f73280/Docs/appstore-badge.png" height="50">](https://apps.apple.com/us/app/first-principles-2d-platformer/id6760980245) |
+
+---
+
 ## Screenshots
 
 <img width="1728" alt="Screen Shot 2026-03-15 at 2 57 39 PM" src="https://user-images.githubusercontent.com/35755386/158451505-71e056ee-cca4-42ee-a621-38c092c806f2.png">
