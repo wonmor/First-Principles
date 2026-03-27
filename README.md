@@ -1,4 +1,4 @@
-# First Principles: An Interactive Module
+# First Principles: 2D Platformer
 
 A **graphing calculator** and **derivative-driven platformer** built in **Unity 6**. The **name** nods to **Elon Musk**’s comments on a **first-principles approach** to **business** and to **problem-solving in life and work**—paired here with **calculus** on the graph as the literal teaching layer ([`docs/first-principles-business.md`](docs/first-principles-business.md)).  
 Credits: **ORCH AEROSPACE** ([orchaerospace.com](https://orchaerospace.com) · [John Wonmo Seong](https://github.com/wonmor)) × **GAME GENESIS** ([itch.io](https://game-genesis.itch.io) · [Rayan Kaissi](https://github.com/rkaissi/)). **Proprietary** — see [`LICENSE`](LICENSE) and [`CREDITS.md`](CREDITS.md) for terms, App Store–style attribution, and third-party notices. **Orch Avionic 1 EFB** (promo): [`docs/orch-avionic-efb.md`](docs/orch-avionic-efb.md).
