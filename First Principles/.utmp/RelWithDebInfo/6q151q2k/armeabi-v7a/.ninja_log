@@ -1,0 +1,5 @@
+# ninja log v5
+143	430	1775243936220251873	/Users/johnseong/Documents/GitHub2/First-Principles/First Principles/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/6q151q2k/obj/armeabi-v7a/libswappywrapper.so	92c326bf63d98075
+0	143	1775243936026605958	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	efdca66ff8a922cf
+1	133	1775244565745256654	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	efdca66ff8a922cf
+133	296	1775244565892603819	/Users/johnseong/Documents/GitHub2/First-Principles/First Principles/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/6q151q2k/obj/armeabi-v7a/libswappywrapper.so	92c326bf63d98075
