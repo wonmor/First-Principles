@@ -218,6 +218,13 @@ public class GraphObstacleGenerator : MonoBehaviour
             }
         }
 
+        // --- Bridge platform pass: fill gaps wider than maxGapColumns ---
+        if (def.maxGapColumns > 0)
+        {
+            InsertBridgePlatforms(def, world, functionPlotter, bounds,
+                new Vector2Int(gridSize.x / 2, gridSize.y / 2));
+        }
+
         if (!spawnChosen && world.platforms.Count > 0)
         {
             // Fallback: spawn on the first platform.
@@ -420,6 +427,99 @@ public class GraphObstacleGenerator : MonoBehaviour
             RiemannRule.Midpoint => 0.5f * (xL + xR),
             _ => 0.5f * (xL + xR)
         };
+    }
+
+    /// <summary>
+    /// Scans for consecutive gap columns wider than <see cref="LevelDefinition.maxGapColumns"/>
+    /// and inserts bridge platforms at the curve height so every gap is jumpable.
+    /// </summary>
+    private void InsertBridgePlatforms(
+        LevelDefinition def,
+        GraphWorld world,
+        FunctionPlotter functionPlotter,
+        GameplayPlayBounds bounds,
+        Vector2Int gridOrigin)
+    {
+        int maxGap = Mathf.Max(2, def.maxGapColumns);
+        int gapStart = -1;
+
+        for (int col = 0; col <= gridSize.x; col++)
+        {
+            bool hasPlatform = col < gridSize.x && ColumnOverlapsAnyPlatform(col, world.platforms);
+
+            if (!hasPlatform && col < gridSize.x)
+            {
+                if (gapStart < 0)
+                    gapStart = col;
+            }
+            else
+            {
+                if (gapStart >= 0)
+                {
+                    int gapLen = col - gapStart;
+                    if (gapLen > maxGap)
+                    {
+                        // Insert bridge platforms every (maxGap - 1) columns within the gap.
+                        for (int b = gapStart + maxGap - 1; b < col; b += maxGap - 1)
+                        {
+                            float xSample = b + 0.5f;
+                            float xGridOff = xSample - gridOrigin.x;
+                            float xPlotter = functionPlotter != null
+                                ? Mathf.Clamp(functionPlotter.DisplayOffsetFromCenterToPlotterX(xGridOff), def.xStart, def.xEnd)
+                                : Mathf.Clamp(xGridOff, def.xStart, def.xEnd);
+
+                            float yCurve = functionPlotter != null ? functionPlotter.SampleCurveGridY(xPlotter) : gridSize.y / 2f;
+                            if (!IsFiniteFloat(yCurve))
+                                yCurve = gridSize.y * 0.35f;
+
+                            float platformTop = Mathf.Clamp(yCurve, def.platformThicknessGrid + 0.5f, gridSize.y - 0.5f);
+
+                            // Find nearest existing platform height for smoother transitions.
+                            float nearestPlatY = FindNearestPlatformTop(world.platforms, b, 6);
+                            if (!float.IsNaN(nearestPlatY))
+                                platformTop = Mathf.Lerp(platformTop, nearestPlatY, 0.45f);
+
+                            platformTop = Mathf.Clamp(platformTop, def.platformThicknessGrid + 0.3f, gridSize.y - 0.3f);
+                            float platformBottom = Mathf.Clamp(platformTop - def.platformThicknessGrid, 0f, platformTop);
+
+                            var bridge = new GridRect(b, b + 1f, platformBottom, platformTop);
+
+                            // Remove any hazard at this column before adding the bridge.
+                            for (int h = world.hazards.Count - 1; h >= 0; h--)
+                            {
+                                var hz = world.hazards[h];
+                                if (hz.xMin < b + 1f && hz.xMax > b)
+                                {
+                                    world.hazards.RemoveAt(h);
+                                    // Visual hazard quad remains but won't kill — acceptable for bridge feel.
+                                }
+                            }
+
+                            AddPlatformClamped(world, def, $"Platform_Bridge_{b}", bridge, bounds);
+                        }
+                    }
+                }
+                gapStart = -1;
+            }
+        }
+    }
+
+    /// <summary>Returns the yMax of the nearest platform within <paramref name="searchRadius"/> columns, or NaN.</summary>
+    private static float FindNearestPlatformTop(List<GridRect> platforms, int col, int searchRadius)
+    {
+        float best = float.NaN;
+        float bestDist = float.PositiveInfinity;
+        for (int i = 0; i < platforms.Count; i++)
+        {
+            float mid = (platforms[i].xMin + platforms[i].xMax) * 0.5f;
+            float d = Mathf.Abs(mid - (col + 0.5f));
+            if (d < bestDist && d <= searchRadius)
+            {
+                bestDist = d;
+                best = platforms[i].yMax;
+            }
+        }
+        return best;
     }
 
     private static bool IntervalsOverlap(float a0, float a1, float b0, float b1)

@@ -211,6 +211,13 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
+        // Ensure music manager exists (creates itself if not already in the scene).
+        if (GameMusicManager.Instance == null)
+        {
+            var musicGo = new GameObject("GameMusicManager");
+            musicGo.AddComponent<GameMusicManager>();
+        }
+
         graphCalculatorMode = GraphCalculatorSession.ConsumeEnterRequest();
         SetupReferences();
         if (graphCalculatorMode)
@@ -1265,6 +1272,7 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
             story:
                 "<color=#c4b5fd><b>Derivative</b></color> = slope of the tangent — how fast <b>f(x)</b> rises or falls at each step.\n\n" +
                 "<color=#fde047>Gold light</color> traces your path; <color=#7dd3fc>ice-blue</color> is f'(x) sculpting <i>where the floor exists</i>.\n\n" +
@@ -1290,7 +1298,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "A traveler walks where the slope is kind. When the derivative turns negative, the ground thins into a gap."
+                "A traveler walks where the slope is kind. When the derivative turns negative, the ground thins into a gap.",
+            forcePlatformsAtStartColumns: 5,
+            maxGapColumns: 6
         ));
 
         levels.Add(MakeLevel(
@@ -1299,13 +1309,14 @@ public class LevelManager : MonoBehaviour
             curveColor: new Color(0.2f, 1f, 0.7f, 1f),
             derivativeColor: new Color(0.2f, 0.8f, 1f, 1f),
             transA: 1f,
-            transK: 0.65f,
+            transK: 0.85f,
             transC: -2f,
             transD: 0f,
             power: 2,
             baseN: 2,
             story:
-                "The curve rises and falls like breath. The derivative points where to land: positive means a safe step, negative means leap."
+                "The curve rises and falls like breath. The derivative points where to land: positive means a safe step, negative means leap.",
+            maxGapColumns: 6
         ));
 
         levels.Add(MakeLevel(
@@ -1314,13 +1325,14 @@ public class LevelManager : MonoBehaviour
             curveColor: new Color(1f, 0.6f, 0.2f, 1f),
             derivativeColor: new Color(0.9f, 0.2f, 0.6f, 1f),
             transA: 1f,
-            transK: 0.65f,
+            transK: 0.85f,
             transC: -2f,
             transD: 0f,
             power: 2,
             baseN: 2,
             story:
-                "Cosine hides its meaning in the sign of its derivative. Watch the pop: it marks where danger will appear."
+                "Cosine hides its meaning in the sign of its derivative. Watch the pop: it marks where danger will appear.",
+            maxGapColumns: 6
         ));
 
         levels.Add(MakeLevel(
@@ -1329,13 +1341,15 @@ public class LevelManager : MonoBehaviour
             curveColor: new Color(0.4f, 0.7f, 1f, 1f),
             derivativeColor: new Color(1f, 0.15f, 0.15f, 1f),
             transA: 1f,
-            transK: 0.55f,
+            transK: 0.75f,
             transC: -2f,
             transD: 0f,
             power: 2,
             baseN: 2,
             story:
-                "The absolute curve folds into a single path. Where the traveler crosses the turning point, the derivative flips—and so does the ground."
+                "The absolute curve folds into a single path. Where the traveler crosses the turning point, the derivative flips—and so does the ground.",
+            forcePlatformsAtStartColumns: 5,
+            maxGapColumns: 6
         ));
 
         levels.Add(MakeLevel(
@@ -1689,6 +1703,8 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>AP Calculus BC — inverse trig.</b> <color=#38bdf8>Arctan</color> is the hero of bounded slopes: d/dx arctan(x) = 1/(1+x²).\n\n" +
                 "It shows up in integrals that produce arctangent, in related‑rate geometry problems, and whenever an angle is defined from a ratio that grows slowly.\n\n" +
@@ -1777,6 +1793,9 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
+            maxGapColumns: 6,
             story:
                 "<b>Hyperbolic sine & cosine</b> (BC): sinh x = (e^x − e^{−x})/2, cosh x = (e^x + e^{−x})/2, and cosh² − sinh² = 1 (a hyperbola identity).\n\n" +
                 "They solve linear ODEs, describe hanging cables alongside cosh, and mirror trig identities with occasional sign flips.\n\n" +
@@ -1799,6 +1818,10 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            derivativeSafeThreshold: -0.15f,
+            maxGapColumns: 5,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
             story:
                 "<b>AP Physics C (calculus‑based)</b> — exponential decay: charge on a discharging capacitor, current in an RL loop, or any quantity Q(t) with dQ/dt ~ −Q.\n\n" +
                 "Solution: <color=#38bdf9>Q = Q₀ e^{−t/τ}</color>; τ (time constant) sets how fast the tail relaxes — the same picture as “half‑life” thinking.\n\n" +
@@ -1843,6 +1866,10 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            derivativeSafeThreshold: -0.1f,
+            maxGapColumns: 5,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
             story:
                 "<b>Projectile height vs time</b> (constant g): y(t) = y₀ + v₀ t − ½ g t² — a <color=#fde047>downward parabola</color> in t for vertical motion.\n\n" +
                 "Derivatives give vertical velocity, then acceleration −g: the Physics C calculus trilogy x, v, a shows up in every kinematics sprint.\n\n" +
@@ -1887,6 +1914,9 @@ public class LevelManager : MonoBehaviour
             transD: -25f,
             power: 2,
             baseN: 2,
+            derivativeSafeThreshold: -0.08f,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>Natural logarithm</b> is the star of ∫ (1/x) dx = ln|x| + C and shows up in p‑growth comparisons, half‑lives, and ε–δ arguments about slow divergence.\n\n" +
                 "Domain x > 0 (here ensured by shifting the graph so u stays positive): slopes are always positive but shrink as x grows — classic “diminishing returns.”\n\n" +
@@ -1909,6 +1939,9 @@ public class LevelManager : MonoBehaviour
             transD: -20f,
             power: 2,
             baseN: 2,
+            derivativeSafeThreshold: -0.08f,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>√x</b> — domain restriction hero. d/dx √x = 1/(2√x) blows up approaching 0 from the right: infinite slope at the vertical tangent place (a classic BC “improper behavior” discussion).\n\n" +
                 "Substitution integrals and arc length formulas love √(1 + (dy/dx)²); the cusp language matches “watch the derivative.”\n\n" +
@@ -1931,6 +1964,9 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
+            maxGapColumns: 5,
             story:
                 "<b>Tangent</b> packs vertical asymptotes where cos → 0 — limits sprint material on every AP sheet.\n\n" +
                 "Here the window is chosen so you explore a single smooth branch between asymptotes: sec²x is the derivative, always ≥ 1 when defined.\n\n" +
@@ -1953,6 +1989,8 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>Exponential growth ODE</b>: if y′ = k y then y = Ce^{kx} — the reason e^x is “its own derivative” up to scaling.\n\n" +
                 "Separable equations, slope fields, and half‑life problems all orbit this curve before you meet logistic saturation next door.\n\n" +
@@ -1997,6 +2035,8 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 3,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            maxGapColumns: 6,
             story:
                 "<b>Cubic graph sketching</b> — a BC classroom ritual: find critical points, inflection where y″ flips sign, end behavior ±∞.\n\n" +
                 "<color=#fca5a5>Inflection</color> is where curvature changes; the derivative has a local max/min there for smooth cubics.\n\n" +
@@ -2041,6 +2081,10 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            derivativeSafeThreshold: -0.15f,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
+            maxGapColumns: 5,
             story:
                 "<b>Circle equation</b> in standard form: <color=#7dd3fc>(x − h)² + (y − k)² = R²</color>. A full circle is not a single y = f(x) graph — it fails the vertical line test — so we walk the <b>upper semicircle</b>:\n\n" +
                 "y = k + √(R² − (x − h)²) on |x − h| ≤ R. <b>Implicit differentiation</b> on the circle gives dy/dx = −(x − h)/(y − k) (away from y = k on the full curve).\n\n" +
@@ -2063,6 +2107,10 @@ public class LevelManager : MonoBehaviour
             transD: -16f,
             power: 2,
             baseN: 140,
+            derivativeSafeThreshold: -0.2f,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
+            maxGapColumns: 5,
             story:
                 "<b>Thermodynamics — reversible adiabatic path</b> — for an ideal gas, <color=#fdba74>quasi-static adiabats</color> obey <b>PV<sup>γ</sup> = constant</b> (no heat exchange, work comes only from internal energy bookkeeping).\n\n" +
                 "Here the horizontal walk is a scaled <color=#7dd3fc>“volume-like”</color> coordinate; height tracks <b>pressure mood</b> as P ∝ V<sup>−γ</sup>. We set <b>N = 140</b> so γ ≈ 1.40 — a familiar air/diatomic story problem vibe, not a lab instrument.\n\n" +
@@ -2143,6 +2191,10 @@ public class LevelManager : MonoBehaviour
             transD: -6f,
             power: 2,
             baseN: 4,
+            derivativeSafeThreshold: -0.15f,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
+            maxGapColumns: 5,
             story:
                 "<b>Atmosphere (isothermal cartoon)</b> — pressure and density drop roughly <color=#86efac>exponentially</color> with altitude: p, ρ ~ e^{−h/H} with <b>scale height</b> H (temperature & mean molar mass set the mood in the real ISA).\n\n" +
                 "Aero engineers live in these curves: thrust, Reynolds, Mach, dynamic pressure q = ½ρV² all track ρ(h).\n\n" +
@@ -2243,6 +2295,10 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            derivativeSafeThreshold: -0.12f,
+            maxGapColumns: 5,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
             story:
                 "<b>Re‑entry & hypersonic heating mood</b> — heat flux scales with <color=#fde047>dynamic pressure × velocity</color> roughly like ρ V³ in many order‑of‑magnitude chats (models vary!), so as altitude climbs (ρ↓) and speed bleeds off, the <i>threat curve</i> relaxes exponentially in time in simplified histories.\n\n" +
                 "Thermal protection, trajectory shaping, and bank angle modulation all serve to keep material beneath limits — calculus is the language of those trade curves.\n\n" +
@@ -2267,6 +2323,9 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
+            maxGapColumns: 5,
             story:
                 "<b>Dot‑com bubble — stylized chart walk</b> — equity indices like the broad <color=#86efac>S&amp;P 500</color> (or the racier <color=#7dd3fc>Nasdaq Composite</color>) climbed through the late 1990s, then <color=#fca5a5>gapped down</color> as the 2000–02 tech hangover unwound years of euphoria.\n\n" +
                 "This path is a <b>smooth teaching silhouette</b> — not downloaded tick data — but it catches the storytelling shape: **grind, parabolic enthusiasm, air pocket, slow rebuild**. Slopes and concavity still read like real market moods.\n\n" +
@@ -2290,6 +2349,9 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
+            maxGapColumns: 5,
             story:
                 "<b>Global financial crisis — stylized stress curve</b> — US <color=#fde047>housing & mortgage</color> risk, structured credit losses, and institutional fragility fed a <color=#fca5a5>violent repricing</color> in 2007–09 that spilled across banks, money markets, and real economies (familiar names in history books: Lehman’s collapse in Sept 2008 as a flashpoint).\n\n" +
                 "Again: <b>no real GSPC series here</b> — just a qualitative spline with a **crest near complacency**, a **cliff**, and a **long crawl** that matches how people <i>remember</i> the V‑shock conversation.\n\n" +
@@ -2313,6 +2375,9 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 1,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
+            maxGapColumns: 5,
             story:
                 "<b>Fourier transform — sinc glimpse</b> — a sharp pulse in time smears into a tall <color=#7dd3fc>sinc</color> in frequency: the side lobes are the price of band-limiting dreams.\n\n" +
                 "Here the horizontal axis is an angular-frequency style <i>u</i>; height follows <b>sin(u)/u</b> (normalized to 1 at the origin). It is the magnitude mood of a rectangular window — not a full FFT engine, but the canonical homework picture.\n\n" +
@@ -2338,6 +2403,10 @@ public class LevelManager : MonoBehaviour
             transD: -6f,
             power: 1,
             baseN: 125,
+            derivativeSafeThreshold: -0.15f,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
+            maxGapColumns: 5,
             story:
                 "<b>Laplace transform — causal exponential</b> — for <b>t ≥ 0</b>, the table favorite <color=#86efac>f(t) = e<sup>−at</sup></color> is the polite ancestor of every damped pole in your s-domain algebra.\n\n" +
                 "We plot that decay with <b>N = 125</b> so the rate is about <b>a ≈ 1.25</b>: horizontal axis as time after the jump, vertical as amplitude.\n\n" +
@@ -2363,6 +2432,9 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 1,
             baseN: 105,
+            maxGapColumns: 6,
+            forcePlatformsAtStartColumns: 4,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>Secret boss — golden spiral</b> — nature’s favorite growth curve is a <color=#fbbf24>logarithmic spiral</color>: each time angle θ advances steadily, radius scales by a fixed factor tied to the <color=#fde68a>golden ratio φ = (1+√5)/2</color>.\n\n" +
                 "Fibonacci rectangles, nautilus moods, and phyllotaxis in sunflowers all whisper the same proportion — here you walk the graph as <b>r(θ) ∝ φ^{kθ}</b> on a polar-style readout (horizontal = θ, vertical = r).\n\n" +
@@ -2388,6 +2460,9 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 80,
             baseN: 26,
+            maxGapColumns: 6,
+            forcePlatformsAtStartColumns: 4,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>True finale — Mandelbrot encore</b> — the <color=#a8b2d1>backdrop</color> is again the classic <b>c-plane</b> (Re horizontal, Im vertical) colored by <color=#a7f3d0>smooth escape time</color>; your path follows the same slice: height vs <color=#86efac>Im(c)</color> at fixed <color=#86efac>Re(c)</color>.\n\n" +
                 "This is the <b>final boss gate</b>: every step still reads Julia–Mandelbrot folklore — bulbs, filaments, and the cardioid where behavior flips.\n\n" +
@@ -2417,6 +2492,9 @@ public class LevelManager : MonoBehaviour
             transD: lorenzBossX0,
             power: 1,
             baseN: 2,
+            maxGapColumns: 5,
+            forcePlatformsAtStartColumns: 4,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>True finale — Chaos Theory</b> — the <color=#a8b2d1>horizontal axis</color> is a long stretch of <color=#86efac>simulation time</color>; height tracks the classic Lorenz <color=#7dd3fc>x(t)</color> with σ=10, ρ=28, β=8/3.\n\n" +
                 "Watch how the attractor <b>keeps retuning</b>: the same law, sensitive dependence, a path that never quite repeats — <color=#fda4af>chaos theory</color> made legible as motion.\n\n" +
@@ -2442,6 +2520,10 @@ public class LevelManager : MonoBehaviour
             transD: 0.38f,
             power: 1,
             baseN: 2,
+            derivativeSafeThreshold: -0.2f,
+            maxGapColumns: 5,
+            forcePlatformsAtStartColumns: 4,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>BOSS: Black hole — gravity well</b> — the curve is a <color=#7dd3fc>softened 1/r</color> slice: depth spikes toward the center, then relaxes into a gentle far-field shoulder.\n\n" +
                 "It is a <b>teaching stand-in</b> for how gravitational potential tightens near mass — not a full GR embedding, but the right <color=#fda4af>“falling in”</color> intuition on a 1D graph.\n\n" +
@@ -2501,6 +2583,10 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 0,
             baseN: 2,
+            derivativeSafeThreshold: -0.01f,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 3,
+            maxGapColumns: 4,
             story:
                 "<b>Big O: O(1)</b> — constant time: the work doesn’t grow with input size. Here <color=#7dd3fc>u⁰ = 1</color>, so height stays flat as <i>u</i> (our stand-in for <i>n</i>) marches.\n\n" +
                 "<size=92%><color=#a8b2d1>Hash lookups and array indexing are classic O(1) <i>when the model fits</i> — the graph is the calm horizontal proof.</color></size>",
@@ -2521,6 +2607,8 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 1,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>Big O: O(log n)</b> — each step shrinks the problem by a constant factor (binary search, balanced trees). <color=#86efac>ln u</color> climbs gently forever.\n\n" +
                 "<size=92%><color=#a8b2d1>Domain needs <i>u</i> &gt; 0 — we sample away from zero so the law stays finite on the grid.</color></size>",
@@ -2581,6 +2669,8 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 1,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            forcePlatformsAtEndColumns: 2,
             story:
                 "<b>Big O: O(n log n)</b> — the sweet spot for sorting lower bounds (comparison sorts) and many divide steps. <color=#7dd3fc>u ln u</color> pulls away from linear but loses to n².\n\n" +
                 "<size=92%><color=#a8b2d1>We clamp the small‑u end so ln doesn’t sing on zero — same idea as “n big enough” in proofs.</color></size>",
@@ -2601,6 +2691,8 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 2,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            maxGapColumns: 5,
             story:
                 "<b>Big O: O(n²)</b> — nested loops, many pairwise checks, naive matrix setups. <color=#fda4af>u²</color> accelerates — the derivative warns you early.\n\n" +
                 "<size=92%><color=#a8b2d1>When you see the parabola in complexity class, look for a double walk over data.</color></size>",
@@ -2621,6 +2713,8 @@ public class LevelManager : MonoBehaviour
             transD: 0f,
             power: 3,
             baseN: 2,
+            forcePlatformsAtStartColumns: 5,
+            maxGapColumns: 5,
             story:
                 "<b>Big O: O(n³)</b> — triple loops, naive Floyd–Warshall mood, dense cubic work. <color=#fbbf24>u³</color> rockets faster than n² — small constants don’t save you forever.\n\n" +
                 "<size=92%><color=#a8b2d1>Good algorithms often <b>avoid</b> this exponent; the graph shows why.</color></size>",
@@ -2683,7 +2777,11 @@ public class LevelManager : MonoBehaviour
         float? levelXEnd = null,
         Color[] dragPolarOverlayColors = null,
         float? riemannPlatformCoverage = null,
-        bool showWindTunnelBackdrop = false)
+        bool showWindTunnelBackdrop = false,
+        int maxGapColumns = 7,
+        float derivativeSafeThreshold = 0f,
+        int forcePlatformsAtStartColumns = 3,
+        int forcePlatformsAtEndColumns = 1)
     {
         var def = ScriptableObject.CreateInstance<LevelDefinition>();
         def.levelName = name;
@@ -2702,9 +2800,10 @@ public class LevelManager : MonoBehaviour
         def.curveColor = curveColor;
         def.derivativeColor = derivativeColor;
 
-        def.derivativeSafeThreshold = 0f;
-        def.forcePlatformsAtStartColumns = 3;
-        def.forcePlatformsAtEndColumns = 1;
+        def.derivativeSafeThreshold = derivativeSafeThreshold;
+        def.forcePlatformsAtStartColumns = forcePlatformsAtStartColumns;
+        def.forcePlatformsAtEndColumns = forcePlatformsAtEndColumns;
+        def.maxGapColumns = maxGapColumns;
         def.platformThicknessGrid = 0.6f;
         def.hazardHeightGrid = 0.5f;
 
@@ -2777,6 +2876,10 @@ public class LevelManager : MonoBehaviour
         var def = levels[currentLevelIndex];
         ApplyLevelTheme(def);
         RefreshStageHud();
+
+        // Trigger per-category background music.
+        if (GameMusicManager.Instance != null)
+            GameMusicManager.Instance.PlayForLevel(currentLevelIndex);
 
         if (levelFlowRoutine != null)
             StopCoroutine(levelFlowRoutine);

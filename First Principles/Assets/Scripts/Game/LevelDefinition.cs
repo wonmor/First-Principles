@@ -68,6 +68,9 @@ public class LevelDefinition : ScriptableObject
     [Tooltip("Visual hazard/spikes height in grid units.")]
     public float hazardHeightGrid = 0.5f;
 
+    [Tooltip("Maximum consecutive hazard/gap columns before a bridge platform is inserted. Prevents impossible jumps. 0 = no limit.")]
+    public int maxGapColumns = 7;
+
     [Header("Visual Theme")]
     public Color curveColor = new Color(1f, 0.759119f, 0f, 1f);
     public Color derivativeColor = new Color(1f, 0.1782313f, 0f, 1f);
