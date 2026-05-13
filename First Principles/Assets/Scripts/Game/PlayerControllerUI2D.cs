@@ -42,6 +42,20 @@ public class PlayerControllerUI2D : MonoBehaviour
     [SerializeField] private float playerWidthGrid = 0.78f;
     [SerializeField] private float playerHeightGrid = 1.12f;
 
+    [Header("Bouncy Ball")]
+    [Tooltip("Restitution on platform landings (0 = stick, 1 = perfect bounce). Kept modest so 59 levels still platform cleanly.")]
+    [Range(0f, 1f)] [SerializeField] private float groundBounciness = 0.42f;
+    [Tooltip("Below this downward speed (grid/s), landings settle instead of bouncing.")]
+    [SerializeField] private float bounceVelocityCutoffGridPerSec = 2.2f;
+    [SerializeField] private float landingSquashSeconds = 0.18f;
+    [Range(0f, 0.6f)] [SerializeField] private float landingSquashStrength = 0.22f;
+
+    [Header("Skyblue Aura")]
+    [SerializeField] private bool showSphereAura = true;
+    [SerializeField] private Color sphereAuraColor = new Color(0.49f, 0.78f, 1f, 0.55f);
+    [Tooltip("Sphere overlay size relative to the player AABB (1 = same size).")]
+    [SerializeField] private float sphereAuraScale = 1.55f;
+
     private RectTransform playerRect;
     private Image playerImage;
 
@@ -80,6 +94,9 @@ public class PlayerControllerUI2D : MonoBehaviour
     private Color gridBackgroundRestColor;
     private float derivativeBgTintPhase;
 
+    private Image sphereAura;
+    private float squashTimer;
+
     const string GridBackgroundObjectName = "Grid Background";
 
     public Vector2 PlayerCenterGrid => posGrid;
@@ -109,6 +126,29 @@ public class PlayerControllerUI2D : MonoBehaviour
     {
         playerRect = rect;
         playerImage = img;
+        EnsureSphereAura();
+    }
+
+    void EnsureSphereAura()
+    {
+        if (!showSphereAura || playerRect == null || sphereAura != null)
+            return;
+
+        var auraGo = new GameObject("SkyblueAura");
+        var auraRt = auraGo.AddComponent<RectTransform>();
+        auraRt.SetParent(playerRect, false);
+        auraRt.anchorMin = Vector2.zero;
+        auraRt.anchorMax = Vector2.one;
+        auraRt.offsetMin = Vector2.zero;
+        auraRt.offsetMax = Vector2.zero;
+        auraRt.localScale = Vector3.one * sphereAuraScale;
+        auraRt.SetAsFirstSibling();
+
+        var auraImg = auraGo.AddComponent<Image>();
+        auraImg.sprite = RuntimeUiPolish.SoftCharacterBlob;
+        auraImg.color = sphereAuraColor;
+        auraImg.raycastTarget = false;
+        sphereAura = auraImg;
     }
 
     public void SetDeathMinYGrid(float deathMinYGrid)
@@ -576,8 +616,18 @@ public class PlayerControllerUI2D : MonoBehaviour
                 if (crossedTopSurface)
                 {
                     pos.y = p.yMax + halfH;
-                    velGrid.y = 0f;
-                    groundedOut = true;
+                    float impact = -velGrid.y;
+                    if (impact > bounceVelocityCutoffGridPerSec && groundBounciness > 0f)
+                    {
+                        velGrid.y = impact * groundBounciness;
+                        groundedOut = false;
+                    }
+                    else
+                    {
+                        velGrid.y = 0f;
+                        groundedOut = true;
+                    }
+                    TriggerLandingSquash(impact);
                 }
             }
             else // Rising — only bonk real ceilings, not the underside lip of the next stair tread.
@@ -637,6 +687,36 @@ public class PlayerControllerUI2D : MonoBehaviour
         float px = (posGrid.x - halfW) * unitWidth;
         float py = (posGrid.y - halfH) * unitHeight;
         playerRect.anchoredPosition = new Vector2(px, py);
+
+        ApplySquashScale();
+    }
+
+    void TriggerLandingSquash(float downwardSpeed)
+    {
+        if (landingSquashSeconds <= 0f || landingSquashStrength <= 0f)
+            return;
+        float refSpeed = Mathf.Max(0.1f, bounceVelocityCutoffGridPerSec * 3f);
+        float intensity = Mathf.Clamp01(downwardSpeed / refSpeed);
+        squashTimer = Mathf.Max(squashTimer, landingSquashSeconds * intensity);
+    }
+
+    void ApplySquashScale()
+    {
+        if (playerRect == null)
+            return;
+
+        if (squashTimer <= 0f || landingSquashSeconds <= 0f)
+        {
+            playerRect.localScale = Vector3.one;
+            return;
+        }
+
+        squashTimer = Mathf.Max(0f, squashTimer - Time.deltaTime);
+        float t = 1f - squashTimer / landingSquashSeconds;
+        float curve = Mathf.Sin(t * Mathf.PI);
+        float yScale = 1f - landingSquashStrength * curve;
+        float xScale = 1f + landingSquashStrength * 0.55f * curve;
+        playerRect.localScale = new Vector3(xScale, yScale, 1f);
     }
 
     private void Die()

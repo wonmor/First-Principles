@@ -2912,15 +2912,16 @@ public class LevelManager : MonoBehaviour
         functionPlotter.differentiate = true;
         functionPlotter.showWindTunnelBackdrop = def.showWindTunnelBackdrop;
 
+        const string IntegralSuffixHex = "5cabff";
         if (def.showRiemannVisualization)
         {
             if (def.riemannRule == RiemannRule.None)
-                functionPlotter.SetEquationExtraSuffix($"Area ≈ Σ f(x*) Δx, n={def.riemannRectCount} (Δx=(b−a)/n)");
+                functionPlotter.SetEquationExtraSuffix($"Area ≈ Σ f(x*) Δx, n={def.riemannRectCount} (Δx=(b−a)/n)", IntegralSuffixHex);
             else
-                functionPlotter.SetEquationExtraSuffix($"Riemann {def.riemannRule}: n={def.riemannRectCount}");
+                functionPlotter.SetEquationExtraSuffix($"Riemann {def.riemannRule}: n={def.riemannRectCount}", IntegralSuffixHex);
         }
         else if (def.useRiemannStairPlatforms && def.riemannRule != RiemannRule.None)
-            functionPlotter.SetEquationExtraSuffix($"Stairs: {def.riemannRule} rule, n={def.riemannRectCount}");
+            functionPlotter.SetEquationExtraSuffix($"Stairs: {def.riemannRule} rule, n={def.riemannRectCount}", IntegralSuffixHex);
         else
             functionPlotter.SetEquationExtraSuffix("");
 

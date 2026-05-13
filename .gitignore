@@ -68,6 +68,14 @@ sysinfo.txt
 *.aab
 *.unitypackage
 
+# Signing material — never commit
+*.keystore
+*.jks
+*.keystore.meta
+*.p12
+*.p8
+*.mobileprovision
+
 # Crashlytics
 crashlytics-build.properties
 

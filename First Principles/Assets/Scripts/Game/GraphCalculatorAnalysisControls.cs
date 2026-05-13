@@ -34,6 +34,12 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
 
     static readonly Color CalculatorRiemannFill = new Color(0.28f, 0.62f, 1f, 0.52f);
 
+    const string DerivativeSuffixHex = "fb7c8f";
+    const string IntegralSuffixHex = "5cabff";
+
+    string derivativeSuffixText = "";
+    string integralSuffixText = "";
+
     Button derivButton;
     Button integralButton;
     GameObject derivButtonRoot;
@@ -67,6 +73,8 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
         derivativeDepth = 0;
         integralUsed = false;
         integralBarsActive = false;
+        derivativeSuffixText = "";
+        integralSuffixText = "";
         CleanupDerivativeLineComponents();
         DestroyUiButtons();
 
@@ -90,12 +98,41 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
         derivativeDepth = 0;
         integralUsed = false;
         integralBarsActive = false;
+        derivativeSuffixText = "";
+        integralSuffixText = "";
         if (plotter != null)
             plotter.SetEquationExtraSuffix("");
         if (riemann != null)
             riemann.ClearStrips();
         HideAllDerivativeLines();
         RefreshButtonInteractable();
+    }
+
+    void RebuildEquationSuffix()
+    {
+        if (plotter == null)
+            return;
+
+        bool hasDeriv = !string.IsNullOrEmpty(derivativeSuffixText);
+        bool hasIntegral = !string.IsNullOrEmpty(integralSuffixText);
+        if (!hasDeriv && !hasIntegral)
+        {
+            plotter.SetEquationExtraSuffix("");
+            return;
+        }
+
+        string combined;
+        if (hasDeriv && hasIntegral)
+            combined = $"<color=#{DerivativeSuffixHex}>{derivativeSuffixText}</color>\n<color=#{IntegralSuffixHex}>{integralSuffixText}</color>";
+        else if (hasDeriv)
+            combined = derivativeSuffixText;
+        else
+            combined = integralSuffixText;
+
+        string outerHex = hasDeriv && !hasIntegral ? DerivativeSuffixHex
+                        : !hasDeriv && hasIntegral ? IntegralSuffixHex
+                        : "a8b2d1";
+        plotter.SetEquationExtraSuffix(combined, outerHex);
     }
 
     void LateUpdate()
@@ -155,6 +192,15 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
             return;
         derivativeDepth++;
         RefreshButtonInteractable();
+
+        string expr = plotter.customExpression ?? "";
+        string hint = GraphingCalculatorDerivativeHint.TryFormatDerivativeLine(expr);
+        string prefix = LocalizationManager.Get("graph.calc_derivative_prefix", "Derivative (guess):");
+        string body = string.IsNullOrEmpty(hint)
+            ? LocalizationManager.Get("graph.calc_derivative_fallback", "f′(u)  (numeric estimate)")
+            : $"f′(u) = {hint}";
+        derivativeSuffixText = $"{prefix} {body}";
+        RebuildEquationSuffix();
     }
 
     void OnIntegralPressed()
@@ -180,7 +226,8 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
             hint = LocalizationManager.Get("graph.calc_integral_fallback", "∫ f(u) du + C  (no symbolic guess)");
 
         string prefix = LocalizationManager.Get("graph.calc_primitive_prefix", "Primitive (guess):");
-        plotter.SetEquationExtraSuffix($"{prefix} {hint}");
+        integralSuffixText = $"{prefix} {hint}";
+        RebuildEquationSuffix();
     }
 
     void RefreshButtonInteractable()

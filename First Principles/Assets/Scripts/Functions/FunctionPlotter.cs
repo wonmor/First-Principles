@@ -90,6 +90,8 @@ public class FunctionPlotter : MonoBehaviour
 
     /// <summary>Optional second line under the main equation (e.g. Riemann / integral note).</summary>
     private string equationExtraSuffix = "";
+    /// <summary>Hex color (no leading <c>#</c>) wrapping <see cref="equationExtraSuffix"/>; inline <c>&lt;color&gt;</c> tags inside the suffix override per-span.</summary>
+    private string equationExtraSuffixColorHex = "a8b2d1";
 
     private LineRendererUI lineRenderer;
     private DerivRendererUI derivRenderer;
@@ -368,6 +370,14 @@ public class FunctionPlotter : MonoBehaviour
     public void SetEquationExtraSuffix(string suffix)
     {
         equationExtraSuffix = suffix ?? "";
+        equationExtraSuffixColorHex = "a8b2d1";
+    }
+
+    /// <param name="colorHex">With or without leading <c>#</c>; <c>null</c>/empty restores the default grey-blue.</param>
+    public void SetEquationExtraSuffix(string suffix, string colorHex)
+    {
+        equationExtraSuffix = suffix ?? "";
+        equationExtraSuffixColorHex = string.IsNullOrEmpty(colorHex) ? "a8b2d1" : colorHex.TrimStart('#');
     }
 
     /// <summary>True when the curve is the polar graph <c>r(θ)</c> (horizontal axis = θ, vertical = r), not Cartesian <c>y(x)</c>.</summary>
@@ -1129,7 +1139,7 @@ public class FunctionPlotter : MonoBehaviour
                     $"<size=94%><color=#f2f4ff>{esc}</color></size>\n" +
                     $"<size=78%><color=#94a3b8>Plotted: <b>y = A·f(u)+C</b>, u = k·(x−D). Edit below. Use sin, cos, tan, sqrt, ln, log, exp, ^, pi, e …</color></size>";
                 if (!string.IsNullOrEmpty(equationExtraSuffix))
-                    equationText.text += $"\n<size=85%><color=#a8b2d1>{equationExtraSuffix}</color></size>";
+                    equationText.text += $"\n<size=85%><color=#{equationExtraSuffixColorHex}>{equationExtraSuffix}</color></size>";
                 return;
             }
             default:
@@ -1138,7 +1148,7 @@ public class FunctionPlotter : MonoBehaviour
         }
 
         if (!string.IsNullOrEmpty(equationExtraSuffix))
-            equationText.text += $"\n<size=85%><color=#a8b2d1>{equationExtraSuffix}</color></size>";
+            equationText.text += $"\n<size=85%><color=#{equationExtraSuffixColorHex}>{equationExtraSuffix}</color></size>";
 
         if (equationText != null)
             equationText.text = TmpLatex.Process(equationText.text);
