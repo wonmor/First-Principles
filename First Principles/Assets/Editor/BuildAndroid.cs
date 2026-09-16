@@ -50,6 +50,39 @@ public static class BuildHelper
             Debug.LogError($"BUILD FAILED: {result.summary.result}");
     }
 
+    [MenuItem("Build/Windows x64 (Steam)")]
+    public static void BuildWindows()
+    {
+        EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+
+        string outputDir = "../Builds/Windows";
+        string outputPath = outputDir + "/First Principles.exe";
+        System.IO.Directory.CreateDirectory(System.IO.Path.GetFullPath(outputDir));
+
+        var options = new BuildPlayerOptions
+        {
+            scenes = new[]
+            {
+                "Assets/Scenes/Menu.unity",
+                "Assets/Scenes/LevelSelect.unity",
+                "Assets/Scenes/Game.unity"
+            },
+            locationPathName = outputPath,
+            target = BuildTarget.StandaloneWindows64,
+            options = BuildOptions.None
+        };
+
+        var result = BuildPipeline.BuildPlayer(options);
+        if (result.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            Debug.Log($"BUILD SUCCEEDED: {outputPath} ({result.summary.totalSize} bytes)");
+        else
+        {
+            Debug.LogError($"BUILD FAILED: {result.summary.result}");
+            if (UnityEditorInternal.InternalEditorUtility.inBatchMode)
+                EditorApplication.Exit(1);
+        }
+    }
+
     [MenuItem("Build/iOS Xcode Project")]
     public static void BuildIOS()
     {
