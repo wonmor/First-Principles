@@ -218,6 +218,7 @@ public static class MenuPlayerGlyphPickerOverlay
             RuntimeUiPolish.ButtonNeutralHover,
             RuntimeUiPolish.PanelDeep);
         closerBtn.onClick.AddListener(Close);
+        OverlayCancelHandler.Attach(root, closerBtn);
 
         var closerTxtGo = new GameObject("Text");
         var closerTxtRt = closerTxtGo.AddComponent<RectTransform>();

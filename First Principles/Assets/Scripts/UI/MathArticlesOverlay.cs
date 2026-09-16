@@ -89,6 +89,7 @@ public static class MathArticlesOverlay
             RuntimeUiPolish.ButtonNeutralHover, RuntimeUiPolish.PanelDeep);
         closeBtn.onClick.AddListener(Close);
         RuntimeUiPolish.ApplyDropShadow(closeRt, new Vector2(1.5f, -2f), 0.22f);
+        OverlayCancelHandler.Attach(root, closeBtn);
 
         var closeTxtGo = new GameObject("Text");
         var closeTxtRt = closeTxtGo.AddComponent<RectTransform>();

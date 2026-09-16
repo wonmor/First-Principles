@@ -696,6 +696,7 @@ public class LevelSelectController : MonoBehaviour
         panelBtn.targetGraphic = panelImg;
         panelBtn.transition = Selectable.Transition.None;
         panelBtn.onClick.AddListener(() => Destroy(root));
+        OverlayCancelHandler.Attach(root, dimBtn, panelBtn);
 
         var msgGo = new GameObject("Message");
         var msgRt = msgGo.AddComponent<RectTransform>();

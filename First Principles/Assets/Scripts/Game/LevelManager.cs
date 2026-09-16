@@ -3397,6 +3397,7 @@ public class LevelManager : MonoBehaviour
         tapBtn.targetGraphic = tapImg;
         tapBtn.transition = Selectable.Transition.None;
         tapBtn.onClick.AddListener(() => stageIntroSkipRequested = true);
+        OverlayCancelHandler.Attach(stageIntroRoot, tapBtn);
 
         stageIntroRoot.SetActive(false);
     }
