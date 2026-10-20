@@ -164,6 +164,8 @@ public static class PaywallOverlay
             LocalizationManager.Get("paywall.not_now", "Not now"),
             UiTypography.Scale(tablet ? 24 : 21), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
         laterBtn.onClick.AddListener(() => { if (!_busy) Close(); });
+        // Escape / gamepad B / Android back = "Not now"; controller focus starts on Buy.
+        OverlayCancelHandler.Attach(_root, laterBtn, _buyBtn);
 
         _statusTmp = AddText(panelRt, "Status", new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.15f), "",
             UiTypography.Scale(tablet ? 21 : 19), new Color(0.75f, 0.8f, 0.92f, 0.9f), FontStyles.Italic);
