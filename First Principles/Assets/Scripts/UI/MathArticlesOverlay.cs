@@ -238,7 +238,7 @@ public static class MathArticlesOverlay
             return;
 
         body.overflowMode = TextOverflowModes.Overflow;
-        body.enableWordWrapping = true;
+        body.textWrappingMode = TextWrappingModes.Normal;
 
         var tmpRt = body.rectTransform;
         var contentRt = tmpRt.parent as RectTransform;
