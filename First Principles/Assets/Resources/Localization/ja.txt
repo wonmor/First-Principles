@@ -87,3 +87,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=フルゲームをアンロック
+paywall.body=無料で{0}レベルを遊べます。1回の購入で全{1}レベルが解放されます：AP微積分BC・物理C、航空宇宙、経済、変換、ビッグO、4体のラスボス — 今後追加されるレベルもすべて。
+paywall.promise=買い切り · 広告なし · サブスクなし
+paywall.buy=全レベルをアンロック
+paywall.buy_price=全レベルをアンロック · {0}
+paywall.restore=購入を復元
+paywall.not_now=あとで
+paywall.status.connecting=ストアに接続中…
+paywall.status.unavailable=現在ストアを利用できません。接続を確認して再度お試しください。
+paywall.status.purchasing=ストアの応答を待っています…
+paywall.status.restoring=購入を復元中…
+paywall.status.nothing_to_restore=このアカウントで以前の購入が見つかりませんでした。
+paywall.status.restore_failed=現在復元できません。もう一度お試しください。
+paywall.status.deferred=購入は承認待ちです。承認されると自動的にレベルが解放されます。
+paywall.status.already_owned=すでに購入済みです — 「購入を復元」をタップしてください。
+paywall.status.failed=購入は完了しませんでした。請求は発生していません。

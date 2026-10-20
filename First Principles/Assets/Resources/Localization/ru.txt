@@ -108,3 +108,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=Открыть полную версию
+paywall.body=У вас {0} бесплатных уровней. Одна покупка открывает все {1}: AP Calculus BC и Physics C, аэрокосмос, экономика, преобразования, «O большое», четыре финальных босса — и все будущие уровни.
+paywall.promise=Разовая покупка · Без рекламы · Без подписки
+paywall.buy=Открыть все уровни
+paywall.buy_price=Открыть все уровни · {0}
+paywall.restore=Восстановить покупки
+paywall.not_now=Не сейчас
+paywall.status.connecting=Подключение к магазину…
+paywall.status.unavailable=Магазин сейчас недоступен. Проверьте подключение и попробуйте снова.
+paywall.status.purchasing=Ожидание магазина…
+paywall.status.restoring=Восстановление покупок…
+paywall.status.nothing_to_restore=Для этой учётной записи предыдущих покупок не найдено.
+paywall.status.restore_failed=Не удалось восстановить. Попробуйте снова.
+paywall.status.deferred=Покупка ожидает одобрения. Уровни откроются автоматически.
+paywall.status.already_owned=У вас это уже есть — нажмите «Восстановить покупки».
+paywall.status.failed=Покупка не прошла. Деньги не списаны.

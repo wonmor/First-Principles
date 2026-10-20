@@ -89,3 +89,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=مکمل گیم ان لاک کریں
+paywall.body=آپ کے پاس {0} مفت لیولز ہیں۔ ایک ہی خریداری سے تمام {1} لیولز کھل جاتے ہیں: AP کیلکولس BC اور فزکس C، ایرو اسپیس، معاشیات، ٹرانسفارمز، Big O، چار فائنل باس — اور آئندہ شامل ہونے والا ہر لیول۔
+paywall.promise=ایک بار کی خریداری · کوئی اشتہار نہیں · کوئی سبسکرپشن نہیں
+paywall.buy=تمام لیولز ان لاک کریں
+paywall.buy_price=تمام لیولز ان لاک کریں · {0}
+paywall.restore=خریداریاں بحال کریں
+paywall.not_now=ابھی نہیں
+paywall.status.connecting=اسٹور سے رابطہ ہو رہا ہے…
+paywall.status.unavailable=اسٹور ابھی دستیاب نہیں۔ اپنا کنکشن چیک کر کے دوبارہ کوشش کریں۔
+paywall.status.purchasing=اسٹور کا انتظار…
+paywall.status.restoring=خریداریاں بحال ہو رہی ہیں…
+paywall.status.nothing_to_restore=اس اکاؤنٹ کے لیے کوئی سابقہ خریداری نہیں ملی۔
+paywall.status.restore_failed=ابھی بحال نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔
+paywall.status.deferred=خریداری منظوری کی منتظر ہے۔ منظوری کے بعد لیولز خود بخود کھل جائیں گے۔
+paywall.status.already_owned=یہ پہلے سے آپ کے پاس ہے — خریداریاں بحال کریں پر ٹیپ کریں۔
+paywall.status.failed=خریداری مکمل نہیں ہوئی۔ آپ سے کوئی رقم نہیں لی گئی۔

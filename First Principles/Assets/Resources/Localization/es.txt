@@ -87,3 +87,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=Desbloquear el juego completo
+paywall.body=Tienes {0} niveles gratis. Una sola compra abre los {1}: AP Cálculo BC y Física C, aeroespacial, economía, transformadas, Big O, los cuatro jefes finales — y todos los niveles futuros.
+paywall.promise=Pago único · Sin anuncios · Sin suscripción
+paywall.buy=Desbloquear todos los niveles
+paywall.buy_price=Desbloquear todos los niveles · {0}
+paywall.restore=Restaurar compras
+paywall.not_now=Ahora no
+paywall.status.connecting=Conectando con la tienda…
+paywall.status.unavailable=La tienda no está disponible ahora. Revisa tu conexión e inténtalo de nuevo.
+paywall.status.purchasing=Esperando a la tienda…
+paywall.status.restoring=Restaurando compras…
+paywall.status.nothing_to_restore=No se encontró ninguna compra anterior en esta cuenta.
+paywall.status.restore_failed=No se pudo restaurar ahora. Inténtalo de nuevo.
+paywall.status.deferred=La compra está pendiente de aprobación. Los niveles se desbloquearán automáticamente.
+paywall.status.already_owned=Ya lo tienes — toca Restaurar compras.
+paywall.status.failed=La compra no se completó. No se te ha cobrado.

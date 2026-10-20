@@ -87,3 +87,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=افتح اللعبة الكاملة
+paywall.body=لديك {0} مستوى مجاني. عملية شراء واحدة تفتح جميع المستويات الـ{1}: حساب التفاضل والتكامل AP BC والفيزياء C، والطيران والفضاء، والاقتصاد، والتحويلات، وترميز O الكبير، والزعماء الأربعة النهائيون — وكل مستوى نضيفه لاحقًا.
+paywall.promise=شراء لمرة واحدة · بلا إعلانات · بلا اشتراك
+paywall.buy=افتح كل المستويات
+paywall.buy_price=افتح كل المستويات · {0}
+paywall.restore=استعادة المشتريات
+paywall.not_now=ليس الآن
+paywall.status.connecting=جارٍ الاتصال بالمتجر…
+paywall.status.unavailable=المتجر غير متاح الآن. تحقّق من اتصالك وحاول مرة أخرى.
+paywall.status.purchasing=بانتظار المتجر…
+paywall.status.restoring=جارٍ استعادة المشتريات…
+paywall.status.nothing_to_restore=لم يُعثر على عملية شراء سابقة لهذا الحساب.
+paywall.status.restore_failed=تعذّرت الاستعادة الآن. يُرجى المحاولة مرة أخرى.
+paywall.status.deferred=عملية الشراء بانتظار الموافقة. ستُفتح المستويات تلقائيًا بعد الموافقة.
+paywall.status.already_owned=أنت تملك هذا بالفعل — اضغط على استعادة المشتريات.
+paywall.status.failed=لم تكتمل عملية الشراء. لم يتم خصم أي مبلغ.

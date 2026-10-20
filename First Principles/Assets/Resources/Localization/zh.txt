@@ -87,3 +87,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=解锁完整游戏
+paywall.body=你已拥有 {0} 个免费关卡。一次购买即可解锁全部 {1} 个关卡：AP 微积分 BC 与物理 C、航空航天、经济学、变换、大 O 记号、四个最终 Boss——以及今后新增的所有关卡。
+paywall.promise=一次性购买 · 无广告 · 无订阅
+paywall.buy=解锁全部关卡
+paywall.buy_price=解锁全部关卡 · {0}
+paywall.restore=恢复购买
+paywall.not_now=以后再说
+paywall.status.connecting=正在连接商店…
+paywall.status.unavailable=商店暂时不可用。请检查网络后重试。
+paywall.status.purchasing=正在等待商店…
+paywall.status.restoring=正在恢复购买…
+paywall.status.nothing_to_restore=此账户没有找到以前的购买记录。
+paywall.status.restore_failed=暂时无法恢复，请重试。
+paywall.status.deferred=购买正在等待批准。批准后关卡将自动解锁。
+paywall.status.already_owned=你已购买此项目——请点按“恢复购买”。
+paywall.status.failed=购买未完成，你没有被扣款。

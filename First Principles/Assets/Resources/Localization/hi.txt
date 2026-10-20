@@ -89,3 +89,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=पूरा गेम अनलॉक करें
+paywall.body=आपके पास {0} मुफ़्त लेवल हैं। एक बार की खरीद से सभी {1} लेवल खुल जाते हैं: AP कैलकुलस BC और फ़िज़िक्स C, एयरोस्पेस, अर्थशास्त्र, ट्रांसफ़ॉर्म, Big O, चार फ़ाइनल बॉस — और आगे जुड़ने वाले सभी लेवल।
+paywall.promise=एक बार की खरीद · कोई विज्ञापन नहीं · कोई सदस्यता नहीं
+paywall.buy=सभी लेवल अनलॉक करें
+paywall.buy_price=सभी लेवल अनलॉक करें · {0}
+paywall.restore=खरीदारी बहाल करें
+paywall.not_now=अभी नहीं
+paywall.status.connecting=स्टोर से कनेक्ट हो रहा है…
+paywall.status.unavailable=स्टोर अभी उपलब्ध नहीं है। अपना कनेक्शन जाँचें और फिर कोशिश करें।
+paywall.status.purchasing=स्टोर की प्रतीक्षा…
+paywall.status.restoring=खरीदारी बहाल की जा रही है…
+paywall.status.nothing_to_restore=इस खाते में कोई पिछली खरीद नहीं मिली।
+paywall.status.restore_failed=अभी बहाल नहीं हो सका। कृपया फिर कोशिश करें।
+paywall.status.deferred=खरीद स्वीकृति की प्रतीक्षा में है। स्वीकृत होते ही लेवल अपने-आप खुल जाएँगे।
+paywall.status.already_owned=यह आपके पास पहले से है — खरीदारी बहाल करें पर टैप करें।
+paywall.status.failed=खरीद पूरी नहीं हुई। आपसे कोई शुल्क नहीं लिया गया।

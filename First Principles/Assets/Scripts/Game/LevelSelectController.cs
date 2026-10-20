@@ -43,14 +43,69 @@ public class LevelSelectController : MonoBehaviour
     private int _levelViewEnd;
     private int _selectedCategoryIndex = -1;
 
+    private TextMeshProUGUI unlockChipTmp;
+
     private void OnEnable()
     {
         LocalizationManager.LanguageChanged += RefreshLocalizedStrings;
+        Entitlements.Changed += OnEntitlementsChanged;
     }
 
     private void OnDisable()
     {
         LocalizationManager.LanguageChanged -= RefreshLocalizedStrings;
+        Entitlements.Changed -= OnEntitlementsChanged;
+    }
+
+    /// <summary>Ownership / price changed (purchase, restore, store answered): redraw lock glyphs and the unlock chip.</summary>
+    private void OnEntitlementsChanged()
+    {
+        if (_levelContentRt == null)
+            return;
+        float scroll = _levelScroll != null ? _levelScroll.verticalNormalizedPosition : 1f;
+        if (_levelPickMode && _selectedCategoryIndex >= 0)
+            OpenCategory(_selectedCategoryIndex);
+        else
+            BuildCategoryView(false);
+        if (_levelScroll != null)
+            _levelScroll.verticalNormalizedPosition = scroll;
+    }
+
+    /// <summary>Text for the "Unlock all levels" chip (includes the localized store price once known).</summary>
+    private static string UnlockChipLabel()
+    {
+        string price = Entitlements.LocalizedPrice;
+        if (string.IsNullOrEmpty(price))
+            return LocalizationManager.Get("paywall.buy", "Unlock all levels");
+        string fmt = LocalizationManager.Get("paywall.buy_price", "Unlock all levels · {0}");
+        try { return string.Format(fmt, price); }
+        catch (System.FormatException) { return fmt; }
+    }
+
+    private static bool ShowUnlockChip =>
+        !Entitlements.HasFullGame && Entitlements.Mode != EntitlementPlatformMode.AlwaysUnlocked;
+
+    private void OpenPaywall()
+    {
+        var canvas = FindAnyObjectByType<Canvas>();
+        if (canvas != null)
+            PaywallOverlay.Open(canvas.transform);
+    }
+
+    /// <summary>Dims a row and adds a padlock on its right edge.</summary>
+    private static void DecorateLockedRow(TextMeshProUGUI rowLabel)
+    {
+        if (rowLabel == null)
+            return;
+        var rowRt = rowLabel.transform.parent as RectTransform;
+        if (rowRt == null)
+            return;
+        bool tablet = DeviceLayout.IsTabletLike();
+        LockGlyph.AddToRow(rowRt, tablet ? 46f : 42f, new Color(0.95f, 0.62f, 0.55f, 0.95f));
+        var trt = rowLabel.rectTransform;
+        trt.offsetMax = new Vector2(-(tablet ? 76f : 70f), trt.offsetMax.y);
+        trt.offsetMin = new Vector2(tablet ? 76f : 70f, trt.offsetMin.y);
+        rowLabel.color = new Color(0.72f, 0.75f, 0.82f, 1f);
     }
 
     private void RefreshLocalizedStrings()
@@ -87,6 +142,11 @@ public class LevelSelectController : MonoBehaviour
         {
             backTmp.text = LocalizationManager.Get("ui.back_menu", "Back to Menu");
             LocalizationManager.ApplyTextDirection(backTmp);
+        }
+        if (unlockChipTmp != null)
+        {
+            unlockChipTmp.text = UnlockChipLabel();
+            LocalizationManager.ApplyTextDirection(unlockChipTmp);
         }
         if (backToCategoriesTmp != null)
         {
@@ -246,6 +306,10 @@ public class LevelSelectController : MonoBehaviour
         CreateHowToPlayButton(panel.transform, canvas.transform);
 
         CreateBackButton(panel.transform);
+
+        // Arrived here because the player cleared the last free level (see LevelManager.AdvanceLevel).
+        if (PaywallRequest.Consume())
+            PaywallOverlay.Open(canvas.transform);
     }
 
     private static void RebuildScrollContent(ScrollRect scroll, RectTransform contentRt)
@@ -553,6 +617,7 @@ public class LevelSelectController : MonoBehaviour
         categoryRowLabels.Clear();
         levelRowLabels.Clear();
         backToCategoriesTmp = null;
+        unlockChipTmp = null;
     }
 
     private void UpdateLevelScrollMinHeight(int rowCount)
@@ -570,6 +635,14 @@ public class LevelSelectController : MonoBehaviour
         _selectedCategoryIndex = -1;
         ClearLevelScrollContent();
 
+        int rows = GameLevelCatalog.SelectCategories.Length;
+        if (ShowUnlockChip)
+        {
+            unlockChipTmp = CreateLevelButton(_levelContentRt, UnlockChipLabel(), OpenPaywall, RuntimeUiPolish.AccentCoral);
+            unlockChipTmp.color = Color.white;
+            rows++;
+        }
+
         for (int c = 0; c < GameLevelCatalog.SelectCategories.Length; c++)
         {
             int catIdx = c;
@@ -578,10 +651,13 @@ public class LevelSelectController : MonoBehaviour
                 _levelContentRt,
                 LocalizationManager.Get(cat.TitleLocalizationKey, cat.DefaultTitle),
                 () => OpenCategory(catIdx));
+            // Locked categories still open (players can browse what they'd get); levels inside show the paywall.
+            if (Entitlements.GetCategoryState(cat) == CategoryLockState.Locked)
+                DecorateLockedRow(tmp);
             categoryRowLabels.Add(tmp);
         }
 
-        UpdateLevelScrollMinHeight(GameLevelCatalog.SelectCategories.Length);
+        UpdateLevelScrollMinHeight(rows);
         RefreshLocalizedStrings();
         RebuildScrollContent(_levelScroll, _levelContentRt);
         if (scrollToTop && _levelScroll != null)
@@ -623,6 +699,8 @@ public class LevelSelectController : MonoBehaviour
                 _levelContentRt,
                 GameLevelCatalog.GetLocalizedDisplayName(capture),
                 () => StartGameAt(capture));
+            if (!Entitlements.IsLevelUnlocked(capture) && !GameLevelCatalog.IsComingSoonLevel(capture))
+                DecorateLockedRow(rowTmp);
             levelRowLabels.Add(rowTmp);
         }
 
@@ -640,6 +718,14 @@ public class LevelSelectController : MonoBehaviour
         if (GameLevelCatalog.IsComingSoonLevel(index))
         {
             ShowComingSoonOverlay();
+            return;
+        }
+
+        if (!Entitlements.IsLevelUnlocked(index))
+        {
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas != null)
+                PaywallOverlay.Open(canvas.transform, () => StartGameAt(index));
             return;
         }
 

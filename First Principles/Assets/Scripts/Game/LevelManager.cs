@@ -229,6 +229,8 @@ public class LevelManager : MonoBehaviour
         BuildSampleLevels();
         // LevelSelect sets LevelSelection; opening Game directly falls back to index 0.
         int startIndex = LevelSelection.ConsumeSelectedLevel(levels.Count);
+        if (!Entitlements.IsLevelUnlocked(startIndex))
+            startIndex = 0; // Level select gates locked levels; this only guards odd entry paths.
         LoadLevel(startIndex);
     }
 
@@ -3531,9 +3533,15 @@ public class LevelManager : MonoBehaviour
         if (levels.Count == 0)
             return;
 
-        int next = currentLevelIndex + 1;
-        if (next >= levels.Count)
-            next = 0; // loop for now
+        // Loops to 0 after the last level; returns -1 when the next level needs the full-game unlock.
+        int next = LevelAccessPolicy.NextPlayableLevel(currentLevelIndex, levels.Count, Entitlements.HasFullGame);
+        if (next < 0)
+        {
+            // Cleared the last free level: back to Level Select, which opens the unlock sheet.
+            PaywallRequest.Request();
+            SceneTransitionHost.LoadSingleScene("LevelSelect");
+            return;
+        }
 
         LoadLevel(next);
     }

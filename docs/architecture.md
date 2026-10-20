@@ -74,6 +74,25 @@ SceneFader              LevelSelectController    Canvas + graph renderers
 ## Persistence
 
 - **Level index:** in-memory only (`LevelSelection`), cleared after **Consume** on Game load.
+- **Full-game unlock:** `PlayerPrefs` key `fp_ent_full` holds a device-bound token (cache only — the store is re-queried on every launch). Debug override `fp_ent_debug`, grandfather flag `fp_ent_legacy`.
+
+## Monetization (`Scripts/Monetization/`)
+
+Free tier = levels **0–13** (*Core & series* + *Multivar & integration*). Everything else is unlocked by one **non-consumable** in-app purchase, product id **`firstprinciples_full_unlock`** (same id on App Store Connect and Google Play).
+
+| Script | Role |
+|--------|------|
+| `LevelAccessPolicy` | Pure rules (free range, category state, next playable level, platform mode, grandfathering). Covered by `Assets/Editor/Tests/LevelAccessPolicyTests.cs`. |
+| `Entitlements` | Runtime service: `HasFullGame`, `IsLevelUnlocked`, `BuyFullGame`, `RestorePurchases`, `Changed` event, local cache, debug override. |
+| `UnityIapEntitlementStore` | Unity IAP 5 (`com.unity.purchasing`) adapter — StoreKit 2 on iOS, Play Billing on Android, fake store in the Editor. |
+| `PaywallOverlay` | Runtime-built unlock sheet (Buy with localized price, **Restore purchases**, Not now). |
+| `LockGlyph` | Procedural padlock sprite for locked rows. |
+
+**Platforms:** iOS / Android are gated; the Editor is gated (fake store) so the paywall can be tested; macOS / Windows / Linux standalone builds are always unlocked (they are distributed as complete builds, not through a store with this product — define `FP_IAP_GATE_STANDALONE` to change that). `FP_UNLOCK_ALL` forces everything open (press / review builds).
+
+**Grandfathering:** devices that ran a pre-paywall build (≤ 1.2) keep all levels (detected on the first launch of the paywall build via the existing `fp_language` pref).
+
+**Testing:** *Tools ▸ First Principles ▸ IAP* (Editor) toggles the override / clears the cache; in Development builds tap the paywall title 7×. Release builds ignore the override.
 
 ## APIs deprecated in Unity 6
 

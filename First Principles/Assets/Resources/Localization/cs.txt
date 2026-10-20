@@ -108,3 +108,21 @@ level.55=Big O: O(n log n) — n log n growth
 level.56=Big O: O(n²) — quadratic growth
 level.57=Big O: O(n³) — cubic growth
 level.58=Big O: O(2ⁿ) — exponential (base 2)
+
+# Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
+paywall.title=Odemknout plnou hru
+paywall.body=Máš {0} úrovní zdarma. Jeden nákup odemkne všech {1}: AP Calculus BC a Physics C, letectví a kosmonautika, ekonomie, transformace, Big O, čtyři finální bossové — a všechny budoucí úrovně.
+paywall.promise=Jednorázový nákup · Bez reklam · Bez předplatného
+paywall.buy=Odemknout všechny úrovně
+paywall.buy_price=Odemknout všechny úrovně · {0}
+paywall.restore=Obnovit nákupy
+paywall.not_now=Teď ne
+paywall.status.connecting=Připojování k obchodu…
+paywall.status.unavailable=Obchod teď není dostupný. Zkontroluj připojení a zkus to znovu.
+paywall.status.purchasing=Čekání na obchod…
+paywall.status.restoring=Obnovování nákupů…
+paywall.status.nothing_to_restore=Pro tento účet nebyl nalezen žádný předchozí nákup.
+paywall.status.restore_failed=Obnovení se teď nepodařilo. Zkus to znovu.
+paywall.status.deferred=Nákup čeká na schválení. Úrovně se odemknou automaticky.
+paywall.status.already_owned=Tohle už vlastníš — klepni na Obnovit nákupy.
+paywall.status.failed=Nákup neproběhl. Nic ti nebylo účtováno.
