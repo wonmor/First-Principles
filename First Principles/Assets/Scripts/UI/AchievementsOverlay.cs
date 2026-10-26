@@ -34,9 +34,9 @@ public static class AchievementsOverlay
         var d = ProgressStore.Data;
         int maxStars = ProgressStore.PlayableLevelCount * ProgressRules.MaxStars;
         string summary = string.Format(LocalizationManager.Get("ach.summary",
-                "<color=#ffd15c><b>{0}/{1}</b> stars</color>   |   <b>{2}</b> levels cleared   |   streak <b>{3}</b> (best {4})   |   <b>{5}</b> f′ double jumps"),
+                "<color=#ffd15c><b>{0}/{1}</b> stars</color>   |   <b>{6}</b> medals   |   <b>{2}</b> levels cleared   |   streak <b>{3}</b> (best {4})   |   <b>{5}</b> f′ double jumps"),
             ProgressStore.TotalStars, maxStars, ProgressStore.Snapshot().LevelsCleared,
-            ProgressStore.CurrentDailyStreak, d.dailyBestStreak, d.airJumps);
+            ProgressStore.CurrentDailyStreak, d.dailyBestStreak, d.airJumps, ProgressStore.MedalCount);
         UiKit.Text(panel, "Summary", new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.9f), summary,
             UiTypography.Scale(tablet ? 21 : 19), UiKit.Muted);
 
@@ -89,7 +89,7 @@ public static class AchievementsOverlay
 
         // Footer: sound toggle + close --------------------------------------------
         TextMeshProUGUI soundLabel = null;
-        var soundBtn = UiKit.Button(panel, "Sound", new Vector2(0.06f, 0.03f), new Vector2(0.49f, 0.115f), "",
+        var soundBtn = UiKit.Button(panel, "Sound", new Vector2(0.04f, 0.03f), new Vector2(0.35f, 0.115f), "",
             RuntimeUiPolish.ButtonNeutral, () =>
             {
                 ProgressStore.SfxMuted = !ProgressStore.SfxMuted;
@@ -97,7 +97,13 @@ public static class AchievementsOverlay
             }, tablet ? 24 : 22);
         soundLabel = soundBtn.GetComponentInChildren<TextMeshProUGUI>();
         SetSoundLabel(soundLabel);
-        var close = UiKit.Button(panel, "Close", new Vector2(0.51f, 0.03f), new Vector2(0.94f, 0.115f),
+        UiKit.Button(panel, "ShowTutorial", new Vector2(0.37f, 0.03f), new Vector2(0.66f, 0.115f),
+            LocalizationManager.Get("ui.show_tutorial", "Show tutorial"), new Color(0.27f, 0.23f, 0.48f, 0.98f), () =>
+            {
+                Close();
+                LevelSelectController.ReplayTutorials();
+            }, tablet ? 24 : 22);
+        var close = UiKit.Button(panel, "Close", new Vector2(0.68f, 0.03f), new Vector2(0.96f, 0.115f),
             LocalizationManager.Get("ui.close", "Close"), RuntimeUiPolish.AccentTeal, Close, tablet ? 24 : 22);
         OverlayCancelHandler.Attach(_root, close, close);
     }

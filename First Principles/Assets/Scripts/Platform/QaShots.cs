@@ -68,24 +68,66 @@ public class QaShots : MonoBehaviour
         yield return new WaitForSecondsRealtime(4f);
         yield return Shot("menu");
 
+        // World map, arriving back from a first clear of level 7 (2 stars): stars pop, the path
+        // fills, the Core trial opens (19/18 stars) and the marker hops to level 8.
+        var d = ProgressStore.Data;
+        d.stars[7] = 2;
+        d.clears[7] = 1;
+        d.bestScore[7] = 80;
+        d.bestSeconds[2] = 22.4f;
+        ProgressStore.Save();
+        MapReturn.Set(7, 0, 2, true, null, 0);
         SceneManager.LoadScene("LevelSelect");
-        yield return new WaitForSecondsRealtime(2.5f);
-        yield return Shot("level-select");
+        yield return new WaitForSecondsRealtime(1.5f);
+        yield return Shot("map-celebrate-stars");
+        yield return new WaitForSecondsRealtime(1.3f);
+        yield return Shot("map-trial-unlocked");
+        yield return new WaitForSecondsRealtime(3f);
+        yield return Shot("map");
 
         var lsc = FindAnyObjectByType<LevelSelectController>();
-        if (lsc != null)
+        var map = FindAnyObjectByType<WorldMapView>();
+        var canvas = FindAnyObjectByType<Canvas>();
+        if (map != null)
         {
-            typeof(LevelSelectController).GetMethod("OpenCategory", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.Invoke(lsc, new object[] { 0 });
-            yield return new WaitForSecondsRealtime(1.2f);
-            yield return Shot("chapter-core-stars");
-            typeof(LevelSelectController).GetMethod("OpenCategory", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.Invoke(lsc, new object[] { 3 });
-            yield return new WaitForSecondsRealtime(1.2f);
-            yield return Shot("chapter-locked");
+            MapLevelSheet.Open(canvas.transform, 2, ChallengeKind.None, "core", new Color(0.22f, 0.66f, 0.62f), null, null, null, null);
+            yield return new WaitForSecondsRealtime(0.8f);
+            yield return Shot("level-sheet");
+            MapLevelSheet.Close();
+
+            map.ScrollToLevel(8, true);
+            bool open = map.IsTrialOpenForRegionEnding(8, out string key, out string req);
+            MapLevelSheet.Open(canvas.transform, 8, ChallengeKind.RegionTrial, key, new Color(0.22f, 0.66f, 0.62f), () => open, req, null, null);
+            yield return new WaitForSecondsRealtime(0.8f);
+            yield return Shot("trial-sheet");
+            MapLevelSheet.Close();
+
+            map.ScrollToLevel(13, true);
+            yield return new WaitForSecondsRealtime(0.6f);
+            yield return Shot("map-integration-trial-gated");
+            map.ScrollToLevel(20);
+            yield return new WaitForSecondsRealtime(0.6f);
+            yield return Shot("map-locked-region");
+            map.ScrollToLevel(49);
+            yield return new WaitForSecondsRealtime(0.6f);
+            yield return Shot("map-bosses-grand-trial");
         }
 
-        var canvas = FindAnyObjectByType<Canvas>();
+        if (lsc != null)
+        {
+            lsc.StartMapTour();
+            for (int step = 1; step <= 5; step++)
+            {
+                yield return new WaitForSecondsRealtime(1.1f);
+                var tour = FindAnyObjectByType<CoachTour>();
+                if (tour == null)
+                    break;
+                yield return Shot("map-tour-" + step);
+                tour.Next();
+            }
+        }
+
+        canvas = FindAnyObjectByType<Canvas>();
         PaywallOverlay.Open(canvas.transform);
         yield return new WaitForSecondsRealtime(1.2f);
         yield return Shot("paywall");
@@ -128,13 +170,40 @@ public class QaShots : MonoBehaviour
         yield return Shot("level-complete");
         LevelCompleteOverlay.Close();
 
-        // First-run onboarding on the primer.
+        // Time trial on a cleared level: live clock in the goal chip, hints off.
         DailyChallengeSession.End();
-        ProgressStore.Data.onboardingDone = false;
+        ChallengeSession.Begin(new ChallengeSpec(ChallengeKind.TimeTrial, 2, ChallengeRules.ParSeconds(22.4f)));
+        LevelSelection.SetSelectedLevel(2);
+        SceneManager.LoadScene("Game");
+        yield return new WaitForSecondsRealtime(8f);
+        yield return Shot("time-trial");
+        canvas = FindAnyObjectByType<Canvas>();
+        var cr = new RunResult(2, 95, 0, 18.2f);
+        var co = new ProgressStore.RecordOutcome { Stars = 3, PreviousStars = 3 };
+        var cc = new ChallengeOutcome { Kind = ChallengeKind.TimeTrial, Met = true, ParSeconds = 20, NewMedal = "t2" };
+        LevelCompleteOverlay.Open(canvas.transform, cr, co, null, null, null, null, cc);
+        yield return new WaitForSecondsRealtime(2.2f);
+        yield return Shot("medal-earned");
+        LevelCompleteOverlay.Close();
+        ChallengeSession.End();
+
+        // First level visit: the coach tour (controls, graph, stars, hints).
+        ProgressStore.Data.levelTourDone = false;
         LevelSelection.SetSelectedLevel(0);
         SceneManager.LoadScene("Game");
-        yield return new WaitForSecondsRealtime(9f);
-        yield return Shot("onboarding");
+        yield return new WaitForSecondsRealtime(3f);
+        var lrd = FindAnyObjectByType<LevelRunDirector>();
+        typeof(LevelRunDirector).GetMethod("StartLevelTour", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?.Invoke(lrd, new object[] { 0 });
+        for (int step = 1; step <= 4; step++)
+        {
+            yield return new WaitForSecondsRealtime(1.1f);
+            var tour = FindAnyObjectByType<CoachTour>();
+            if (tour == null)
+                break;
+            yield return Shot("level-tour-" + step);
+            tour.Next();
+        }
 
         Debug.Log("QaShots: done");
         Application.Quit();

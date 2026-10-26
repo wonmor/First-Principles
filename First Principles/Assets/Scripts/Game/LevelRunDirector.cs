@@ -10,7 +10,9 @@ using UnityEngine.UI;
 //   * Hint button (3 free a day, unlimited with Plus): explains the level's rule and
 //     drops "jump here" chevrons over every gap / step for a few seconds,
 //   * first-run coach marks on the primer level (move → jump → f′ double jump → exit),
-//   * daily-challenge goal chip when the run is today's challenge.
+//   * goal chip when the run is today's daily challenge or a map challenge (Flawless,
+//     Time trial with a live clock, region / Grand trials; hints are off in no-hint modes),
+//   * first-level coach tour (spotlight walkthrough of controls, stars and hints).
 // -----------------------------------------------------------------------------
 
 public class LevelRunDirector : MonoBehaviour
@@ -80,7 +82,9 @@ public class LevelRunDirector : MonoBehaviour
         _meterShown = -1;
         RefreshHintLabel();
         RefreshDailyChip(levelIndex);
-        if (!restart && levelIndex == 0 && !ProgressStore.OnboardingDone && _coachStep < 0)
+        if (!restart && !ProgressStore.LevelTourDone && !QaShots.Enabled && !CoachTour.IsOpen)
+            StartCoroutine(StartLevelTourSoon(levelIndex));
+        else if (!restart && levelIndex == 0 && !ProgressStore.OnboardingDone && _coachStep < 0)
             StartCoach();
     }
 
@@ -103,6 +107,7 @@ public class LevelRunDirector : MonoBehaviour
                 StartCoroutine(FeelDirector.PopScale(_meterStars[potential].transform, 0.35f, 1.25f));
         }
         TickCoach();
+        TickChallengeClock();
     }
 
     // ------------------------------------------------------------------ star meter
@@ -163,6 +168,11 @@ public class LevelRunDirector : MonoBehaviour
             return;
         int left = ProgressStore.HintsLeftToday;
         string word = LocalizationManager.Get("hint.button", "Hint");
+        if (_lm != null && ChallengeSession.BlocksHints(_lm.CurrentLevelIndex))
+        {
+            _hintLabel.text = LocalizationManager.Get("hint.off", "Hints off");
+            return;
+        }
         _hintLabel.text = Entitlements.HasPlus || left == int.MaxValue ? word : $"{word} ({left})";
     }
 
@@ -170,6 +180,12 @@ public class LevelRunDirector : MonoBehaviour
     {
         if (_lm == null || _lm.Player == null || _lm.Player.World == null)
             return;
+        if (ChallengeSession.BlocksHints(_lm.CurrentLevelIndex))
+        {
+            FeelDirector.Play(SfxId.Locked, 0.7f);
+            StartCoroutine(FeelDirector.PopScale(_hintBtn.transform, 0.3f, 1.15f));
+            return;
+        }
         if (!ProgressStore.TryUseHint())
         {
             FeelDirector.Play(SfxId.Locked, 0.7f);
@@ -305,7 +321,9 @@ public class LevelRunDirector : MonoBehaviour
     void RefreshDailyChip(int levelIndex)
     {
         var d = DailyChallengeSession.Active;
-        bool show = d.HasValue && d.Value.LevelIndex == levelIndex && !ProgressStore.DailyDoneToday;
+        var ch = ChallengeSession.Active;
+        bool challenge = ch.HasValue && ch.Value.LevelIndex == levelIndex;
+        bool show = challenge || (d.HasValue && d.Value.LevelIndex == levelIndex && !ProgressStore.DailyDoneToday);
         if (!show)
         {
             if (_dailyChip != null)
@@ -328,7 +346,127 @@ public class LevelRunDirector : MonoBehaviour
             _dailyChip = UiKit.Text(rt, "Text", new Vector2(0.03f, 0.05f), new Vector2(0.97f, 0.95f), "",
                 UiTypography.Scale(20), new Color(0.88f, 0.84f, 1f, 1f), FontStyles.Bold);
         }
-        _dailyChip.text = LocalizationManager.Get("daily.chip", "Daily challenge: ") + DailyChallengeSession.GoalText(d.Value.Goal);
+        if (challenge)
+        {
+            _challengeLevel = levelIndex;
+            _dailyChip.text = ChallengeChipText(ch.Value);
+            _dailyChip.transform.parent.GetComponent<Image>().color = new Color(0.36f, 0.24f, 0.62f, 0.94f);
+        }
+        else
+        {
+            _challengeLevel = -1;
+            _dailyChip.text = LocalizationManager.Get("daily.chip", "Daily challenge: ") + DailyChallengeSession.GoalText(d.Value.Goal);
+        }
+    }
+
+    int _challengeLevel = -1;
+    float _nextClockTick;
+
+    string ChallengeChipText(ChallengeSpec c)
+    {
+        string head = ChallengeSession.Title(c.Kind) + ": ";
+        if (c.Kind == ChallengeKind.TimeTrial && _lm != null)
+        {
+            float t = _lm.LevelElapsed;
+            string clock = LevelCompleteOverlay.FormatTime(t);
+            string color = t <= c.ParSeconds ? "#9fe8d8" : "#ff9a8a";
+            return head + $"<color={color}>{clock}</color> / {c.ParSeconds}s";
+        }
+        return head + ChallengeSession.GoalText(c);
+    }
+
+    void TickChallengeClock()
+    {
+        if (_dailyChip == null || _challengeLevel < 0 || Time.unscaledTime < _nextClockTick)
+            return;
+        _nextClockTick = Time.unscaledTime + 0.1f;
+        var ch = ChallengeSession.Active;
+        if (ch.HasValue && ch.Value.Kind == ChallengeKind.TimeTrial && ch.Value.LevelIndex == _challengeLevel)
+            _dailyChip.text = ChallengeChipText(ch.Value);
+    }
+
+    // ------------------------------------------------------------------ first-level coach tour
+
+    IEnumerator StartLevelTourSoon(int levelIndex)
+    {
+        // Let the HUD lay out, then freeze the run while the walkthrough is up.
+        yield return new WaitForSecondsRealtime(0.8f);
+        // Let the level's story card finish first (the tour then explains the playfield).
+        float waited = 0f;
+        while (_lm != null && _lm.StageIntroShowing && waited < 30f)
+        {
+            waited += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        yield return new WaitForSecondsRealtime(0.3f);
+        if (ProgressStore.LevelTourDone || CoachTour.IsOpen || _canvas == null)
+            yield break;
+        StartLevelTour(levelIndex);
+    }
+
+    void StartLevelTour(int levelIndex)
+    {
+        bool touch = DeviceLayout.PreferOnScreenGameControls;
+        bool pad = UnityEngine.InputSystem.Gamepad.current != null;
+        string controls = touch
+            ? LocalizationManager.Get("tour.level.controls.touch", "Hold the left or right side of the screen to move. Tap with a second finger to jump.")
+            : pad ? LocalizationManager.Get("tour.level.controls.pad", "Move with the left stick or d-pad and press A to jump. Press B to leave the level.")
+            : LocalizationManager.Get("tour.level.controls.keys", "Move with ← → or A / D, jump with Space, W or ↑. Esc leaves the level.");
+        var steps = new List<CoachStep>
+        {
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.level.controls.title", "Controls"),
+                Body = controls,
+                Target = () => null,
+            },
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.level.graph.title", "The level is the graph"),
+                Body = LocalizationManager.Get("tour.level.graph.body",
+                    "You walk on f(x). Ground only exists where the slope f′(x) is high enough, so jump the pits where it dips. Touch the glowing f′ curve in mid-air for a double jump. Reach the blue exit on the right."),
+                Target = () => _lm != null ? _lm.CartesianPlane : null,
+            },
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.level.stars.title", "Stars"),
+                Body = string.Format(LocalizationManager.Get("tour.level.stars.body",
+                    "These three stars show what this run is worth right now. Falling or grazing f′ costs you: 3 stars need no falls and {0}+ points."),
+                    ProgressRules.ThreeStarMinScore),
+                Target = () => _meterRt,
+            },
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.level.hint.title", "Hints"),
+                Body = string.Format(LocalizationManager.Get("tour.level.hint.body",
+                    "Stuck? Hint explains this level's rule and marks every take-off edge for a few seconds. You get {0} free hints a day."),
+                    ProgressRules.FreeHintsPerDay),
+                Target = () => _hintBtn != null ? (RectTransform)_hintBtn.transform : null,
+            },
+        };
+        float savedScale = Time.timeScale;
+        Time.timeScale = 0f;
+        if (_lm != null && _lm.Player != null)
+            _lm.Player.SetInputLocked(true);
+        CoachTour.Show(_canvas.transform, steps, done =>
+        {
+            Time.timeScale = savedScale <= 0f ? 1f : savedScale;
+            // Unlock a frame later so the press that closed the tour is not also a jump.
+            if (isActiveAndEnabled)
+                StartCoroutine(UnlockInputNextFrame());
+            ProgressStore.LevelTourDone = true;
+            // The walkthrough covers what the old on-the-fly coach marks taught.
+            ProgressStore.OnboardingDone = true;
+        });
+    }
+
+
+    IEnumerator UnlockInputNextFrame()
+    {
+        yield return null;
+        yield return null;
+        if (_lm != null && _lm.Player != null)
+            _lm.Player.SetInputLocked(false);
     }
 
     // ------------------------------------------------------------------ onboarding coach marks

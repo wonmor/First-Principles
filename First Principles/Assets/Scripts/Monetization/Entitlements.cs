@@ -96,7 +96,9 @@ public static class Entitlements
         get
         {
             EnsureInitialized();
-            return Mode == EntitlementPlatformMode.AlwaysUnlocked || _purchasedOrCached || _grandfathered || DebugOverride == true;
+            if (DebugOverride.HasValue)
+                return DebugOverride.Value;
+            return Mode == EntitlementPlatformMode.AlwaysUnlocked || _purchasedOrCached || _grandfathered;
         }
     }
 

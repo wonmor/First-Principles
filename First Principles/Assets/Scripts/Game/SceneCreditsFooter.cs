@@ -20,7 +20,8 @@ public static class SceneCreditsFooter
     /// <summary>Centered block: version, credits, support email (<c>menu.support_contact</c>).</summary>
     public static string BuildMenuFooterRichText()
     {
-        string ver = LocalizationManager.Get("menu.version_line", HomeFooterDefault);
+        string ver = LocalizationManager.Get("menu.version_line", HomeFooterDefault)
+            .Replace("1.0)", UnityEngine.Application.version + ")");
         string cred = LocalizationManager.Get("menu.credits_line", CreditsLineDefaultEn);
         string sup = LocalizationManager.Get("menu.support_contact", SupportContactDefault);
 

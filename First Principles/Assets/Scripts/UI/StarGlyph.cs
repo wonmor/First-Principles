@@ -20,6 +20,11 @@ public static class StarGlyph
     public static Sprite Chevron => _chevron != null ? _chevron : (_chevron = BuildSdf(ChevronSdf));
     public static Sprite Calendar => _calendar != null ? _calendar : (_calendar = BuildSdf(CalendarSdf));
 
+    public static Sprite Medal => _medal != null ? _medal : (_medal = BuildSdf(MedalSdf));
+    public static Sprite Pin => _pin != null ? _pin : (_pin = BuildSdf(PinSdf));
+    public static Sprite Stopwatch => _stopwatch != null ? _stopwatch : (_stopwatch = BuildSdf(StopwatchSdf));
+    static Sprite _medal, _pin, _stopwatch;
+
     public static Image Add(RectTransform parent, string name, Sprite sprite, Color tint, Vector2 size)
     {
         var go = new GameObject(name);
@@ -150,6 +155,43 @@ public static class StarGlyph
         // Check mark inside.
         d = Mathf.Min(d, Segment(p, new Vector2(-14f, -10f), new Vector2(-4f, -20f), w));
         d = Mathf.Min(d, Segment(p, new Vector2(-4f, -20f), new Vector2(16f, 2f), w));
+        return d;
+    }
+
+    static float MedalSdf(Vector2 p)
+    {
+        const float w = 6f;
+        // Ribbon (two straps meeting the ring) + ring + a small check-style chevron inside.
+        float d = Segment(p, new Vector2(-18f, 40f), new Vector2(-6f, 10f), w);
+        d = Mathf.Min(d, Segment(p, new Vector2(18f, 40f), new Vector2(6f, 10f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(-18f, 40f), new Vector2(18f, 40f), w));
+        d = Mathf.Min(d, Ring(p, new Vector2(0f, -12f), 22f, w));
+        d = Mathf.Min(d, Segment(p, new Vector2(-9f, -12f), new Vector2(-2f, -19f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(-2f, -19f), new Vector2(10f, -5f), w));
+        return d;
+    }
+
+    static float PinSdf(Vector2 p)
+    {
+        const float w = 6f;
+        // Map pin: round head outline + inner ring + point.
+        float head = Ring(p, new Vector2(0f, 12f), 24f, w);
+        if (p.y < -4f && Mathf.Abs(p.x) < 20f) head = 999f;
+        float d = head;
+        d = Mathf.Min(d, Ring(p, new Vector2(0f, 12f), 9f, w));
+        d = Mathf.Min(d, Segment(p, new Vector2(-18f, -4f), new Vector2(0f, -38f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(18f, -4f), new Vector2(0f, -38f), w));
+        return d;
+    }
+
+    static float StopwatchSdf(Vector2 p)
+    {
+        const float w = 6f;
+        float d = Ring(p, new Vector2(0f, -6f), 28f, w);
+        d = Mathf.Min(d, Segment(p, new Vector2(-8f, 34f), new Vector2(8f, 34f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(0f, 34f), new Vector2(0f, 24f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(0f, -6f), new Vector2(0f, 12f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(0f, -6f), new Vector2(12f, -14f), w));
         return d;
     }
 

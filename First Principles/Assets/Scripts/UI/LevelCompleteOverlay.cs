@@ -19,7 +19,7 @@ public static class LevelCompleteOverlay
     public static bool IsOpen => _root != null;
 
     public static void Open(Transform canvas, RunResult r, ProgressStore.RecordOutcome o, DailyChallengeSpec? daily,
-        Action onNext, Action onReplay, Action onLevels)
+        Action onNext, Action onReplay, Action onLevels, ChallengeOutcome challenge = null)
     {
         Close();
         if (canvas == null)
@@ -73,7 +73,24 @@ public static class LevelCompleteOverlay
 
         // Badge line (new best / daily / streak).
         string badge = "";
-        if (o.DailyCompletedNow)
+        bool goldBadge = o.DailyCompletedNow;
+        if (challenge != null && challenge.Kind != ChallengeKind.None)
+        {
+            string name = ChallengeSession.Title(challenge.Kind);
+            if (challenge.Met)
+            {
+                badge = string.IsNullOrEmpty(challenge.NewMedal)
+                    ? string.Format(LocalizationManager.Get("complete.challenge_again", "{0} passed again"), name)
+                    : string.Format(LocalizationManager.Get("complete.challenge_medal", "{0} passed! Medal earned"), name);
+                goldBadge = true;
+            }
+            else
+            {
+                badge = string.Format(LocalizationManager.Get("complete.challenge_missed", "{0} not passed: {1}"), name,
+                    ChallengeSession.GoalText(new ChallengeSpec(challenge.Kind, r.LevelIndex, challenge.ParSeconds)));
+            }
+        }
+        else if (o.DailyCompletedNow)
             badge = string.Format(LocalizationManager.Get("complete.daily_done",
                 "Daily challenge complete!   Streak: {0} day(s)"), o.DailyStreak);
         else if (daily.HasValue && daily.Value.LevelIndex == r.LevelIndex && !ProgressStore.DailyDoneToday)
@@ -84,7 +101,7 @@ public static class LevelCompleteOverlay
         else if (o.NewBestScore)
             badge = LocalizationManager.Get("complete.best", "New best score!");
         var badgeTmp = UiKit.Text(panel, "Badge", new Vector2(0.06f, 0.33f), new Vector2(0.94f, 0.41f), badge,
-            UiTypography.Scale(tablet ? 26 : 23), o.DailyCompletedNow ? UiKit.Gold : UiKit.Mint, FontStyles.Bold);
+            UiTypography.Scale(tablet ? 26 : 23), goldBadge ? UiKit.Gold : UiKit.Mint, FontStyles.Bold);
 
         // Buttons.
         bool nextLocked = !Entitlements.IsLevelUnlocked(NextIndex(r.LevelIndex));

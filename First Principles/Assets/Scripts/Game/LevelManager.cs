@@ -125,6 +125,9 @@ public class LevelManager : MonoBehaviour
     public PlayerControllerUI2D Player => playerController;
     public RectTransform ObstaclesRoot => obstaclesRoot;
     public RectTransform CartesianPlane => cartesianPlaneRect;
+    public bool StageIntroShowing => stageIntroRoot != null && stageIntroRoot.activeInHierarchy;
+    /// <summary>Seconds since the level was entered (restarts after a fall keep counting).</summary>
+    public float LevelElapsed => Time.time - levelStartTime;
     public LevelDefinition CurrentDefinition =>
         currentLevelIndex >= 0 && currentLevelIndex < levels.Count ? levels[currentLevelIndex] : null;
 
@@ -3578,7 +3581,11 @@ public class LevelManager : MonoBehaviour
         var result = new RunResult(currentLevelIndex, gameplayScore, fallsThisLevel,
             Time.time - levelStartTime, runDirector != null ? runDirector.HintsUsedThisLevel : 0);
         var daily = DailyChallengeSession.Active;
+        int medalsBefore = ProgressStore.MedalCount;
         var outcome = ProgressStore.RecordClear(result, daily);
+        var challenge = ProgressStore.RecordChallenge(result, ChallengeSession.Active);
+        MapReturn.Set(currentLevelIndex, outcome.PreviousStars, Mathf.Max(outcome.Stars, outcome.PreviousStars),
+            outcome.FirstClear, challenge.NewMedal, medalsBefore);
         var canvas = FindAnyObjectByType<Canvas>();
         if (canvas == null)
         {
@@ -3595,13 +3602,16 @@ public class LevelManager : MonoBehaviour
             onLevels: () =>
             {
                 DailyChallengeSession.End();
+                ChallengeSession.End();
                 SceneTransitionHost.LoadSingleScene("LevelSelect");
-            });
+            },
+            challenge: challenge);
     }
 
     private void GoToNextLevel()
     {
         DailyChallengeSession.End();
+        ChallengeSession.End();
         if (levels.Count == 0)
             return;
 

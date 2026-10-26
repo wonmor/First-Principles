@@ -8,8 +8,10 @@ using TMPro;
 // -----------------------------------------------------------------------------
 // LevelSelectController — all UI for the LevelSelect scene is code-generated
 // -----------------------------------------------------------------------------
-// Parents to MobileUiRoots safe rect. Scrolls if GameLevelCatalog.LevelCount grows.
-// “Math tips” opens MathArticlesOverlay on the same Canvas.
+// Parents to MobileUiRoots safe rect. The middle of the screen is the WorldMapView (themed
+// regions, path, trials); around it: language chip, title, unlock chip, progress chip (top),
+// Back, daily challenge card, Math tips and How to play (bottom). First visit runs the map
+// coach tour (replayable from Progress & achievements > Show tutorial).
 // -----------------------------------------------------------------------------
 
 /// <summary>
@@ -26,22 +28,14 @@ public class LevelSelectController : MonoBehaviour
     private TextMeshProUGUI mathTipsTmp;
     private TextMeshProUGUI backTmp;
     private TextMeshProUGUI levelSelectLangTmp;
-    private readonly List<TextMeshProUGUI> categoryRowLabels = new List<TextMeshProUGUI>();
-    private readonly List<TextMeshProUGUI> levelRowLabels = new List<TextMeshProUGUI>();
-    private TextMeshProUGUI backToCategoriesTmp;
+    private WorldMapView _map;
+    private RectTransform _dailyRt;
+    private RectTransform _progressChipRt;
+    private RectTransform _panelRt;
+    private Transform _canvasTransform;
+    private TextMeshProUGUI _dailyTmp;
 
-    private ScrollRect _levelScroll;
-    private RectTransform _levelContentRt;
-    private LayoutElement _levelContentLayoutElement;
-    private VerticalLayoutGroup _levelContentVlg;
-    private int _levelContentPadVertical;
-    private float _levelRowHeight;
-    private float _levelRowSpacing;
-
-    private bool _levelPickMode;
-    private int _levelViewStart;
-    private int _levelViewEnd;
-    private int _selectedCategoryIndex = -1;
+    public static LevelSelectController Instance { get; private set; }
 
     private TextMeshProUGUI unlockChipTmp;
 
@@ -57,18 +51,12 @@ public class LevelSelectController : MonoBehaviour
         Entitlements.Changed -= OnEntitlementsChanged;
     }
 
-    /// <summary>Ownership / price changed (purchase, restore, store answered): redraw lock glyphs and the unlock chip.</summary>
+    /// <summary>Ownership / price changed (purchase, restore, store answered): redraw locks and the unlock chip.</summary>
     private void OnEntitlementsChanged()
     {
-        if (_levelContentRt == null)
-            return;
-        float scroll = _levelScroll != null ? _levelScroll.verticalNormalizedPosition : 1f;
-        if (_levelPickMode && _selectedCategoryIndex >= 0)
-            OpenCategory(_selectedCategoryIndex);
-        else
-            BuildCategoryView(false);
-        if (_levelScroll != null)
-            _levelScroll.verticalNormalizedPosition = scroll;
+        if (_map != null)
+            _map.Rebuild();
+        RefreshUnlockChip();
     }
 
     /// <summary>Text for the "Unlock all levels" chip (includes the localized store price once known).</summary>
@@ -92,38 +80,11 @@ public class LevelSelectController : MonoBehaviour
             PaywallOverlay.Open(canvas.transform);
     }
 
-    /// <summary>Dims a row and adds a padlock on its right edge.</summary>
-    private static void DecorateLockedRow(TextMeshProUGUI rowLabel)
-    {
-        if (rowLabel == null)
-            return;
-        var rowRt = rowLabel.transform.parent as RectTransform;
-        if (rowRt == null)
-            return;
-        bool tablet = DeviceLayout.IsTabletLike();
-        LockGlyph.AddToRow(rowRt, tablet ? 46f : 42f, new Color(0.95f, 0.62f, 0.55f, 0.95f));
-        var trt = rowLabel.rectTransform;
-        trt.offsetMax = new Vector2(-(tablet ? 76f : 70f), trt.offsetMax.y);
-        trt.offsetMin = new Vector2(tablet ? 76f : 70f, trt.offsetMin.y);
-        rowLabel.color = new Color(0.72f, 0.75f, 0.82f, 1f);
-    }
-
     private void RefreshLocalizedStrings()
     {
         if (titleTmp != null)
         {
-            if (_levelPickMode
-                && _selectedCategoryIndex >= 0
-                && _selectedCategoryIndex < GameLevelCatalog.SelectCategories.Length)
-            {
-                var cat = GameLevelCatalog.SelectCategories[_selectedCategoryIndex];
-                titleTmp.text = LocalizationManager.Get(cat.TitleLocalizationKey, cat.DefaultTitle);
-            }
-            else
-            {
-                titleTmp.text = LocalizationManager.Get("ui.choose_stage", "Select level");
-            }
-
+            titleTmp.text = LocalizationManager.Get("map.title", "World map");
             LocalizationManager.ApplyTextDirection(titleTmp);
         }
 
@@ -148,32 +109,6 @@ public class LevelSelectController : MonoBehaviour
             unlockChipTmp.text = UnlockChipLabel();
             LocalizationManager.ApplyTextDirection(unlockChipTmp);
         }
-        if (backToCategoriesTmp != null)
-        {
-            backToCategoriesTmp.text = LocalizationManager.Get("ui.level_select.back_categories", "All categories");
-            LocalizationManager.ApplyTextDirection(backToCategoriesTmp);
-        }
-
-        for (int i = 0; i < categoryRowLabels.Count; i++)
-        {
-            var tmp = categoryRowLabels[i];
-            if (tmp == null || i >= GameLevelCatalog.SelectCategories.Length)
-                continue;
-            var cat = GameLevelCatalog.SelectCategories[i];
-            tmp.text = LocalizationManager.Get(cat.TitleLocalizationKey, cat.DefaultTitle);
-            LocalizationManager.ApplyTextDirection(tmp);
-        }
-
-        for (int i = 0; i < levelRowLabels.Count; i++)
-        {
-            var tmp = levelRowLabels[i];
-            if (tmp == null)
-                continue;
-            int levelIdx = _levelViewStart + i;
-            tmp.text = GameLevelCatalog.GetLocalizedDisplayName(levelIdx);
-            LocalizationManager.ApplyTextDirection(tmp);
-        }
-
         RefreshLevelSelectLanguageLabel();
     }
 
@@ -187,12 +122,14 @@ public class LevelSelectController : MonoBehaviour
 
     private void Start()
     {
+        Instance = this;
         var canvas = FindAnyObjectByType<Canvas>();
         if (canvas == null)
         {
             Debug.LogError("LevelSelectController: No Canvas in scene.");
             return;
         }
+        _canvasTransform = canvas.transform;
 
         var safeParent = MobileUiRoots.GetSafeContentParent(canvas.transform);
         var panel = new GameObject("LevelSelectPanel");
@@ -202,6 +139,7 @@ public class LevelSelectController : MonoBehaviour
         prt.anchorMax = Vector2.one;
         prt.offsetMin = Vector2.zero;
         prt.offsetMax = Vector2.zero;
+        _panelRt = prt;
 
         var pimg = panel.AddComponent<Image>();
         pimg.color = backgroundColor;
@@ -217,19 +155,21 @@ public class LevelSelectController : MonoBehaviour
         backdropGo.AddComponent<LevelSelectFallingSymbolsBackdrop>();
         backdropGo.transform.SetAsFirstSibling();
 
+        bool tablet = DeviceLayout.IsTabletLike();
         var titleGo = new GameObject("Title");
         var titleRt = titleGo.AddComponent<RectTransform>();
         titleRt.SetParent(panel.transform, false);
-        bool tablet = DeviceLayout.IsTabletLike();
-        titleRt.anchorMin = new Vector2(0.5f, tablet ? 0.91f : 0.9f);
-        titleRt.anchorMax = new Vector2(0.5f, tablet ? 0.91f : 0.9f);
-        titleRt.pivot = new Vector2(0.5f, 0.5f);
-        titleRt.sizeDelta = new Vector2(tablet ? 1080f : 1000f, tablet ? 108f : 96f);
-        titleRt.anchoredPosition = Vector2.zero;
+        titleRt.anchorMin = new Vector2(0.5f, 1f);
+        titleRt.anchorMax = new Vector2(0.5f, 1f);
+        titleRt.pivot = new Vector2(0.5f, 1f);
+        titleRt.sizeDelta = new Vector2(tablet ? 560f : 520f, tablet ? 72f : 66f);
+        titleRt.anchoredPosition = new Vector2(tablet ? -120f : -110f, tablet ? -6f : -4f);
 
         titleTmp = titleGo.AddComponent<TextMeshProUGUI>();
-        titleTmp.text = LocalizationManager.Get("ui.choose_stage", "Select level");
-        titleTmp.fontSize = UiTypography.Scale(tablet ? 52 : 46);
+        titleTmp.text = LocalizationManager.Get("map.title", "World map");
+        titleTmp.enableAutoSizing = true;
+        titleTmp.fontSizeMin = UiTypography.Scale(24);
+        titleTmp.fontSizeMax = UiTypography.Scale(tablet ? 44 : 40);
         titleTmp.alignment = TextAlignmentOptions.Center;
         titleTmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(titleTmp);
@@ -237,75 +177,17 @@ public class LevelSelectController : MonoBehaviour
 
         CreateLevelSelectLanguagePicker(panel.transform);
         CreateProgressChip(panel.transform, canvas.transform);
+        RefreshUnlockChip();
 
-        // Scrollable list (categories first, then per-category stages).
-        var scrollGo = new GameObject("LevelScroll");
-        var scrollRt = scrollGo.AddComponent<RectTransform>();
-        scrollRt.SetParent(panel.transform, false);
-        scrollRt.anchorMin = DeviceLayout.LevelSelectScrollAnchorMin;
-        scrollRt.anchorMax = DeviceLayout.LevelSelectScrollAnchorMax;
-        scrollRt.offsetMin = Vector2.zero;
-        scrollRt.offsetMax = Vector2.zero;
+        // World map fills the middle band.
+        var mapHost = UiKit.Rect("MapHost", panel.transform, new Vector2(0f, tablet ? 0.13f : 0.14f), new Vector2(1f, tablet ? 0.9f : 0.885f));
+        _map = WorldMapView.Create(mapHost, canvas.transform, StartGameAt, StartChallenge, OpenPaywall, ShowComingSoonOverlay);
+        _map.Built += OnMapBuilt;
+        _map.Rebuild();
 
-        _levelScroll = scrollGo.AddComponent<ScrollRect>();
-        _levelScroll.horizontal = false;
-        _levelScroll.vertical = true;
-        _levelScroll.movementType = ScrollRect.MovementType.Clamped;
-        _levelScroll.scrollSensitivity = DeviceLayout.LevelSelectScrollSensitivity;
-
-        var viewportGo = new GameObject("Viewport");
-        var viewportRt = viewportGo.AddComponent<RectTransform>();
-        viewportRt.SetParent(scrollGo.transform, false);
-        viewportRt.anchorMin = Vector2.zero;
-        viewportRt.anchorMax = Vector2.one;
-        viewportRt.offsetMin = Vector2.zero;
-        viewportRt.offsetMax = Vector2.zero;
-        viewportGo.AddComponent<RectMask2D>();
-        var vImg = viewportGo.AddComponent<Image>();
-        vImg.color = new Color(0f, 0f, 0f, 0f);
-        vImg.raycastTarget = true;
-        _levelScroll.viewport = viewportRt;
-
-        var contentGo = new GameObject("Content");
-        var contentRt = contentGo.AddComponent<RectTransform>();
-        contentRt.SetParent(viewportGo.transform, false);
-        contentRt.anchorMin = new Vector2(0f, 1f);
-        contentRt.anchorMax = new Vector2(1f, 1f);
-        contentRt.pivot = new Vector2(0.5f, 1f);
-        contentRt.anchoredPosition = Vector2.zero;
-        contentRt.sizeDelta = new Vector2(0f, 0f);
-
-        _levelScroll.content = contentRt;
-        _levelContentRt = contentRt;
-
-        _levelContentVlg = contentGo.AddComponent<VerticalLayoutGroup>();
-        _levelContentVlg.childAlignment = TextAnchor.UpperCenter;
-        _levelRowSpacing = tablet ? 20f : 18f;
-        _levelContentVlg.spacing = _levelRowSpacing;
-        _levelContentVlg.padding = new RectOffset(tablet ? 16 : 12, tablet ? 16 : 12, tablet ? 14 : 12, tablet ? 14 : 12);
-        _levelContentVlg.childControlHeight = true;
-        _levelContentVlg.childControlWidth = true;
-        _levelContentVlg.childForceExpandHeight = false;
-        _levelContentVlg.childForceExpandWidth = true;
-
-        var fitter = contentGo.AddComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        _levelRowHeight = tablet ? 100f : 92f;
-        _levelContentPadVertical = _levelContentVlg.padding.top + _levelContentVlg.padding.bottom;
-        _levelContentLayoutElement = contentGo.AddComponent<LayoutElement>();
-        _levelContentLayoutElement.minHeight = 400f;
-
-        BuildCategoryView(false);
-
-        RebuildScrollContent(_levelScroll, contentRt);
-        StartCoroutine(FinalizeScrollAfterTmpLayout(_levelScroll, contentRt));
-
-        // Chips anchored to bottom (Math tips above How to play); create order puts How to play on top in sibling stack.
+        BuildDailyCard(panel.transform);
         CreateMathArticlesButton(panel.transform, canvas.transform);
         CreateHowToPlayButton(panel.transform, canvas.transform);
-
         CreateBackButton(panel.transform);
 
         // Arrived here because the player cleared the last free level (see LevelManager.AdvanceLevel).
@@ -313,31 +195,140 @@ public class LevelSelectController : MonoBehaviour
             PaywallOverlay.Open(canvas.transform);
     }
 
-    private static void RebuildScrollContent(ScrollRect scroll, RectTransform contentRt)
+    private void OnDestroy()
     {
-        if (contentRt == null)
-            return;
-
-        for (int i = 0; i < contentRt.childCount; i++)
-        {
-            var tmp = contentRt.GetChild(i).GetComponentInChildren<TextMeshProUGUI>();
-            if (tmp != null)
-                tmp.ForceMeshUpdate(true);
-        }
-
-        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
-        Canvas.ForceUpdateCanvases();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
-
-        if (scroll != null)
-            scroll.verticalNormalizedPosition = 1f;
+        if (Instance == this)
+            Instance = null;
     }
 
-    private static IEnumerator FinalizeScrollAfterTmpLayout(ScrollRect scroll, RectTransform contentRt)
+    private bool _tourChecked;
+
+    private void OnMapBuilt()
     {
-        yield return null;
-        yield return new WaitForEndOfFrame();
-        RebuildScrollContent(scroll, contentRt);
+        if (_tourChecked)
+            return;
+        _tourChecked = true;
+        if (!ProgressStore.MapTourDone && !PaywallOverlay.IsOpen && !QaShots.Enabled)
+            StartCoroutine(StartTourSoon());
+    }
+
+    private IEnumerator StartTourSoon()
+    {
+        yield return new WaitForSecondsRealtime(0.6f);
+        StartMapTour();
+    }
+
+    /// <summary>Settings "Show tutorial": forget both tours and replay the map one now.</summary>
+    public static void ReplayTutorials()
+    {
+        ProgressStore.MapTourDone = false;
+        ProgressStore.LevelTourDone = false;
+        if (Instance != null)
+            Instance.StartMapTour();
+    }
+
+    public void StartMapTour()
+    {
+        if (_canvasTransform == null || _map == null)
+            return;
+        MapLevelSheet.Close();
+        bool touch = DeviceLayout.PreferOnScreenGameControls;
+        bool pad = GamepadSupport.ControllerActive;
+        string pick = touch ? LocalizationManager.Get("tour.map.pick.touch", "Tap a tile to see its stars and play it. Swipe sideways to explore the map.")
+            : pad ? LocalizationManager.Get("tour.map.pick.pad", "Move between tiles with the d-pad or left stick and press A to open one.")
+            : LocalizationManager.Get("tour.map.pick.keys", "Click a tile to see its stars and play it. Scroll or drag sideways to explore the map.");
+        var steps = new List<CoachStep>
+        {
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.map.here.title", "You are here"),
+                Body = LocalizationManager.Get("tour.map.here.body", "Your glyph marks the next level on the path. Each region of the map is one topic, from derivatives to Big O.") + " " + pick,
+                OnEnter = () => _map.ScrollTo(_map.CurrentNodeRect, true),
+                Target = () => _map.CurrentNodeRect,
+            },
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.map.stars.title", "Stars and medals"),
+                Body = string.Format(LocalizationManager.Get("tour.map.stars.body",
+                    "Reach the exit for 1 star, fall at most once for 2, no falls and {0}+ points for 3. Cleared levels open a Flawless run and a Time trial that each earn a medal."),
+                    ProgressRules.ThreeStarMinScore),
+                OnEnter = () => _map.ScrollTo(_map.StarsExampleRect, true),
+                Target = () => _map.StarsExampleRect,
+            },
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.map.trial.title", "Trials and gated paths"),
+                Body = string.Format(LocalizationManager.Get("tour.map.trial.body",
+                    "Dashed paths lead to optional boss trials. Each one opens once you hold {0} stars per level in its region, and the Grand trial needs {1} medals. The main path never needs them."),
+                    ChallengeRules.TrialStarsPerLevel, ChallengeRules.GrandTrialMedalsNeeded),
+                OnEnter = () => _map.ScrollTo(_map.FirstTrialRect, true),
+                Target = () => _map.FirstTrialRect,
+            },
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.map.daily.title", "Daily challenge"),
+                Body = LocalizationManager.Get("tour.map.daily.body", "A new goal every day. Complete it to grow your streak."),
+                Target = () => _dailyRt,
+            },
+            new CoachStep
+            {
+                Title = LocalizationManager.Get("tour.map.progress.title", "Progress and settings"),
+                Body = LocalizationManager.Get("tour.map.progress.body", "Your stars, medals and achievements live here, along with sound and Show tutorial to replay this walkthrough."),
+                Target = () => _progressChipRt,
+            },
+        };
+        if (_dailyRt == null)
+            steps.RemoveAt(3);
+        CoachTour.Show(_canvasTransform, steps, done =>
+        {
+            ProgressStore.MapTourDone = true;
+            if (_map != null)
+                _map.ScrollTo(_map.CurrentNodeRect, false);
+        });
+    }
+
+    private void StartChallenge(ChallengeSpec spec)
+    {
+        if (!Entitlements.IsLevelUnlocked(spec.LevelIndex))
+        {
+            OpenPaywall();
+            return;
+        }
+        DailyChallengeSession.End();
+        ChallengeSession.Begin(spec);
+        LevelSelection.SetSelectedLevel(spec.LevelIndex);
+        SceneTransitionHost.LoadSingleScene("Game");
+    }
+
+    private void RefreshUnlockChip()
+    {
+        var existing = _panelRt != null ? _panelRt.Find("UnlockChip") : null;
+        if (!ShowUnlockChip)
+        {
+            if (existing != null)
+                Destroy(existing.gameObject);
+            unlockChipTmp = null;
+            return;
+        }
+        if (existing != null || _panelRt == null)
+        {
+            if (unlockChipTmp != null)
+                unlockChipTmp.text = UnlockChipLabel();
+            return;
+        }
+        bool tablet = DeviceLayout.IsTabletLike();
+        var btn = UiKit.Button(_panelRt, "UnlockChip", new Vector2(1f, 1f), new Vector2(1f, 1f), UnlockChipLabel(),
+            RuntimeUiPolish.AccentCoral, OpenPaywall, tablet ? 22 : 20, Color.white);
+        var rt = (RectTransform)btn.transform;
+        rt.pivot = new Vector2(1f, 1f);
+        rt.sizeDelta = new Vector2(tablet ? 340f : 320f, tablet ? 64f : 56f);
+        rt.anchoredPosition = new Vector2(-((tablet ? 14f : 10f) + (tablet ? 400f : 370f) + 12f), tablet ? -10f : -8f);
+        unlockChipTmp = btn.GetComponentInChildren<TextMeshProUGUI>();
+        var lk = StarGlyph.Add(rt, "Lock", LockGlyph.Unlocked, Color.white, new Vector2(30f, 30f));
+        lk.rectTransform.anchorMin = lk.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+        lk.rectTransform.pivot = new Vector2(0f, 0.5f);
+        lk.rectTransform.anchoredPosition = new Vector2(12f, 0f);
+        unlockChipTmp.rectTransform.offsetMin = new Vector2(30f, unlockChipTmp.rectTransform.offsetMin.y);
     }
 
     private void CreateHowToPlayButton(Transform panelRoot, Transform canvasTransform)
@@ -349,15 +340,13 @@ public class LevelSelectController : MonoBehaviour
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(panelRoot, false);
         bool tablet = DeviceLayout.IsTabletLike();
-        // Leave room for bottom-left Back button (see CreateBackButton).
-        float bottomInset = tablet ? 88f : 92f;
-        float howH = tablet ? 76f : 70f;
-        // Bottom-centered — lowest chip (Math tips sits above; see CreateMathArticlesButton).
-        rt.anchorMin = new Vector2(0.5f, 0f);
-        rt.anchorMax = new Vector2(0.5f, 0f);
-        rt.pivot = new Vector2(0.5f, 0f);
-        rt.sizeDelta = new Vector2(tablet ? 700f : 632f, howH);
-        rt.anchoredPosition = new Vector2(0f, bottomInset);
+        // Bottom-right corner (Math tips sits to its left; see CreateMathArticlesButton).
+        float margin = tablet ? 20f : 16f;
+        rt.anchorMin = new Vector2(1f, 0f);
+        rt.anchorMax = new Vector2(1f, 0f);
+        rt.pivot = new Vector2(1f, 0f);
+        rt.sizeDelta = new Vector2(tablet ? 260f : 240f, tablet ? 64f : 58f);
+        rt.anchoredPosition = new Vector2(-margin, margin + 4f);
 
         var img = go.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
@@ -380,11 +369,14 @@ public class LevelSelectController : MonoBehaviour
 
         howToPlayTmp = textGo.AddComponent<TextMeshProUGUI>();
         howToPlayTmp.text = LocalizationManager.Get("menu.tutorial_button", "How to play");
-        howToPlayTmp.fontSize = UiTypography.Scale(tablet ? 36 : 32);
+        howToPlayTmp.fontSize = UiTypography.Scale(tablet ? 28 : 25);
         howToPlayTmp.fontStyle = FontStyles.Bold;
         howToPlayTmp.alignment = TextAlignmentOptions.Center;
         howToPlayTmp.color = new Color(0.92f, 0.98f, 1f, 1f);
-        howToPlayTmp.textWrappingMode = TextWrappingModes.Normal;
+        howToPlayTmp.textWrappingMode = TextWrappingModes.NoWrap;
+        howToPlayTmp.enableAutoSizing = true;
+        howToPlayTmp.fontSizeMin = UiTypography.Scale(14);
+        howToPlayTmp.fontSizeMax = howToPlayTmp.fontSize;
         howToPlayTmp.overflowMode = TextOverflowModes.Overflow;
         howToPlayTmp.richText = true;
         CopyFontFromAny(howToPlayTmp);
@@ -405,16 +397,13 @@ public class LevelSelectController : MonoBehaviour
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(panelRoot, false);
         bool tablet = DeviceLayout.IsTabletLike();
-        float bottomInset = tablet ? 88f : 92f;
-        float howH = tablet ? 76f : 70f;
-        float mathH = tablet ? 82f : 76f;
-        float chipGap = 12f;
-        // Bottom band — directly above "How to play".
-        rt.anchorMin = new Vector2(0.5f, 0f);
-        rt.anchorMax = new Vector2(0.5f, 0f);
-        rt.pivot = new Vector2(0.5f, 0f);
-        rt.sizeDelta = new Vector2(tablet ? 700f : 632f, mathH);
-        rt.anchoredPosition = new Vector2(0f, bottomInset + howH + chipGap);
+        float margin = tablet ? 20f : 16f;
+        // Bottom-right, left of "How to play".
+        rt.anchorMin = new Vector2(1f, 0f);
+        rt.anchorMax = new Vector2(1f, 0f);
+        rt.pivot = new Vector2(1f, 0f);
+        rt.sizeDelta = new Vector2(tablet ? 290f : 268f, tablet ? 64f : 58f);
+        rt.anchoredPosition = new Vector2(-(margin + (tablet ? 260f : 240f) + 12f), margin + 4f);
 
         var img = go.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
@@ -437,11 +426,14 @@ public class LevelSelectController : MonoBehaviour
 
         mathTipsTmp = textGo.AddComponent<TextMeshProUGUI>();
         mathTipsTmp.text = LocalizationManager.Get("ui.math_tips", "Math tips & snippets");
-        mathTipsTmp.fontSize = UiTypography.Scale(tablet ? 38 : 34);
+        mathTipsTmp.fontSize = UiTypography.Scale(tablet ? 28 : 25);
         mathTipsTmp.fontStyle = FontStyles.Bold;
         mathTipsTmp.alignment = TextAlignmentOptions.Center;
         mathTipsTmp.color = new Color(0.9f, 0.96f, 1f, 1f);
-        mathTipsTmp.textWrappingMode = TextWrappingModes.Normal;
+        mathTipsTmp.textWrappingMode = TextWrappingModes.NoWrap;
+        mathTipsTmp.enableAutoSizing = true;
+        mathTipsTmp.fontSizeMin = UiTypography.Scale(14);
+        mathTipsTmp.fontSizeMax = mathTipsTmp.fontSize;
         mathTipsTmp.overflowMode = TextOverflowModes.Overflow;
         CopyFontFromAny(mathTipsTmp);
         mathTipsTmp.fontStyle = FontStyles.Bold;
@@ -457,7 +449,8 @@ public class LevelSelectController : MonoBehaviour
         var rt = UiKit.Rect("ProgressChip", panelRoot, new Vector2(1f, 1f), new Vector2(1f, 1f));
         rt.pivot = new Vector2(1f, 1f);
         rt.anchoredPosition = new Vector2(tablet ? -14f : -10f, tablet ? -10f : -8f);
-        rt.sizeDelta = new Vector2(tablet ? 340f : 310f, tablet ? 64f : 56f);
+        rt.sizeDelta = new Vector2(tablet ? 400f : 370f, tablet ? 64f : 56f);
+        _progressChipRt = rt;
         var img = rt.gameObject.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
         img.color = new Color(0.16f, 0.2f, 0.28f, 0.92f);
@@ -469,19 +462,24 @@ public class LevelSelectController : MonoBehaviour
             FeelDirector.Play(SfxId.Click, 0.6f);
             AchievementsOverlay.Open(canvasTransform);
         });
-        var star = StarGlyph.Add(rt, "Star", StarGlyph.Filled, UiKit.Gold, new Vector2(36f, 36f));
-        star.rectTransform.anchorMin = star.rectTransform.anchorMax = new Vector2(0f, 0.5f);
-        star.rectTransform.pivot = new Vector2(0f, 0.5f);
-        star.rectTransform.anchoredPosition = new Vector2(12f, 0f);
-        var trophy = StarGlyph.Add(rt, "Trophy", StarGlyph.Trophy, UiKit.Mint, new Vector2(36f, 36f));
-        trophy.rectTransform.anchorMin = trophy.rectTransform.anchorMax = new Vector2(0.52f, 0.5f);
-        trophy.rectTransform.pivot = new Vector2(0f, 0.5f);
         int maxStars = ProgressStore.PlayableLevelCount * ProgressRules.MaxStars;
-        UiKit.Text(rt, "Stars", new Vector2(0.16f, 0.1f), new Vector2(0.52f, 0.9f), $"{ProgressStore.TotalStars}/{maxStars}",
-            UiTypography.Scale(tablet ? 22 : 20), UiKit.Gold, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
-        UiKit.Text(rt, "Ach", new Vector2(0.67f, 0.1f), new Vector2(0.97f, 0.9f),
-            $"{ProgressStore.Data.achievements.Count}/{AchievementCatalog.All.Length}",
-            UiTypography.Scale(tablet ? 22 : 20), UiKit.Mint, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
+        float fs = UiTypography.Scale(tablet ? 22 : 20);
+        AddChipStat(rt, "Stars", StarGlyph.Filled, UiKit.Gold, 0f, 0.42f, $"{ProgressStore.TotalStars}/{maxStars}", fs);
+        AddChipStat(rt, "Medals", StarGlyph.Medal, UiKit.Gold, 0.42f, 0.66f, ProgressStore.MedalCount.ToString(), fs);
+        AddChipStat(rt, "Ach", StarGlyph.Trophy, UiKit.Mint, 0.66f, 1f,
+            $"{ProgressStore.Data.achievements.Count}/{AchievementCatalog.All.Length}", fs);
+    }
+
+    private static void AddChipStat(RectTransform chip, string name, Sprite glyph, Color c, float x0, float x1, string text, float size)
+    {
+        var cell = UiKit.Rect(name, chip, new Vector2(x0, 0f), new Vector2(x1, 1f));
+        var icon = StarGlyph.Add(cell, "Glyph", glyph, c, new Vector2(32f, 32f));
+        icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+        icon.rectTransform.pivot = new Vector2(0f, 0.5f);
+        icon.rectTransform.anchoredPosition = new Vector2(10f, 0f);
+        var t = UiKit.Text(cell, "Text", new Vector2(0f, 0.1f), new Vector2(1f, 0.9f), text, size, c, FontStyles.Bold,
+            TextAlignmentOptions.MidlineLeft);
+        t.rectTransform.offsetMin = new Vector2(46f, 0f);
     }
 
     private void CreateLevelSelectLanguagePicker(Transform panelRoot)
@@ -549,55 +547,6 @@ public class LevelSelectController : MonoBehaviour
             target.fontStyle = FontStyles.Bold;
     }
 
-    /// <returns>Label <see cref="TextMeshProUGUI"/> for live language updates.</returns>
-    private TextMeshProUGUI CreateLevelButton(Transform parent, string label, UnityAction onClick, Color? backgroundOverride = null)
-    {
-        var go = new GameObject("LevelButton");
-        var rt = go.AddComponent<RectTransform>();
-        rt.SetParent(parent, false);
-
-        bool tablet = DeviceLayout.IsTabletLike();
-        var le = go.AddComponent<LayoutElement>();
-        le.preferredHeight = tablet ? 100f : 92f;
-        le.minHeight = tablet ? 100f : 92f;
-
-        Color bg = backgroundOverride ?? buttonColor;
-        var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = bg;
-
-        var btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, bg,
-            RuntimeUiPolish.ButtonNeutralHover,
-            new Color(0.12f, 0.13f, 0.16f, 1f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(1.5f, -2.5f), 0.2f);
-
-        var textGo = new GameObject("Text");
-        var trt = textGo.AddComponent<RectTransform>();
-        trt.SetParent(go.transform, false);
-        trt.anchorMin = Vector2.zero;
-        trt.anchorMax = Vector2.one;
-        trt.offsetMin = new Vector2(20f, 8f);
-        trt.offsetMax = new Vector2(-20f, -8f);
-
-        var tmp = textGo.AddComponent<TextMeshProUGUI>();
-        tmp.text = label;
-        tmp.textWrappingMode = TextWrappingModes.Normal;
-        tmp.overflowMode = TextOverflowModes.Overflow;
-        tmp.enableAutoSizing = true;
-        tmp.fontSizeMin = Mathf.Max(14, UiTypography.Scale(17));
-        tmp.fontSizeMax = UiTypography.Scale(tablet ? 32 : 30);
-        tmp.fontSize = tmp.fontSizeMax;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = RuntimeUiPolish.TitleIvory;
-        CopyFontFromAny(tmp);
-        LocalizationManager.ApplyTextDirection(tmp);
-
-        btn.onClick.AddListener(onClick);
-        return tmp;
-    }
-
     private void CreateBackButton(Transform parent)
     {
         bool tablet = DeviceLayout.IsTabletLike();
@@ -608,7 +557,7 @@ public class LevelSelectController : MonoBehaviour
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.zero;
         rt.pivot = Vector2.zero;
-        rt.sizeDelta = new Vector2(tablet ? 300f : 272f, tablet ? 64f : 58f);
+        rt.sizeDelta = new Vector2(tablet ? 260f : 240f, tablet ? 64f : 58f);
         rt.anchoredPosition = new Vector2(margin, margin + 4f);
 
         var img = go.AddComponent<Image>();
@@ -632,7 +581,7 @@ public class LevelSelectController : MonoBehaviour
 
         backTmp = textGo.AddComponent<TextMeshProUGUI>();
         backTmp.text = LocalizationManager.Get("ui.back_menu", "Back to Menu");
-        backTmp.fontSize = UiTypography.Scale(tablet ? 32 : 28);
+        backTmp.fontSize = UiTypography.Scale(tablet ? 28 : 25);
         backTmp.fontStyle = FontStyles.Bold;
         backTmp.alignment = TextAlignmentOptions.Center;
         backTmp.color = RuntimeUiPolish.TitleIvory;
@@ -641,119 +590,6 @@ public class LevelSelectController : MonoBehaviour
         LocalizationManager.ApplyTextDirection(backTmp);
 
         btn.onClick.AddListener(() => SceneTransitionHost.LoadSingleScene("Menu"));
-    }
-
-    private void ClearLevelScrollContent()
-    {
-        if (_levelContentRt == null)
-            return;
-        for (int i = _levelContentRt.childCount - 1; i >= 0; i--)
-            Destroy(_levelContentRt.GetChild(i).gameObject);
-        categoryRowLabels.Clear();
-        levelRowLabels.Clear();
-        backToCategoriesTmp = null;
-        unlockChipTmp = null;
-    }
-
-    private void UpdateLevelScrollMinHeight(int rowCount)
-    {
-        if (_levelContentLayoutElement == null)
-            return;
-        _levelContentLayoutElement.minHeight =
-            rowCount * _levelRowHeight + Mathf.Max(0, rowCount - 1) * _levelRowSpacing + _levelContentPadVertical;
-    }
-
-    /// <param name="scrollToTop">When true, snap scroll after rebuild (e.g. returning from a submenu).</param>
-    private void BuildCategoryView(bool scrollToTop)
-    {
-        _levelPickMode = false;
-        _selectedCategoryIndex = -1;
-        ClearLevelScrollContent();
-
-        int rows = GameLevelCatalog.SelectCategories.Length;
-        if (ShowUnlockChip)
-        {
-            unlockChipTmp = CreateLevelButton(_levelContentRt, UnlockChipLabel(), OpenPaywall, RuntimeUiPolish.AccentCoral);
-            unlockChipTmp.color = Color.white;
-            rows++;
-        }
-
-        // Daily challenge card (first row) — free players draw from the free levels, owners from everything.
-        if (BuildDailyRow())
-            rows++;
-
-        for (int c = 0; c < GameLevelCatalog.SelectCategories.Length; c++)
-        {
-            int catIdx = c;
-            var cat = GameLevelCatalog.SelectCategories[c];
-            var tmp = CreateLevelButton(
-                _levelContentRt,
-                LocalizationManager.Get(cat.TitleLocalizationKey, cat.DefaultTitle),
-                () => OpenCategory(catIdx));
-            // Locked categories still open (players can browse what they'd get); levels inside show the paywall.
-            if (Entitlements.GetCategoryState(cat) == CategoryLockState.Locked)
-                DecorateLockedRow(tmp);
-            else
-                DecorateCategoryProgress(tmp, cat);
-            categoryRowLabels.Add(tmp);
-        }
-
-        UpdateLevelScrollMinHeight(rows);
-        RefreshLocalizedStrings();
-        RebuildScrollContent(_levelScroll, _levelContentRt);
-        if (scrollToTop && _levelScroll != null)
-            _levelScroll.verticalNormalizedPosition = 1f;
-        if (isActiveAndEnabled && _levelScroll != null && _levelContentRt != null)
-            StartCoroutine(FinalizeScrollAfterTmpLayout(_levelScroll, _levelContentRt));
-    }
-
-    private void OpenCategory(int categoryIndex)
-    {
-        if (categoryIndex < 0 || categoryIndex >= GameLevelCatalog.SelectCategories.Length)
-            return;
-
-        var cat = GameLevelCatalog.SelectCategories[categoryIndex];
-        BuildLevelViewForCategory(categoryIndex, cat.FirstLevelIndex, cat.LastLevelIndexInclusive);
-    }
-
-    private void BuildLevelViewForCategory(int categoryIndex, int firstLevel, int lastLevel)
-    {
-        _levelPickMode = true;
-        _selectedCategoryIndex = categoryIndex;
-        _levelViewStart = firstLevel;
-        _levelViewEnd = lastLevel;
-        ClearLevelScrollContent();
-
-        Color backTint = new Color(0.15f, 0.17f, 0.24f, 0.96f);
-        backToCategoriesTmp = CreateLevelButton(
-            _levelContentRt,
-            LocalizationManager.Get("ui.level_select.back_categories", "All categories"),
-            () => BuildCategoryView(true),
-            backTint);
-
-        int n = lastLevel - firstLevel + 1;
-        for (int i = 0; i < n; i++)
-        {
-            int idx = firstLevel + i;
-            int capture = idx;
-            var rowTmp = CreateLevelButton(
-                _levelContentRt,
-                GameLevelCatalog.GetLocalizedDisplayName(capture),
-                () => StartGameAt(capture));
-            if (!Entitlements.IsLevelUnlocked(capture) && !GameLevelCatalog.IsComingSoonLevel(capture))
-                DecorateLockedRow(rowTmp);
-            else if (!GameLevelCatalog.IsComingSoonLevel(capture))
-                DecorateLevelStars(rowTmp, capture);
-            levelRowLabels.Add(rowTmp);
-        }
-
-        UpdateLevelScrollMinHeight(n + 1);
-        RefreshLocalizedStrings();
-        RebuildScrollContent(_levelScroll, _levelContentRt);
-        if (_levelScroll != null)
-            _levelScroll.verticalNormalizedPosition = 1f;
-        if (isActiveAndEnabled && _levelScroll != null && _levelContentRt != null)
-            StartCoroutine(FinalizeScrollAfterTmpLayout(_levelScroll, _levelContentRt));
     }
 
     private void StartGameAt(int index)
@@ -773,74 +609,20 @@ public class LevelSelectController : MonoBehaviour
         }
 
         DailyChallengeSession.End();
+        ChallengeSession.End();
         LevelSelection.SetSelectedLevel(index);
         SceneTransitionHost.LoadSingleScene("Game");
     }
 
-    // ------------------------------------------------------------------ progress decorations (stars, daily)
+    // ------------------------------------------------------------------ daily challenge card
 
-    /// <summary>Right-aligned "★ n / max" + cleared count on a category row.</summary>
-    private static void DecorateCategoryProgress(TextMeshProUGUI rowLabel, LevelSelectCategory cat)
-    {
-        if (rowLabel == null || GameLevelCatalog.IsComingSoonLevel(cat.FirstLevelIndex))
-            return;
-        var rowRt = rowLabel.transform.parent as RectTransform;
-        if (rowRt == null)
-            return;
-        bool tablet = DeviceLayout.IsTabletLike();
-        int stars = ProgressStore.StarsInRange(cat.FirstLevelIndex, cat.LastLevelIndexInclusive);
-        int max = cat.LevelCount * ProgressRules.MaxStars;
-        float w = tablet ? 150f : 136f;
-        var box = UiKit.Rect("Progress", rowRt, new Vector2(1f, 0f), new Vector2(1f, 1f));
-        box.pivot = new Vector2(1f, 0.5f);
-        box.sizeDelta = new Vector2(w, 0f);
-        box.anchoredPosition = new Vector2(-14f, 0f);
-        var star = StarGlyph.Add(box, "Star", stars > 0 ? StarGlyph.Filled : StarGlyph.Outline,
-            stars > 0 ? UiKit.Gold : UiKit.GoldDim, new Vector2(34f, 34f));
-        star.rectTransform.anchorMin = star.rectTransform.anchorMax = new Vector2(0f, 0.5f);
-        star.rectTransform.pivot = new Vector2(0f, 0.5f);
-        UiKit.Text(box, "Count", new Vector2(0.27f, 0.1f), new Vector2(1f, 0.9f), $"{stars}/{max}",
-            UiTypography.Scale(tablet ? 22 : 20), stars >= max ? UiKit.Gold : UiKit.Muted, FontStyles.Bold,
-            TextAlignmentOptions.MidlineLeft);
-        // Thin completion bar along the bottom edge.
-        float frac = max > 0 ? stars / (float)max : 0f;
-        var bar = UiKit.Rect("Bar", rowRt, new Vector2(0.04f, 0f), new Vector2(0.04f + 0.92f * frac, 0f));
-        bar.pivot = new Vector2(0f, 0f);
-        bar.sizeDelta = new Vector2(0f, 5f);
-        bar.anchoredPosition = new Vector2(0f, 7f);
-        var barImg = bar.gameObject.AddComponent<Image>();
-        barImg.color = new Color(1f, 0.82f, 0.36f, 0.75f);
-        barImg.raycastTarget = false;
-        var trt = rowLabel.rectTransform;
-        trt.offsetMax = new Vector2(-(w + 18f), trt.offsetMax.y);
-        trt.offsetMin = new Vector2(w + 18f, trt.offsetMin.y);
-    }
-
-    /// <summary>Three small stars on the right edge of a level row (best result so far).</summary>
-    private static void DecorateLevelStars(TextMeshProUGUI rowLabel, int levelIndex)
-    {
-        var rowRt = rowLabel != null ? rowLabel.transform.parent as RectTransform : null;
-        if (rowRt == null)
-            return;
-        bool tablet = DeviceLayout.IsTabletLike();
-        float s = tablet ? 34f : 30f;
-        float w = s * 3f + 16f;
-        var box = UiKit.Rect("Stars", rowRt, new Vector2(1f, 0f), new Vector2(1f, 1f));
-        box.pivot = new Vector2(1f, 0.5f);
-        box.sizeDelta = new Vector2(w, 0f);
-        box.anchoredPosition = new Vector2(-14f, 0f);
-        UiKit.Stars(box, Vector2.zero, Vector2.one, ProgressStore.StarsFor(levelIndex), s);
-        var trt = rowLabel.rectTransform;
-        trt.offsetMax = new Vector2(-(w + 18f), trt.offsetMax.y);
-        trt.offsetMin = new Vector2(w + 18f, trt.offsetMin.y);
-    }
-
-    /// <summary>Adds the daily challenge row to the category list. Returns false if there is no pool.</summary>
-    private bool BuildDailyRow()
+    /// <summary>Bottom-centre card for today's challenge (free players draw from free levels).</summary>
+    private void BuildDailyCard(Transform panelRoot)
     {
         var spec = ProgressStore.TodaysChallenge();
         if (!spec.IsValid)
-            return false;
+            return;
+        bool tablet = DeviceLayout.IsTabletLike();
         bool done = ProgressStore.DailyDoneToday;
         int streak = ProgressStore.CurrentDailyStreak;
         string title = done
@@ -851,37 +633,36 @@ public class LevelSelectController : MonoBehaviour
             ? string.Format(LocalizationManager.Get("daily.streak", "Streak: {0} day(s)"), streak)
             : DailyChallengeSession.GoalText(spec.Goal) +
               (streak > 0 ? "   |   " + string.Format(LocalizationManager.Get("daily.streak", "Streak: {0} day(s)"), streak) : "");
-        var tmp = CreateLevelButton(_levelContentRt, $"<b>{title}</b>\n<size=72%><color=#d9d2ff>{sub}</color></size>",
-            () =>
-            {
-                if (done)
-                {
-                    FeelDirector.Play(SfxId.Locked, 0.5f);
-                    return;
-                }
-                DailyChallengeSession.Begin(spec);
-                LevelSelection.SetSelectedLevel(spec.LevelIndex);
-                SceneTransitionHost.LoadSingleScene("Game");
-            },
-            new Color(0.27f, 0.22f, 0.5f, 0.97f));
-        tmp.richText = true;
-        var rowRt = tmp.transform.parent as RectTransform;
-        bool tablet = DeviceLayout.IsTabletLike();
-        var le = rowRt.GetComponent<LayoutElement>();
-        if (le != null)
+        var bg = new Color(0.27f, 0.22f, 0.5f, 0.97f);
+        var btn = UiKit.Button(panelRoot, "DailyCard", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), "", bg, () =>
         {
-            le.preferredHeight = tablet ? 124f : 116f;
-            le.minHeight = le.preferredHeight;
-        }
-        var icon = StarGlyph.Add(rowRt, "DailyIcon", done ? StarGlyph.Calendar : StarGlyph.Flame,
-            done ? UiKit.Mint : UiKit.Gold, new Vector2(52f, 52f));
+            if (done)
+            {
+                FeelDirector.Play(SfxId.Locked, 0.5f);
+                return;
+            }
+            ChallengeSession.End();
+            DailyChallengeSession.Begin(spec);
+            LevelSelection.SetSelectedLevel(spec.LevelIndex);
+            SceneTransitionHost.LoadSingleScene("Game");
+        });
+        var rt = (RectTransform)btn.transform;
+        rt.pivot = new Vector2(0.5f, 0f);
+        float margin = tablet ? 20f : 16f;
+        // Fits between Back (left) and Math tips + How to play (right) on a landscape phone.
+        rt.sizeDelta = new Vector2(tablet ? 680f : 700f, tablet ? 88f : 80f);
+        rt.anchoredPosition = new Vector2(tablet ? -130f : -140f, margin - 2f);
+        _dailyRt = rt;
+        var icon = StarGlyph.Add(rt, "DailyIcon", done ? StarGlyph.Calendar : StarGlyph.Flame,
+            done ? UiKit.Mint : UiKit.Gold, new Vector2(46f, 46f));
         icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(0f, 0.5f);
         icon.rectTransform.pivot = new Vector2(0f, 0.5f);
-        icon.rectTransform.anchoredPosition = new Vector2(20f, 0f);
-        var trt = tmp.rectTransform;
-        trt.offsetMin = new Vector2(84f, trt.offsetMin.y);
-        trt.offsetMax = new Vector2(-84f, trt.offsetMax.y);
-        return true;
+        icon.rectTransform.anchoredPosition = new Vector2(16f, 0f);
+        _dailyTmp = UiKit.Text(rt, "Label", new Vector2(0f, 0.06f), new Vector2(1f, 0.94f),
+            $"<b>{title}</b>\n<size=76%><color=#d9d2ff>{sub}</color></size>",
+            UiTypography.Scale(tablet ? 24 : 22), RuntimeUiPolish.TitleIvory, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
+        _dailyTmp.rectTransform.offsetMin = new Vector2(76f, 0f);
+        _dailyTmp.rectTransform.offsetMax = new Vector2(-14f, 0f);
     }
 
     private const string ComingSoonOverlayName = "ComingSoonOverlayRoot";

@@ -187,6 +187,77 @@ public static class ProgressRules
 }
 
 // -----------------------------------------------------------------------------
+// Map challenges — optional harder content layered on the world map. The main path never
+// needs any of it: medals come from Flawless / Time-trial runs of cleared levels, region
+// Trials (gated by stars earned in that region) and the Grand trial (gated by medals).
+// -----------------------------------------------------------------------------
+
+public enum ChallengeKind
+{
+    None = 0,
+    /// <summary>Cleared level: no falls, no hints, at least <see cref="ChallengeRules.FlawlessMinScore"/> points.</summary>
+    Flawless = 1,
+    /// <summary>Cleared level: reach the exit within the par time (any falls / hints allowed).</summary>
+    TimeTrial = 2,
+    /// <summary>Region boss node: no falls, no hints, at least <see cref="ChallengeRules.TrialMinScore"/> points.</summary>
+    RegionTrial = 3,
+    /// <summary>End-of-map bonus node (medal-gated): same bar as Flawless on a boss level.</summary>
+    GrandTrial = 4,
+}
+
+public static class ChallengeRules
+{
+    public const int FlawlessMinScore = 95;
+    public const int TrialMinScore = 90;
+    /// <summary>Region trials open once the region holds this many stars per level on average.</summary>
+    public const int TrialStarsPerLevel = 2;
+    public const int GrandTrialMedalsNeeded = 5;
+    /// <summary>Time-trial par = this fraction of the best clear time (rounded down, at least MinParSeconds).</summary>
+    public const float ParFraction = 0.9f;
+    public const int MinParSeconds = 8;
+
+    public static bool NoHints(ChallengeKind k) => k == ChallengeKind.Flawless || k == ChallengeKind.RegionTrial || k == ChallengeKind.GrandTrial;
+
+    public static int ParSeconds(float bestSeconds)
+    {
+        if (bestSeconds <= 0f)
+            return 0;
+        return Math.Max(MinParSeconds, (int)Math.Floor(bestSeconds * ParFraction));
+    }
+
+    public static int TrialStarsNeeded(int levelCount) => Math.Max(1, levelCount) * TrialStarsPerLevel;
+
+    public static bool Meets(ChallengeKind kind, RunResult r, int parSeconds)
+    {
+        switch (kind)
+        {
+            case ChallengeKind.Flawless:
+            case ChallengeKind.GrandTrial:
+                return r.Falls == 0 && r.HintsUsed == 0 && r.Score >= FlawlessMinScore;
+            case ChallengeKind.RegionTrial:
+                return r.Falls == 0 && r.HintsUsed == 0 && r.Score >= TrialMinScore;
+            case ChallengeKind.TimeTrial:
+                return parSeconds > 0 && r.Seconds <= parSeconds;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>Medal id stored in progress ("f12", "t12", "r:core", "grand").</summary>
+    public static string MedalId(ChallengeKind kind, int levelIndex, string regionKey)
+    {
+        switch (kind)
+        {
+            case ChallengeKind.Flawless: return "f" + levelIndex;
+            case ChallengeKind.TimeTrial: return "t" + levelIndex;
+            case ChallengeKind.RegionTrial: return "r:" + regionKey;
+            case ChallengeKind.GrandTrial: return "grand";
+            default: return null;
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
 // Achievements — ids double as Steamworks achievement API names (see STEAM_RELEASE.md).
 // -----------------------------------------------------------------------------
 

@@ -122,4 +122,31 @@ public class ProgressRulesTests
         Assert.IsTrue(LevelAccessPolicy.ResolveHasFullGame(EntitlementPlatformMode.StoreGated, null, false, true));
         Assert.IsFalse(LevelAccessPolicy.ResolveHasFullGame(EntitlementPlatformMode.StoreGated, null, false, false));
     }
+
+    [Test]
+    public void Challenges_FlawlessTimeAndTrials()
+    {
+        // Flawless: no falls, no hints, 95+.
+        Assert.IsTrue(ChallengeRules.Meets(ChallengeKind.Flawless, new RunResult(3, 95, 0, 30f, 0), 0));
+        Assert.IsFalse(ChallengeRules.Meets(ChallengeKind.Flawless, new RunResult(3, 95, 0, 30f, 1), 0));
+        Assert.IsFalse(ChallengeRules.Meets(ChallengeKind.Flawless, new RunResult(3, 90, 0, 30f, 0), 0));
+        Assert.IsFalse(ChallengeRules.Meets(ChallengeKind.Flawless, new RunResult(3, 100, 1, 30f, 0), 0));
+        // Region trial bar is 90+.
+        Assert.IsTrue(ChallengeRules.Meets(ChallengeKind.RegionTrial, new RunResult(8, 90, 0, 30f, 0), 0));
+        Assert.IsFalse(ChallengeRules.Meets(ChallengeKind.RegionTrial, new RunResult(8, 85, 0, 30f, 0), 0));
+        // Time trial: at or under par; par is 90% of best, never below the floor.
+        Assert.AreEqual(20, ChallengeRules.ParSeconds(22.4f));
+        Assert.AreEqual(ChallengeRules.MinParSeconds, ChallengeRules.ParSeconds(5f));
+        Assert.AreEqual(0, ChallengeRules.ParSeconds(0f));
+        Assert.IsTrue(ChallengeRules.Meets(ChallengeKind.TimeTrial, new RunResult(2, 60, 3, 20f, 2), 20));
+        Assert.IsFalse(ChallengeRules.Meets(ChallengeKind.TimeTrial, new RunResult(2, 100, 0, 20.1f, 0), 20));
+        Assert.IsFalse(ChallengeRules.Meets(ChallengeKind.TimeTrial, new RunResult(2, 100, 0, 5f, 0), 0));
+        // Gates and ids.
+        Assert.AreEqual(18, ChallengeRules.TrialStarsNeeded(9));
+        Assert.AreEqual("f12", ChallengeRules.MedalId(ChallengeKind.Flawless, 12, null));
+        Assert.AreEqual("t12", ChallengeRules.MedalId(ChallengeKind.TimeTrial, 12, null));
+        Assert.AreEqual("r:core", ChallengeRules.MedalId(ChallengeKind.RegionTrial, 8, "core"));
+        Assert.IsTrue(ChallengeRules.NoHints(ChallengeKind.RegionTrial));
+        Assert.IsFalse(ChallengeRules.NoHints(ChallengeKind.TimeTrial));
+    }
 }

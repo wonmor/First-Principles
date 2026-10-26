@@ -40,6 +40,10 @@ public class ProgressData
     public List<string> achievements = new List<string>();
 
     public bool onboardingDone;
+    /// <summary>Medals from optional map challenges (see <see cref="ChallengeRules.MedalId"/>).</summary>
+    public List<string> medals = new List<string>();
+    public bool mapTourDone;
+    public bool levelTourDone;
     public bool sfxMuted;
     public long savedUnix;
 }
@@ -100,6 +104,7 @@ public static class ProgressStore
         if (d.clears == null || d.clears.Length < n) Array.Resize(ref d.clears, n);
         if (d.bestSeconds == null || d.bestSeconds.Length < n) Array.Resize(ref d.bestSeconds, n);
         d.achievements ??= new List<string>();
+        d.medals ??= new List<string>();
     }
 
     public static void Save()
@@ -332,6 +337,60 @@ public static class ProgressStore
         }
     }
 
+    public static bool MapTourDone
+    {
+        get => Data.mapTourDone;
+        set
+        {
+            if (Data.mapTourDone == value) return;
+            Data.mapTourDone = value;
+            Touch();
+        }
+    }
+
+    public static bool LevelTourDone
+    {
+        get => Data.levelTourDone;
+        set
+        {
+            if (Data.levelTourDone == value) return;
+            Data.levelTourDone = value;
+            Touch();
+        }
+    }
+
+    // ------------------------------------------------------------------ medals
+
+    public static bool HasMedal(string id) => !string.IsNullOrEmpty(id) && Data.medals.Contains(id);
+
+    public static int MedalCount => Data.medals.Count;
+
+    public static float BestSeconds(int levelIndex)
+    {
+        var b = Data.bestSeconds;
+        return levelIndex >= 0 && levelIndex < b.Length ? b[levelIndex] : 0f;
+    }
+
+    /// <summary>Evaluates the active map challenge for a cleared run. Returns the medal id when newly earned.</summary>
+    public static ChallengeOutcome RecordChallenge(RunResult r, ChallengeSpec? spec)
+    {
+        var o = new ChallengeOutcome();
+        if (!spec.HasValue || spec.Value.Kind == ChallengeKind.None || spec.Value.LevelIndex != r.LevelIndex)
+            return o;
+        var c = spec.Value;
+        o.Kind = c.Kind;
+        o.Met = ChallengeRules.Meets(c.Kind, r, c.ParSeconds);
+        o.ParSeconds = c.ParSeconds;
+        string id = ChallengeRules.MedalId(c.Kind, c.LevelIndex, c.RegionKey);
+        if (o.Met && id != null && !Data.medals.Contains(id))
+        {
+            Data.medals.Add(id);
+            o.NewMedal = id;
+            Touch();
+        }
+        return o;
+    }
+
     public static bool SfxMuted
     {
         get => Data.sfxMuted;
@@ -398,6 +457,12 @@ public static class ProgressStore
             if (!d.achievements.Contains(a))
                 d.achievements.Add(a);
         d.onboardingDone |= other.onboardingDone;
+        if (other.medals != null)
+            foreach (var m in other.medals)
+                if (!d.medals.Contains(m))
+                    d.medals.Add(m);
+        d.mapTourDone |= other.mapTourDone;
+        d.levelTourDone |= other.levelTourDone;
         Touch();
     }
 
@@ -444,4 +509,96 @@ public static class DailyChallengeSession
                 return string.Format(LocalizationManager.Get("daily.goal.high_score", "Clear it with {0}+ points"), ProgressRules.DailyHighScore);
         }
     }
+}
+
+/// <summary>What a map challenge run asks for (set by the world map, read by the Game scene).</summary>
+public readonly struct ChallengeSpec
+{
+    public readonly ChallengeKind Kind;
+    public readonly int LevelIndex;
+    public readonly int ParSeconds;
+    public readonly string RegionKey;
+
+    public ChallengeSpec(ChallengeKind kind, int levelIndex, int parSeconds = 0, string regionKey = null)
+    {
+        Kind = kind;
+        LevelIndex = levelIndex;
+        ParSeconds = parSeconds;
+        RegionKey = regionKey;
+    }
+}
+
+public sealed class ChallengeOutcome
+{
+    public ChallengeKind Kind;
+    public bool Met;
+    public int ParSeconds;
+    public string NewMedal;
+}
+
+public static class ChallengeSession
+{
+    public static ChallengeSpec? Active { get; private set; }
+
+    public static void Begin(ChallengeSpec spec) => Active = spec;
+
+    public static void End() => Active = null;
+
+    public static bool BlocksHints(int levelIndex) =>
+        Active.HasValue && Active.Value.LevelIndex == levelIndex && ChallengeRules.NoHints(Active.Value.Kind);
+
+    public static string Title(ChallengeKind k)
+    {
+        switch (k)
+        {
+            case ChallengeKind.Flawless: return LocalizationManager.Get("challenge.flawless", "Flawless run");
+            case ChallengeKind.TimeTrial: return LocalizationManager.Get("challenge.time", "Time trial");
+            case ChallengeKind.RegionTrial: return LocalizationManager.Get("challenge.trial", "Region trial");
+            case ChallengeKind.GrandTrial: return LocalizationManager.Get("challenge.grand", "Grand trial");
+            default: return "";
+        }
+    }
+
+    public static string GoalText(ChallengeSpec c)
+    {
+        switch (c.Kind)
+        {
+            case ChallengeKind.TimeTrial:
+                return string.Format(LocalizationManager.Get("challenge.time.goal", "Reach the exit in {0}s or less"), c.ParSeconds);
+            case ChallengeKind.RegionTrial:
+                return string.Format(LocalizationManager.Get("challenge.trial.goal", "No falls, no hints, {0}+ points"), ChallengeRules.TrialMinScore);
+            default:
+                return string.Format(LocalizationManager.Get("challenge.flawless.goal", "No falls, no hints, {0}+ points"), ChallengeRules.FlawlessMinScore);
+        }
+    }
+}
+
+/// <summary>Game → world map handoff: what just changed, so the map can celebrate it.</summary>
+public static class MapReturn
+{
+    public static bool Pending { get; private set; }
+    public static int LevelIndex { get; private set; }
+    public static int PreviousStars { get; private set; }
+    public static int Stars { get; private set; }
+    public static bool FirstClear { get; private set; }
+    public static string NewMedal { get; private set; }
+    /// <summary>Medal count before this run (to spot a Grand trial gate opening).</summary>
+    public static int PreviousMedalCount { get; private set; }
+
+    public static void Set(int level, int prevStars, int stars, bool firstClear, string newMedal, int prevMedals)
+    {
+        // Keep the earliest "previous" state if several levels are cleared before returning to the map.
+        if (!Pending)
+        {
+            PreviousMedalCount = prevMedals;
+        }
+        Pending = true;
+        LevelIndex = level;
+        PreviousStars = prevStars;
+        Stars = stars;
+        FirstClear = firstClear;
+        NewMedal = newMedal;
+    }
+
+    public static void Clear() => Pending = false;
 }
