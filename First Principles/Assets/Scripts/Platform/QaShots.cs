@@ -62,6 +62,13 @@ public class QaShots : MonoBehaviour
         Debug.Log($"QaShots: writing to {_dir} at {Screen.width}x{Screen.height} x{_scale}");
 
         SeedProgress();
+        string rec = Arg("-fpRecord");
+        if (!string.IsNullOrEmpty(rec))
+        {
+            yield return Record(rec, int.TryParse(Arg("-fpRecordLevel"), out int rl) ? rl : 2);
+            Application.Quit();
+            yield break;
+        }
         Entitlements.DebugOverride = false; // show the free tier (locks, paywall)
         Entitlements.InstallQaStore(new QaPriceStore());
 
@@ -193,8 +200,15 @@ public class QaShots : MonoBehaviour
         SceneManager.LoadScene("Game");
         yield return new WaitForSecondsRealtime(3f);
         var lrd = FindAnyObjectByType<LevelRunDirector>();
-        typeof(LevelRunDirector).GetMethod("StartLevelTour", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?.Invoke(lrd, new object[] { 0 });
+        // Same path a first-time player gets: waits for the story card, then starts the tour.
+        var soon = typeof(LevelRunDirector).GetMethod("StartLevelTourSoon", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?.Invoke(lrd, new object[] { 0 }) as IEnumerator;
+        if (lrd != null && soon != null)
+            lrd.StartCoroutine(soon);
+        var introBtn = GameObject.Find("StageIntroOverlay")?.GetComponentInChildren<Button>();
+        introBtn?.onClick.Invoke();
+        for (int i = 0; i < 40 && FindAnyObjectByType<CoachTour>() == null; i++)
+            yield return new WaitForSecondsRealtime(0.25f);
         for (int step = 1; step <= 4; step++)
         {
             yield return new WaitForSecondsRealtime(1.1f);
@@ -207,6 +221,44 @@ public class QaShots : MonoBehaviour
 
         Debug.Log("QaShots: done");
         Application.Quit();
+    }
+
+    /// <summary>Gameplay clip for the report: autopilot run, frames written as PNGs (stitched into a GIF outside).</summary>
+    IEnumerator Record(string dir, int level)
+    {
+        Directory.CreateDirectory(dir);
+        ProgressStore.Data.levelTourDone = true;
+        Entitlements.DebugOverride = true;
+        LevelSelection.SetSelectedLevel(level);
+        SceneManager.LoadScene("Game");
+        yield return new WaitForSecondsRealtime(2.5f);
+        // Skip the story card.
+        var intro = GameObject.Find("StageIntroOverlay");
+        var tap = intro != null ? intro.GetComponentInChildren<Button>() : null;
+        tap?.onClick.Invoke();
+        yield return new WaitForSecondsRealtime(1.2f);
+        MobileHoldAxis.PressRight();
+        int frame = 0;
+        float next = 0f, jumpAt = 0.4f;
+        for (float t = 0f; t < 10f; t += Time.unscaledDeltaTime)
+        {
+            if (MobileHoldAxis.Axis == 0f)
+                MobileHoldAxis.PressRight(); // level start clears touch routing once input unlocks
+            if (t >= jumpAt)
+            {
+                MobileInputBridge.QueueJump();
+                jumpAt = t + 0.55f;
+            }
+            if (t >= next)
+            {
+                yield return new WaitForEndOfFrame();
+                ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"f{frame++:000}.png"), 1);
+                next = t + 1f / 15f;
+            }
+            yield return null;
+        }
+        MobileHoldAxis.Clear();
+        yield return new WaitForSecondsRealtime(0.5f);
     }
 
     IEnumerator Shot(string name)

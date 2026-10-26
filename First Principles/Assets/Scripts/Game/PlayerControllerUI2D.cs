@@ -21,6 +21,22 @@ public class PlayerControllerUI2D : MonoBehaviour
     [SerializeField] private float gravityGridPerSec2 = 15.5f;
     [SerializeField] private float jumpVelocityGridPerSec = 11.2f;
 
+    [Header("Feel (1.3)")]
+    [Tooltip("Ground acceleration toward the target speed (grid/s²). High enough that full speed arrives in ~0.09 s.")]
+    [SerializeField] private float groundAccel = 80f;
+    [SerializeField] private float groundDecel = 95f;
+    [SerializeField] private float airAccel = 60f;
+    [Tooltip("Grace window to jump after walking off a ledge or during a landing bounce.")]
+    [SerializeField] private float coyoteSeconds = 0.1f;
+    [Tooltip("A jump pressed this long before landing still fires on touchdown.")]
+    [SerializeField] private float jumpBufferSeconds = 0.13f;
+    [Tooltip("Releasing jump while rising cuts the upward speed (short hop). Holding gives the full, level-tuned arc.")]
+    [Range(0.2f, 1f)] [SerializeField] private float jumpCutMultiplier = 0.5f;
+    [Tooltip("Gravity multiplier near the apex while jump is held (a touch of hang time).")]
+    [Range(0.3f, 1f)] [SerializeField] private float apexGravityMultiplier = 0.7f;
+    [SerializeField] private float apexSpeedBand = 1.6f;
+    [SerializeField] private float maxFallSpeed = 24f;
+
     [Header("f′ line — air jump")]
     [Tooltip("Grid-space proximity to f′ (player center vs polyline). Wider = easier to register a 'hit'.")]
     [SerializeField] private float derivativeTouchRadiusGrid = 0.58f;
@@ -96,6 +112,41 @@ public class PlayerControllerUI2D : MonoBehaviour
 
     private Image sphereAura;
     private float squashTimer;
+    private float stretchTimer;
+    const float StretchSeconds = 0.14f;
+
+    private float coyoteTimer;
+    private float jumpBufferTimer;
+    private bool jumpCutAvailable;
+    private float groundJumpBoost = 1f;
+    private bool touchJumpHeld;
+
+    /// <summary>Raised when a ground jump fires (argument = velocity multiplier, &gt; 1 on a spring).</summary>
+    public event Action<float> GroundJumped;
+    /// <summary>Raised on an f′ air jump.</summary>
+    public event Action AirJumped;
+    /// <summary>Raised when the avatar lands (bounce or settle) with the downward speed.</summary>
+    public event Action<float> LandedWithSpeed;
+
+    public bool Grounded => grounded;
+    public Vector2 VelocityGrid => velGrid;
+    public Vector2 PlayerSizeGrid => new Vector2(playerWidthGrid, playerHeightGrid);
+    public bool IsDeadOrFinished => isDead || isFinished;
+
+    /// <summary>Spring pads call this every frame the avatar stands on them (reset after each jump/frame).</summary>
+    public void SetGroundJumpBoost(float multiplier) => groundJumpBoost = Mathf.Max(groundJumpBoost, multiplier);
+
+    /// <summary>Moving hazards (CourseExtras) end the run through the normal death flow.</summary>
+    public void Kill() => Die();
+
+    /// <summary>Checkpoint respawn: stand on top of the given platform column.</summary>
+    public void TeleportTo(float xGrid, float topYGrid)
+    {
+        posGrid = new Vector2(xGrid, topYGrid + playerHeightGrid / 2f + 0.01f);
+        velGrid = Vector2.zero;
+        ClampPositionToPlayBounds();
+        ApplyVisualPosition();
+    }
 
     const string GridBackgroundObjectName = "Grid Background";
 
@@ -184,6 +235,10 @@ public class PlayerControllerUI2D : MonoBehaviour
         isDead = false;
         isFinished = false;
         grounded = false;
+        coyoteTimer = 0f;
+        jumpBufferTimer = 0f;
+        jumpCutAvailable = false;
+        groundJumpBoost = 1f;
         strongFirstGroundJumpPending = grantStrongFirstGroundJump;
 
         float halfH = playerHeightGrid / 2f;
@@ -241,22 +296,43 @@ public class PlayerControllerUI2D : MonoBehaviour
         if (Mathf.Approximately(inputX, 0f))
             inputX = MobileInputBridge.TouchHorizontal;
 
-        velGrid.x = inputX * moveSpeedGridPerSec;
+        // Acceleration curve toward the target speed (top speed unchanged, so level tuning holds).
+        float target = inputX * moveSpeedGridPerSec;
+        float rate = !grounded ? airAccel
+            : Mathf.Abs(target) < 0.01f ? groundDecel
+            : Mathf.Sign(target) != Mathf.Sign(velGrid.x) && Mathf.Abs(velGrid.x) > 0.1f ? groundDecel * 1.4f
+            : groundAccel;
+        velGrid.x = Mathf.MoveTowards(velGrid.x, target, rate * dt);
 
         if (grounded)
+        {
             derivativeAirJumpConsumedThisBand = false;
+            coyoteTimer = coyoteSeconds;
+        }
+        else
+            coyoteTimer -= dt;
 
         UpdateDerivativeTouchAndHighlight(dt);
 
         bool jumpPressed = ReadJumpPressed();
         if (!jumpPressed)
-            jumpPressed = MobileInputBridge.ConsumeJump();
-
-        if (jumpPressed)
         {
-            if (grounded)
+            jumpPressed = MobileInputBridge.ConsumeJump();
+            if (jumpPressed)
+                touchJumpHeld = true; // taps have no duration: full arc
+        }
+        else
+            touchJumpHeld = false;
+        if (jumpPressed)
+            jumpBufferTimer = jumpBufferSeconds;
+        else
+            jumpBufferTimer -= dt;
+
+        if (jumpBufferTimer > 0f)
+        {
+            if (grounded || coyoteTimer > 0f)
             {
-                float jv = jumpVelocityGridPerSec;
+                float jv = jumpVelocityGridPerSec * groundJumpBoost;
                 if (strongFirstGroundJumpPending)
                 {
                     jv *= 1.12f;
@@ -264,18 +340,45 @@ public class PlayerControllerUI2D : MonoBehaviour
                 }
                 velGrid.y = jv;
                 grounded = false;
+                coyoteTimer = 0f;
+                jumpBufferTimer = 0f;
+                jumpCutAvailable = true;
+                stretchTimer = StretchSeconds;
                 GameFeel.RaiseJump(false);
+                GroundJumped?.Invoke(groundJumpBoost);
             }
-            else if (CanUseDerivativeAirJump())
+            else if (jumpPressed && CanUseDerivativeAirJump())
             {
                 velGrid.y = jumpVelocityGridPerSec * doubleJumpVelocityMultiplier;
                 derivativeAirJumpConsumedThisBand = true;
+                jumpBufferTimer = 0f;
+                jumpCutAvailable = true;
+                stretchTimer = StretchSeconds;
                 GameFeel.RaiseJump(true);
+                AirJumped?.Invoke();
             }
         }
+        groundJumpBoost = 1f;
 
-        // Gravity.
-        velGrid.y -= gravityGridPerSec2 * dt;
+        // Variable jump height: let go early for a short hop (holding keeps the full tuned arc).
+        if (grounded && velGrid.y <= 0f)
+            touchJumpHeld = false;
+        bool held = touchJumpHeld || ReadJumpHeld();
+        if (jumpCutAvailable && !held && velGrid.y > 0f)
+        {
+            velGrid.y *= jumpCutMultiplier;
+            jumpCutAvailable = false;
+        }
+        if (velGrid.y <= 0f)
+            jumpCutAvailable = false;
+
+        // Gravity (a little hang time at the apex while jump is held).
+        float g = gravityGridPerSec2;
+        if (held && Mathf.Abs(velGrid.y) < apexSpeedBand)
+            g *= apexGravityMultiplier;
+        velGrid.y -= g * dt;
+        if (velGrid.y < -maxFallSpeed)
+            velGrid.y = -maxFallSpeed;
 
         Vector2 nextPos = posGrid;
 
@@ -537,6 +640,18 @@ public class PlayerControllerUI2D : MonoBehaviour
         return inputX;
     }
 
+    /// <summary>Jump currently held (keyboard / gamepad). Touch jumps are taps with no hold, so they always get the full arc.</summary>
+    private static bool ReadJumpHeld()
+    {
+        if (DeviceLayout.PreferOnScreenGameControls)
+            return true;
+        var kb = Keyboard.current;
+        if (kb != null && (kb.spaceKey.isPressed || kb.wKey.isPressed || kb.upArrowKey.isPressed))
+            return true;
+        var gp = Gamepad.current;
+        return gp != null && gp.buttonSouth.isPressed;
+    }
+
     private static bool ReadJumpPressed()
     {
         var kb = Keyboard.current;
@@ -625,6 +740,8 @@ public class PlayerControllerUI2D : MonoBehaviour
                 {
                     pos.y = p.yMax + halfH;
                     float impact = -velGrid.y;
+                    coyoteTimer = coyoteSeconds; // touching ground (even mid-bounce) counts for jumping
+                    LandedWithSpeed?.Invoke(impact);
                     if (impact > bounceVelocityCutoffGridPerSec && groundBounciness > 0f)
                     {
                         velGrid.y = impact * groundBounciness;
@@ -714,6 +831,13 @@ public class PlayerControllerUI2D : MonoBehaviour
         if (playerRect == null)
             return;
 
+        if (stretchTimer > 0f)
+        {
+            stretchTimer = Mathf.Max(0f, stretchTimer - Time.deltaTime);
+            float k = Mathf.Sin((1f - stretchTimer / StretchSeconds) * Mathf.PI);
+            playerRect.localScale = new Vector3(1f - 0.12f * k, 1f + 0.18f * k, 1f);
+            return;
+        }
         if (squashTimer <= 0f || landingSquashSeconds <= 0f)
         {
             playerRect.localScale = Vector3.one;

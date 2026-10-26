@@ -307,7 +307,7 @@ public class GamepadSupport : MonoBehaviour
 
     private void OnFocusChanged(bool focused)
     {
-        if (!focused)
+        if (!focused && !QaShots.Enabled) // QA runs happen in a background window
             PauseMatch(LocalizationManager.Get("ui.paused", "Paused"));
     }
 

@@ -23,7 +23,10 @@ public static class StarGlyph
     public static Sprite Medal => _medal != null ? _medal : (_medal = BuildSdf(MedalSdf));
     public static Sprite Pin => _pin != null ? _pin : (_pin = BuildSdf(PinSdf));
     public static Sprite Stopwatch => _stopwatch != null ? _stopwatch : (_stopwatch = BuildSdf(StopwatchSdf));
-    static Sprite _medal, _pin, _stopwatch;
+    public static Sprite Spring => _spring != null ? _spring : (_spring = BuildSdf(SpringSdf));
+    public static Sprite Flag => _flag != null ? _flag : (_flag = BuildSdf(FlagSdf));
+    public static Sprite Restart => _restart != null ? _restart : (_restart = BuildSdf(RestartSdf));
+    static Sprite _medal, _pin, _stopwatch, _spring, _flag, _restart;
 
     public static Image Add(RectTransform parent, string name, Sprite sprite, Color tint, Vector2 size)
     {
@@ -192,6 +195,49 @@ public static class StarGlyph
         d = Mathf.Min(d, Segment(p, new Vector2(0f, 34f), new Vector2(0f, 24f), w));
         d = Mathf.Min(d, Segment(p, new Vector2(0f, -6f), new Vector2(0f, 12f), w));
         d = Mathf.Min(d, Segment(p, new Vector2(0f, -6f), new Vector2(12f, -14f), w));
+        return d;
+    }
+
+    static float SpringSdf(Vector2 p)
+    {
+        const float w = 6f;
+        // Coil spring: top and bottom plates + zigzag.
+        float d = Segment(p, new Vector2(-30f, 34f), new Vector2(30f, 34f), w);
+        d = Mathf.Min(d, Segment(p, new Vector2(-30f, -34f), new Vector2(30f, -34f), w));
+        Vector2 prev = new Vector2(0f, -34f);
+        for (int i = 1; i <= 7; i++)
+        {
+            float y = -34f + i * (68f / 8f);
+            var q = new Vector2(i % 2 == 1 ? -22f : 22f, y);
+            d = Mathf.Min(d, Segment(p, prev, q, w));
+            prev = q;
+        }
+        d = Mathf.Min(d, Segment(p, prev, new Vector2(0f, 34f), w));
+        return d;
+    }
+
+    static float FlagSdf(Vector2 p)
+    {
+        const float w = 6f;
+        float d = Segment(p, new Vector2(-22f, -40f), new Vector2(-22f, 40f), w);
+        d = Mathf.Min(d, Segment(p, new Vector2(-22f, 38f), new Vector2(28f, 26f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(28f, 26f), new Vector2(-22f, 12f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(-34f, -40f), new Vector2(-10f, -40f), w));
+        return d;
+    }
+
+    static float RestartSdf(Vector2 p)
+    {
+        const float w = 7f;
+        // Circular arrow (open arc) with an arrow head at the top.
+        Vector2 c = new Vector2(0f, -4f);
+        float ang = Mathf.Atan2(p.y - c.y, p.x - c.x) * Mathf.Rad2Deg;
+        float arc = Ring(p, c, 28f, w);
+        if (ang > 55f && ang < 115f) arc = 999f;
+        float d = arc;
+        Vector2 tip = c + new Vector2(Mathf.Cos(55f * Mathf.Deg2Rad), Mathf.Sin(55f * Mathf.Deg2Rad)) * 28f;
+        d = Mathf.Min(d, Segment(p, tip, tip + new Vector2(-16f, 6f), w));
+        d = Mathf.Min(d, Segment(p, tip, tip + new Vector2(2f, -17f), w));
         return d;
     }
 

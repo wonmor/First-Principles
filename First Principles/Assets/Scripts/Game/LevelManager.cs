@@ -115,6 +115,8 @@ public class LevelManager : MonoBehaviour
     // --- Run tracking (stars / level-complete card) ---
     private int fallsThisLevel;
     private float levelStartTime;
+    private CourseExtras courseExtras;
+    private bool pendingRestartAfterFall;
     private bool levelCompleteShowing;
     private LevelRunDirector runDirector;
 
@@ -125,6 +127,31 @@ public class LevelManager : MonoBehaviour
     public PlayerControllerUI2D Player => playerController;
     public RectTransform ObstaclesRoot => obstaclesRoot;
     public RectTransform CartesianPlane => cartesianPlaneRect;
+    public CourseExtras Course => courseExtras;
+
+    /// <summary>∂ tokens: add points back (score never exceeds the starting 100).</summary>
+    public void AddScoreBonus(int points)
+    {
+        if (graphCalculatorMode)
+            return;
+        gameplayScore = Mathf.Min(GameplayStartingScore, gameplayScore + points);
+        RefreshScoreHud();
+    }
+
+    /// <summary>One-input fresh attempt (R / gamepad Y / HUD button): back to the start, falls and clock reset.</summary>
+    public void QuickRestart()
+    {
+        if (graphCalculatorMode || levelCompleteShowing || isRestarting || levels.Count == 0)
+            return;
+        if (playerController != null && playerController.IsDeadOrFinished)
+            return;
+        skipNextStageIntro = true;
+        skipSpawnSpotlight = true;
+        if (courseExtras != null)
+            courseExtras.ResetCheckpoint();
+        FeelDirector.Play(SfxId.Click, 0.6f, 0.8f);
+        LoadLevel(currentLevelIndex, false);
+    }
     public bool StageIntroShowing => stageIntroRoot != null && stageIntroRoot.activeInHierarchy;
     /// <summary>Seconds since the level was entered (restarts after a fall keep counting).</summary>
     public float LevelElapsed => Time.time - levelStartTime;
@@ -314,6 +341,12 @@ public class LevelManager : MonoBehaviour
             GameplayScreenTouchZones.EnsureForGameCanvas(mainCanvas.transform);
             GameplayScreenTouchZones.SetActiveForGameplayMode(!graphCalculatorMode);
         }
+
+        // Obstacle-course layer (tokens, springs, sentries, checkpoint, flow combo).
+        courseExtras = GetComponent<CourseExtras>();
+        if (courseExtras == null)
+            courseExtras = gameObject.AddComponent<CourseExtras>();
+        courseExtras.Bind(this, playerController);
 
         // Wire callbacks.
         playerController.SetDeathCallback(RestartCurrentLevel);
@@ -2900,6 +2933,9 @@ public class LevelManager : MonoBehaviour
             return;
 
         levelCompleteShowing = false;
+        pendingRestartAfterFall = isRestartAfterFall && index == currentLevelIndex;
+        if (!pendingRestartAfterFall && courseExtras != null)
+            courseExtras.ResetCheckpoint();
         if (!isRestartAfterFall || index != currentLevelIndex)
         {
             fallsThisLevel = 0;
@@ -3490,6 +3526,23 @@ public class LevelManager : MonoBehaviour
         playerController.SetWorld(world);
         playerController.ResetToSpawn(world, grantStrongFirstGroundJump);
 
+        if (courseExtras != null && !graphCalculatorMode)
+        {
+            courseExtras.Build(world, obstaclesRoot, cartesianPlaneRect, currentLevelIndex, pendingRestartAfterFall);
+            if (pendingRestartAfterFall && courseExtras.CheckpointReached)
+            {
+                var cp = courseExtras.CheckpointGrid;
+                playerController.TeleportTo(cp.x, cp.y);
+                // Stage pops already passed stay passed (no burst of pops on respawn).
+                while (stageTriggerXGrid != null && nextStageIndex < stageTriggerXGrid.Count && stageTriggerXGrid[nextStageIndex] <= cp.x)
+                {
+                    if (nextStageIndex < stagePopColors.Count && derivRenderer != null)
+                        derivRenderer.color = stagePopColors[nextStageIndex];
+                    nextStageIndex++;
+                }
+            }
+        }
+
         _lastSyncedCartesianRectSize = cartesianPlaneRect.rect.size;
     }
 
@@ -3532,6 +3585,9 @@ public class LevelManager : MonoBehaviour
         if (playerController == null || stageTriggerXGrid == null)
             return;
 
+        if (QuickRestartPressed())
+            QuickRestart();
+
         RefreshStageHud();
 
         // Trigger derivative "pops" at stage boundaries.
@@ -3550,6 +3606,15 @@ public class LevelManager : MonoBehaviour
                 break;
             }
         }
+    }
+
+    private static bool QuickRestartPressed()
+    {
+        var kb = UnityEngine.InputSystem.Keyboard.current;
+        if (kb != null && kb.rKey.wasPressedThisFrame)
+            return true;
+        var gp = UnityEngine.InputSystem.Gamepad.current;
+        return gp != null && gp.buttonNorth.wasPressedThisFrame;
     }
 
     private void RestartCurrentLevel()

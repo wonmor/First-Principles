@@ -160,6 +160,23 @@ public class LevelRunDirector : MonoBehaviour
             UiTypography.Scale(tablet ? 26 : 24), new Color(1f, 0.95f, 0.8f, 1f), FontStyles.Bold);
         _hintBtn.onClick.AddListener(OnHintPressed);
         RefreshHintLabel();
+
+        // Quick restart (also R on keyboard, Y / triangle on a controller).
+        var rr = UiKit.Rect("RestartButton", _safe, new Vector2(1f, 1f), new Vector2(1f, 1f));
+        rr.pivot = new Vector2(1f, 1f);
+        float rs = tablet ? 60f : 56f;
+        rr.sizeDelta = new Vector2(rs, rs);
+        rr.anchoredPosition = new Vector2(rt.anchoredPosition.x - rt.sizeDelta.x - 12f, -topPad);
+        var rimg = rr.gameObject.AddComponent<Image>();
+        RuntimeUiPolish.UseRoundedSliced(rimg);
+        var rbg = new Color(0.16f, 0.19f, 0.27f, 0.95f);
+        rimg.color = rbg;
+        var rbtn = rr.gameObject.AddComponent<Button>();
+        rbtn.targetGraphic = rimg;
+        RuntimeUiPolish.ApplyButtonTransitions(rbtn, rbg, Color.Lerp(rbg, Color.white, 0.18f), Color.Lerp(rbg, Color.black, 0.22f));
+        var rglyph = StarGlyph.Add(rr, "Glyph", StarGlyph.Restart, RuntimeUiPolish.TitleIvory, new Vector2(rs * 0.66f, rs * 0.66f));
+        rglyph.rectTransform.anchoredPosition = Vector2.zero;
+        rbtn.onClick.AddListener(() => { if (_lm != null) _lm.QuickRestart(); });
     }
 
     void RefreshHintLabel()
@@ -409,9 +426,9 @@ public class LevelRunDirector : MonoBehaviour
         bool touch = DeviceLayout.PreferOnScreenGameControls;
         bool pad = UnityEngine.InputSystem.Gamepad.current != null;
         string controls = touch
-            ? LocalizationManager.Get("tour.level.controls.touch", "Hold the left or right side of the screen to move. Tap with a second finger to jump.")
-            : pad ? LocalizationManager.Get("tour.level.controls.pad", "Move with the left stick or d-pad and press A to jump. Press B to leave the level.")
-            : LocalizationManager.Get("tour.level.controls.keys", "Move with ← → or A / D, jump with Space, W or ↑. Esc leaves the level.");
+            ? LocalizationManager.Get("tour.level.controls.touch", "Hold the left or right side of the screen to move. Tap with a second finger to jump. The circular arrow restarts instantly.")
+            : pad ? LocalizationManager.Get("tour.level.controls.pad", "Move with the left stick or d-pad and press A to jump; hold A for a higher jump. Y restarts instantly, B leaves the level.")
+            : LocalizationManager.Get("tour.level.controls.keys", "Move with ← → or A / D, jump with Space, W or ↑ (hold for a higher jump). R restarts instantly, Esc leaves the level.");
         var steps = new List<CoachStep>
         {
             new CoachStep
@@ -424,7 +441,7 @@ public class LevelRunDirector : MonoBehaviour
             {
                 Title = LocalizationManager.Get("tour.level.graph.title", "The level is the graph"),
                 Body = LocalizationManager.Get("tour.level.graph.body",
-                    "You walk on f(x). Ground only exists where the slope f′(x) is high enough, so jump the pits where it dips. Touch the glowing f′ curve in mid-air for a double jump. Reach the blue exit on the right."),
+                    "You walk on f(x). Ground only exists where the slope f′(x) is high enough, so jump the pits where it dips. Touch the glowing f′ curve in mid-air for a double jump. Grab ∂ tokens for points, bounce off springs for big leaps, and reach the blue exit on the right. Longer levels have a checkpoint flag."),
                 Target = () => _lm != null ? _lm.CartesianPlane : null,
             },
             new CoachStep
