@@ -94,6 +94,54 @@ public static class BuildHelper
         Run(BuildTarget.StandaloneOSX, "../Builds/Steam/macOS/First Principles.app", BuildOptions.None);
     }
 
+    /// <summary>
+    /// Mac App Store build: same bundle id as iOS (universal app record), store-gated with the
+    /// same IAP products (FP_IAP_GATE_STANDALONE), receipt validation on. Signing, sandbox
+    /// entitlements and the .pkg are done by tools/mas_package.sh.
+    /// </summary>
+    [MenuItem("Build/macOS (Mac App Store)")]
+    public static void BuildMacAppStore()
+    {
+        ApplyCommonPlayerSettings();
+        SetSteamDefine(NamedBuildTarget.Standalone, false);
+        PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out string[] before);
+        var defines = before.Where(d => d != MasDefine).ToList();
+        defines.Add(MasDefine);
+        string oldId = PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Standalone);
+        bool oldValidation = PlayerSettings.useMacAppStoreValidation;
+        try
+        {
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, defines.ToArray());
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone, IosBundleId);
+            PlayerSettings.useMacAppStoreValidation = true;
+            PlayerSettings.macOS.applicationCategoryType = "public.app-category.educational-games";
+#if UNITY_EDITOR_OSX
+            UnityEditor.OSXStandalone.UserBuildSettings.architecture = UnityEditor.Build.OSArchitecture.x64ARM64;
+            // Xcode project so xcodebuild can archive with cloud-managed signing (tools/mas_upload.sh).
+            UnityEditor.OSXStandalone.UserBuildSettings.createXcodeProject = true;
+#endif
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX);
+            try
+            {
+                Run(BuildTarget.StandaloneOSX, "../Builds/MAS/FirstPrinciples", BuildOptions.None);
+            }
+            finally
+            {
+#if UNITY_EDITOR_OSX
+                UnityEditor.OSXStandalone.UserBuildSettings.createXcodeProject = false;
+#endif
+            }
+        }
+        finally
+        {
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, before);
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone, oldId);
+            PlayerSettings.useMacAppStoreValidation = oldValidation;
+        }
+    }
+
+    const string MasDefine = "FP_IAP_GATE_STANDALONE";
+
     /// <summary>Development macOS build (no Steam) for automated QA screenshots (-fpShots).</summary>
     [MenuItem("Build/macOS (Dev, QA screenshots)")]
     public static void BuildMacDev()

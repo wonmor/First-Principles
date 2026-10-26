@@ -1,0 +1,21 @@
+"AppBuild"
+{
+	"AppID" "__APPID__"
+	"Desc" "First Principles __VERSION__ (world map, challenges, course layer)"
+	"BuildOutput" "__OUTPUT__"
+	"ContentRoot" "__CONTENT__"
+	"SetLive" "__BRANCH__"
+	"Depots"
+	{
+		"__DEPOT_WIN__"
+		{
+			"FileMapping" { "LocalPath" "Windows/*" "DepotPath" "." "recursive" "1" }
+			"FileExclusion" "*_DoNotShip*"
+			"FileExclusion" "*_ButDontShipItWithYourGame*"
+		}
+		"__DEPOT_MAC__"
+		{
+			"FileMapping" { "LocalPath" "macOS/*" "DepotPath" "." "recursive" "1" }
+		}
+	}
+}

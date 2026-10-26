@@ -79,6 +79,20 @@ xcrun notarytool submit fp-mac.zip --key ~/.appstoreconnect/private_keys/AuthKey
 xcrun stapler staple "Builds/Steam/macOS/First Principles.app"
 ```
 
+## 2b. Status on 2026-10-26
+
+- Builds are in `Builds/Steam/Windows/` (Mono, cross-built on the Mac, `steam_api64.dll`
+  included) and `Builds/Steam/macOS/First Principles.app` (universal). Both launch offline
+  when Steam is not running (`SteamBridge: Steam not running / not owned; playing offline`).
+- No Steam App ID, depot ids or steamcmd login exist on this Mac, and the store has no public
+  First Principles page yet, so nothing has been uploaded.
+- The macOS build is **not signed with Developer ID yet**: the account's Developer ID
+  Application certificate (expires 2027-02-01) is not in this Mac's keychain, and only the
+  Account Holder can create one. Once it is: `tools/steam/sign_notarize_mac.sh`.
+- One command uploads both depots and sets the build live on a **beta** branch only:
+  `STEAM_APPID=... STEAM_DEPOT_WIN=... STEAM_DEPOT_MAC=... STEAM_USER=... tools/steam/upload.sh`
+  (downloads steamcmd for macOS on first run; asks for the password and Steam Guard code).
+
 ## 3. Upload with steamcmd (ContentBuilder)
 
 Create `steam/app_build_<appid>.vdf`:
