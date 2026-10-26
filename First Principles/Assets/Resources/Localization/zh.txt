@@ -13,12 +13,12 @@ ui.move=移动
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（键盘：方向键 / 空格）</color></size>
 hud.stage=阶段
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x)（x>0）· min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x)（x>0）| min(x,3)...
 graph.status_enter=回车 / 点击外部绘制图象
 graph.status_graphed=<color=#8fd9b3>已绘制</color>
 graph.line1=<b>图形计算器模式</b>
 graph.line2=<size=88%><color=#c4d0e8>在下方输入 <b>f(u)</b>（框内变量 <b>x</b> 为内层 u）。然后：</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · 双击 <b>+</b> · 长按 <b>−</b> · <b>Scale</b> 点按放大 / 长按缩小 · 双指 <b>捏合</b></size>
+graph.line3=<size=92%><b>Trans</b> → {0} | 双击 <b>+</b> | 长按 <b>−</b> | <b>Scale</b> 点按放大 / 长按缩小 | 双指 <b>捏合</b></size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x 在 [{4},{5}] 内</color></size>
 graph.param_a=A（纵向缩放）
 graph.param_k=k（横向缩放）
@@ -64,7 +64,7 @@ level.32=BC：b^x 与 d/dx b^x
 level.33=圆：(x−h)² + (y−k)² = R²
 level.34=物理C：热力学（绝热P–V，γ由N给出）
 level.35=航空：升力 C_L(α) 线性+失速
-level.36=航空：阻力极曲线（型阻·诱导·总阻）
+level.36=航空：阻力极曲线（型阻/诱导/总阻）
 level.37=航空：等温大气 ρ(h)
 level.38=航空：起伏运动 / 阻尼俯仰-沉浮
 level.39=航空：牛顿流 Cp ~ sin²α
@@ -91,9 +91,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=解锁完整游戏
 paywall.body=你已拥有 {0} 个免费关卡。一次购买即可解锁全部 {1} 个关卡：AP 微积分 BC 与物理 C、航空航天、经济学、变换、大 O 记号、四个最终 Boss——以及今后新增的所有关卡。
-paywall.promise=一次性购买 · 无广告 · 无订阅
+paywall.promise=一次性购买 | 无广告 | 无订阅
 paywall.buy=解锁全部关卡
-paywall.buy_price=解锁全部关卡 · {0}
+paywall.buy_price=解锁全部关卡 | {0}
 paywall.restore=恢复购买
 paywall.not_now=以后再说
 paywall.status.connecting=正在连接商店…

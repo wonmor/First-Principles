@@ -1074,8 +1074,8 @@ public class FunctionPlotter : MonoBehaviour
             case FunctionType.AeroDragPolarTriple:
                 equationText.text =
                     $@"<b>\(\text{{Drag polar — three traces}}\)</b>\n" +
-                    $@"<size=92%><color=#a8b2d1><b>Parasitic</b> \(C_{{D,\text{{par}}}} \approx {a}\cdot({c})\) (flat) · " +
-                    $@"<b>Induced</b> \(C_{{D,\text{{ind}}}} = {a}\,u^{{{power}}}\) · " +
+                    $@"<size=92%><color=#a8b2d1><b>Parasitic</b> \(C_{{D,\text{{par}}}} \approx {a}\cdot({c})\) (flat) | " +
+                    $@"<b>Induced</b> \(C_{{D,\text{{ind}}}} = {a}\,u^{{{power}}}\) | " +
                     $@"<b>Total</b> \(C_{{D,\text{{tot}}}} = {a}\,(u^{{{power}}}+{c})\), \(u={k}(x-{d})\).</color></size>";
                 break;
             case FunctionType.ThermoAdiabaticPV:

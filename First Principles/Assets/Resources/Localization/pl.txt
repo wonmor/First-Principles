@@ -26,12 +26,12 @@ ui.move=Ruch
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(klawiatura: strzałki / Spacja)</color></size>
 hud.stage=ETAP
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x) dla x>0 · min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x) dla x>0 | min(x,3)...
 graph.status_enter=Enter / dotknij poza pole, aby narysować
 graph.status_graphed=<color=#8fd9b3>Narysowano</color>
 graph.line1=<b>Tryb kalkulatora graficznego</b>
 graph.line2=<size=88%><color=#c4d0e8>Wpisz <b>f(u)</b> poniżej (zmienna <b>x</b> w polu = wewnętrzne u). Potem:</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · podwójne dotknięcie <b>+</b> · przytrzymaj <b>−</b> · <b>Skala</b> przybliż / przytrzymaj oddal · <b>szczyp</b> dwoma palcami</size>
+graph.line3=<size=92%><b>Trans</b> → {0} | podwójne dotknięcie <b>+</b> | przytrzymaj <b>−</b> | <b>Skala</b> przybliż / przytrzymaj oddal | <b>szczyp</b> dwoma palcami</size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x w [{4},{5}]</color></size>
 graph.param_a=A (skala pionowa)
 graph.param_k=k (skala pozioma)
@@ -41,7 +41,7 @@ graph.calculator_intro=<b>Tryb kalkulatora graficznego</b>\n<size=88%>Wpisz praw
 aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>Przypomnienie polary oporu</color></b> (każdy poziom <b>Aerospace</b>)\n<size=92%><b>Opór pasożytniczy (przy znikomej sile nośnej)</b> — tarcie powierzchni, opór kształtu i interferencja w <b>C<sub>D0</sub></b> modelu parabolicznego (z grubsza <i>nie</i> część rosnąca z siłą nośną).\n<b>Opór indukowany</b> — cena generowania siły nośnej: wiry z końcówek skrzydła dają ~ <b>K C<sub>L</sub>²</b> (wyższe C<sub>L</sub> / ostrzejsze zakręty → więcej indukcji).\n<b>Polara całkowita</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: parabola w górę w C<sub>L</sub>; <b>C<sub>L</sub></b> przy min. oporze między „za wolno / duże α” a „za szybko / małe α”.</size>
 menu.tutorial_button=Jak grać
 menu.tutorial_title=Jak grać
-menu.tutorial_body=<b>Cel</b>\nIdź wzdłuż wykresu, używaj platform (zielonych), unikaj czerwonych zagrożeń i dotrzyj do jasnego wyjścia po prawej.\n\n<b>Sterowanie</b>\n• <b>Ruch</b> — strzałki / WASD lub przyciski na ekranie.\n• <b>Skok</b> — Spacja (lub skok na telefonie). Skaczesz z twardych platform.\n\n<b>Dwie krzywe</b>\n• <color=#c4b5fd>Główna krzywa</color> — funkcja, po której idziesz.\n• <color=#fdba74>Pochodna f′</color> — nachylenie; druga linia.\n\n<b>Skok w powietrzu na pochodnej</b>\nGdy jesteś <b>w powietrzu</b> i postać nakłada się na <b>krzywą pochodnej</b>, naciśnij ponownie <b>Skok</b>.\n\n<size=94%><color=#a8b2d1>Linia pochodnej jaśnieje przy dotyku. Masz <b>jeden</b> bonusowy skok za każdym razem, aż opuścisz krzywą lub wylądujesz. Na telefonie możliwa jest krótka wibracja; na PC dźwięk, gdy brak wibracji.</color></size>\n\n<b>Wybór poziomu</b>\n<size=94%>Poziomy są w grupach (Podstawy, Inżynieria, AP Calculus, Aerospace …). Dotknij <b>Jak grać</b>, by ponownie otworzyć pomoc.</size>
+menu.tutorial_body=<b>Cel</b>\nIdź wzdłuż wykresu, używaj platform (zielonych), unikaj czerwonych zagrożeń i dotrzyj do jasnego wyjścia po prawej.\n\n<b>Sterowanie</b>\n– <b>Ruch</b> — strzałki / WASD lub przyciski na ekranie.\n– <b>Skok</b> — Spacja (lub skok na telefonie). Skaczesz z twardych platform.\n\n<b>Dwie krzywe</b>\n– <color=#c4b5fd>Główna krzywa</color> — funkcja, po której idziesz.\n– <color=#fdba74>Pochodna f′</color> — nachylenie; druga linia.\n\n<b>Skok w powietrzu na pochodnej</b>\nGdy jesteś <b>w powietrzu</b> i postać nakłada się na <b>krzywą pochodnej</b>, naciśnij ponownie <b>Skok</b>.\n\n<size=94%><color=#a8b2d1>Linia pochodnej jaśnieje przy dotyku. Masz <b>jeden</b> bonusowy skok za każdym razem, aż opuścisz krzywą lub wylądujesz. Na telefonie możliwa jest krótka wibracja; na PC dźwięk, gdy brak wibracji.</color></size>\n\n<b>Wybór poziomu</b>\n<size=94%>Poziomy są w grupach (Podstawy, Inżynieria, AP Calculus, Aerospace …). Dotknij <b>Jak grać</b>, by ponownie otworzyć pomoc.</size>
 menu.player_icon_title=Ikona gracza
 menu.player_icon_set=Ustaw ikonę gracza
 menu.player_icon_hint=Dotknij symbolu — to twój awatar w poziomach.
@@ -112,9 +112,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=Odblokuj pełną grę
 paywall.body=Masz {0} darmowych poziomów. Jeden zakup odblokowuje wszystkie {1}: AP Calculus BC i Physics C, lotnictwo i kosmonautyka, ekonomia, transformaty, Big O, czterech finałowych bossów — i każdy przyszły poziom.
-paywall.promise=Jednorazowy zakup · Bez reklam · Bez subskrypcji
+paywall.promise=Jednorazowy zakup | Bez reklam | Bez subskrypcji
 paywall.buy=Odblokuj wszystkie poziomy
-paywall.buy_price=Odblokuj wszystkie poziomy · {0}
+paywall.buy_price=Odblokuj wszystkie poziomy | {0}
 paywall.restore=Przywróć zakupy
 paywall.not_now=Nie teraz
 paywall.status.connecting=Łączenie ze sklepem…

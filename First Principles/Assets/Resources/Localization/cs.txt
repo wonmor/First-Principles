@@ -26,12 +26,12 @@ ui.move=Pohyb
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(klávesnice: šipky / Mezerník)</color></size>
 hud.stage=FÁZE
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x) pro x>0 · min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x) pro x>0 | min(x,3)...
 graph.status_enter=Enter / klepněte mimo pro graf
 graph.status_graphed=<color=#8fd9b3>Vykresleno</color>
 graph.line1=<b>Režim grafické kalkulačky</b>
 graph.line2=<size=88%><color=#c4d0e8>Napište <b>f(u)</b> níže (proměnná <b>x</b> v poli = vnitřní u). Pak:</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · dvojité klepnutí <b>+</b> · podržte <b>−</b> · <b>Měřítko</b> přiblížení / podržte oddálení · <b>špetka</b> dvěma prsty</size>
+graph.line3=<size=92%><b>Trans</b> → {0} | dvojité klepnutí <b>+</b> | podržte <b>−</b> | <b>Měřítko</b> přiblížení / podržte oddálení | <b>špetka</b> dvěma prsty</size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x v [{4},{5}]</color></size>
 graph.param_a=A (svislé měřítko)
 graph.param_k=k (vodorovné měřítko)
@@ -41,7 +41,7 @@ graph.calculator_intro=<b>Režim grafické kalkulačky</b>\n<size=88%>Zadejte t�
 aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>Připomínka poláru odporu</color></b> (každá úroveň <b>Aerospace</b>)\n<size=92%><b>Parazitní odpor (nulová vztlak)</b> — tření povrchu, tvarový odpor a interference shrnuté jako <b>C<sub>D0</sub></b> v parabolickém modelu (zhruba <i>ne</i> ta část, která roste se vztlakem).\n<b>Indukovaný odpor</b> — cena vztlaku: vírové stopy přidávají ~ <b>K C<sub>L</sub>²</b> (vyšší C<sub>L</sub> / ostřejší zatáčky → víc indukovaného).\n<b>Celková polára</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: parabola nahoru v C<sub>L</sub>; <b>C<sub>L</sub></b> s minimálním odporem leží mezi „moc pomalu / vysoké α“ a „moc rychle / nízké α“.</size>
 menu.tutorial_button=Jak hrát
 menu.tutorial_title=Jak hrát
-menu.tutorial_body=<b>Cíl</b>\nPohybujte se po grafu, používejte plošiny (zelené), vyhněte se červeným nástrahám a dostaňte se ke světlému východu vpravo.\n\n<b>Ovládání</b>\n• <b>Pohyb</b> — šipky / WASD nebo tlačítka na obrazovce.\n• <b>Skok</b> — Mezerník (nebo skok na mobilu). Skákáte z pevných plošin.\n\n<b>Dvě křivky</b>\n• <color=#c4b5fd>Hlavní křivka</color> — funkce, po níž chodíte.\n• <color=#fdba74>Derivace f′</color> — informace o sklonu; druhá čára.\n\n<b>Skok ve vzduchu na derivaci</b>\nKdyž jste <b>ve vzduchu</b> a postava se překrývá s <b>křivkou derivace</b>, stiskněte znovu <b>Skok</b> pro extra odraz.\n\n<size=94%><color=#a8b2d1>Čára derivace se při doteku rozsvítí. Máte <b>jeden</b> bonusový skok při každém lehkém doteku, dokud křivku neopustíte nebo nepřistanete. Na telefonu můžete cítit krátkou vibraci při doteku f′; na PC zní zvuk, pokud vibrace není k dispozici.</color></size>\n\n<b>Výběr úrovně</b>\n<size=94%>Úrovně jsou ve skupinách (Základy, Inženýrství, AP Calculus, Aerospace …). Klepněte na <b>Jak hrát</b> pro nápovědu. Vyberte skupinu a pak úroveň.</size>
+menu.tutorial_body=<b>Cíl</b>\nPohybujte se po grafu, používejte plošiny (zelené), vyhněte se červeným nástrahám a dostaňte se ke světlému východu vpravo.\n\n<b>Ovládání</b>\n– <b>Pohyb</b> — šipky / WASD nebo tlačítka na obrazovce.\n– <b>Skok</b> — Mezerník (nebo skok na mobilu). Skákáte z pevných plošin.\n\n<b>Dvě křivky</b>\n– <color=#c4b5fd>Hlavní křivka</color> — funkce, po níž chodíte.\n– <color=#fdba74>Derivace f′</color> — informace o sklonu; druhá čára.\n\n<b>Skok ve vzduchu na derivaci</b>\nKdyž jste <b>ve vzduchu</b> a postava se překrývá s <b>křivkou derivace</b>, stiskněte znovu <b>Skok</b> pro extra odraz.\n\n<size=94%><color=#a8b2d1>Čára derivace se při doteku rozsvítí. Máte <b>jeden</b> bonusový skok při každém lehkém doteku, dokud křivku neopustíte nebo nepřistanete. Na telefonu můžete cítit krátkou vibraci při doteku f′; na PC zní zvuk, pokud vibrace není k dispozici.</color></size>\n\n<b>Výběr úrovně</b>\n<size=94%>Úrovně jsou ve skupinách (Základy, Inženýrství, AP Calculus, Aerospace …). Klepněte na <b>Jak hrát</b> pro nápovědu. Vyberte skupinu a pak úroveň.</size>
 menu.player_icon_title=Ikona hráče
 menu.player_icon_set=Nastavit ikonu hráče
 menu.player_icon_hint=Klepněte na symbol — je to váš avatar v úrovních.
@@ -112,9 +112,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=Odemknout plnou hru
 paywall.body=Máš {0} úrovní zdarma. Jeden nákup odemkne všech {1}: AP Calculus BC a Physics C, letectví a kosmonautika, ekonomie, transformace, Big O, čtyři finální bossové — a všechny budoucí úrovně.
-paywall.promise=Jednorázový nákup · Bez reklam · Bez předplatného
+paywall.promise=Jednorázový nákup | Bez reklam | Bez předplatného
 paywall.buy=Odemknout všechny úrovně
-paywall.buy_price=Odemknout všechny úrovně · {0}
+paywall.buy_price=Odemknout všechny úrovně | {0}
 paywall.restore=Obnovit nákupy
 paywall.not_now=Teď ne
 paywall.status.connecting=Připojování k obchodu…

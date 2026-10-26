@@ -77,7 +77,7 @@ public class LevelSelectController : MonoBehaviour
         string price = Entitlements.LocalizedPrice;
         if (string.IsNullOrEmpty(price))
             return LocalizationManager.Get("paywall.buy", "Unlock all levels");
-        string fmt = LocalizationManager.Get("paywall.buy_price", "Unlock all levels · {0}");
+        string fmt = LocalizationManager.Get("paywall.buy_price", "Unlock all levels | {0}");
         try { return string.Format(fmt, price); }
         catch (System.FormatException) { return fmt; }
     }
@@ -236,6 +236,7 @@ public class LevelSelectController : MonoBehaviour
         LocalizationManager.ApplyTextDirection(titleTmp);
 
         CreateLevelSelectLanguagePicker(panel.transform);
+        CreateProgressChip(panel.transform, canvas.transform);
 
         // Scrollable list (categories first, then per-category stages).
         var scrollGo = new GameObject("LevelScroll");
@@ -449,6 +450,40 @@ public class LevelSelectController : MonoBehaviour
         btn.onClick.AddListener(() => MathArticlesOverlay.Open(canvasTransform));
     }
 
+    /// <summary>Top-right chip: total stars + achievements count; opens the achievements / settings sheet.</summary>
+    private void CreateProgressChip(Transform panelRoot, Transform canvasTransform)
+    {
+        bool tablet = DeviceLayout.IsTabletLike();
+        var rt = UiKit.Rect("ProgressChip", panelRoot, new Vector2(1f, 1f), new Vector2(1f, 1f));
+        rt.pivot = new Vector2(1f, 1f);
+        rt.anchoredPosition = new Vector2(tablet ? -14f : -10f, tablet ? -10f : -8f);
+        rt.sizeDelta = new Vector2(tablet ? 340f : 310f, tablet ? 64f : 56f);
+        var img = rt.gameObject.AddComponent<Image>();
+        RuntimeUiPolish.UseRoundedSliced(img);
+        img.color = new Color(0.16f, 0.2f, 0.28f, 0.92f);
+        var btn = rt.gameObject.AddComponent<Button>();
+        btn.targetGraphic = img;
+        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color, Color.Lerp(img.color, Color.white, 0.15f), Color.Lerp(img.color, Color.black, 0.2f));
+        btn.onClick.AddListener(() =>
+        {
+            FeelDirector.Play(SfxId.Click, 0.6f);
+            AchievementsOverlay.Open(canvasTransform);
+        });
+        var star = StarGlyph.Add(rt, "Star", StarGlyph.Filled, UiKit.Gold, new Vector2(36f, 36f));
+        star.rectTransform.anchorMin = star.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+        star.rectTransform.pivot = new Vector2(0f, 0.5f);
+        star.rectTransform.anchoredPosition = new Vector2(12f, 0f);
+        var trophy = StarGlyph.Add(rt, "Trophy", StarGlyph.Trophy, UiKit.Mint, new Vector2(36f, 36f));
+        trophy.rectTransform.anchorMin = trophy.rectTransform.anchorMax = new Vector2(0.52f, 0.5f);
+        trophy.rectTransform.pivot = new Vector2(0f, 0.5f);
+        int maxStars = ProgressStore.PlayableLevelCount * ProgressRules.MaxStars;
+        UiKit.Text(rt, "Stars", new Vector2(0.16f, 0.1f), new Vector2(0.52f, 0.9f), $"{ProgressStore.TotalStars}/{maxStars}",
+            UiTypography.Scale(tablet ? 22 : 20), UiKit.Gold, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
+        UiKit.Text(rt, "Ach", new Vector2(0.67f, 0.1f), new Vector2(0.97f, 0.9f),
+            $"{ProgressStore.Data.achievements.Count}/{AchievementCatalog.All.Length}",
+            UiTypography.Scale(tablet ? 22 : 20), UiKit.Mint, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
+    }
+
     private void CreateLevelSelectLanguagePicker(Transform panelRoot)
     {
         if (GameObject.Find("LevelSelectLanguagePicker") != null)
@@ -643,6 +678,10 @@ public class LevelSelectController : MonoBehaviour
             rows++;
         }
 
+        // Daily challenge card (first row) — free players draw from the free levels, owners from everything.
+        if (BuildDailyRow())
+            rows++;
+
         for (int c = 0; c < GameLevelCatalog.SelectCategories.Length; c++)
         {
             int catIdx = c;
@@ -654,6 +693,8 @@ public class LevelSelectController : MonoBehaviour
             // Locked categories still open (players can browse what they'd get); levels inside show the paywall.
             if (Entitlements.GetCategoryState(cat) == CategoryLockState.Locked)
                 DecorateLockedRow(tmp);
+            else
+                DecorateCategoryProgress(tmp, cat);
             categoryRowLabels.Add(tmp);
         }
 
@@ -701,6 +742,8 @@ public class LevelSelectController : MonoBehaviour
                 () => StartGameAt(capture));
             if (!Entitlements.IsLevelUnlocked(capture) && !GameLevelCatalog.IsComingSoonLevel(capture))
                 DecorateLockedRow(rowTmp);
+            else if (!GameLevelCatalog.IsComingSoonLevel(capture))
+                DecorateLevelStars(rowTmp, capture);
             levelRowLabels.Add(rowTmp);
         }
 
@@ -729,8 +772,116 @@ public class LevelSelectController : MonoBehaviour
             return;
         }
 
+        DailyChallengeSession.End();
         LevelSelection.SetSelectedLevel(index);
         SceneTransitionHost.LoadSingleScene("Game");
+    }
+
+    // ------------------------------------------------------------------ progress decorations (stars, daily)
+
+    /// <summary>Right-aligned "★ n / max" + cleared count on a category row.</summary>
+    private static void DecorateCategoryProgress(TextMeshProUGUI rowLabel, LevelSelectCategory cat)
+    {
+        if (rowLabel == null || GameLevelCatalog.IsComingSoonLevel(cat.FirstLevelIndex))
+            return;
+        var rowRt = rowLabel.transform.parent as RectTransform;
+        if (rowRt == null)
+            return;
+        bool tablet = DeviceLayout.IsTabletLike();
+        int stars = ProgressStore.StarsInRange(cat.FirstLevelIndex, cat.LastLevelIndexInclusive);
+        int max = cat.LevelCount * ProgressRules.MaxStars;
+        float w = tablet ? 150f : 136f;
+        var box = UiKit.Rect("Progress", rowRt, new Vector2(1f, 0f), new Vector2(1f, 1f));
+        box.pivot = new Vector2(1f, 0.5f);
+        box.sizeDelta = new Vector2(w, 0f);
+        box.anchoredPosition = new Vector2(-14f, 0f);
+        var star = StarGlyph.Add(box, "Star", stars > 0 ? StarGlyph.Filled : StarGlyph.Outline,
+            stars > 0 ? UiKit.Gold : UiKit.GoldDim, new Vector2(34f, 34f));
+        star.rectTransform.anchorMin = star.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+        star.rectTransform.pivot = new Vector2(0f, 0.5f);
+        UiKit.Text(box, "Count", new Vector2(0.27f, 0.1f), new Vector2(1f, 0.9f), $"{stars}/{max}",
+            UiTypography.Scale(tablet ? 22 : 20), stars >= max ? UiKit.Gold : UiKit.Muted, FontStyles.Bold,
+            TextAlignmentOptions.MidlineLeft);
+        // Thin completion bar along the bottom edge.
+        float frac = max > 0 ? stars / (float)max : 0f;
+        var bar = UiKit.Rect("Bar", rowRt, new Vector2(0.04f, 0f), new Vector2(0.04f + 0.92f * frac, 0f));
+        bar.pivot = new Vector2(0f, 0f);
+        bar.sizeDelta = new Vector2(0f, 5f);
+        bar.anchoredPosition = new Vector2(0f, 7f);
+        var barImg = bar.gameObject.AddComponent<Image>();
+        barImg.color = new Color(1f, 0.82f, 0.36f, 0.75f);
+        barImg.raycastTarget = false;
+        var trt = rowLabel.rectTransform;
+        trt.offsetMax = new Vector2(-(w + 18f), trt.offsetMax.y);
+        trt.offsetMin = new Vector2(w + 18f, trt.offsetMin.y);
+    }
+
+    /// <summary>Three small stars on the right edge of a level row (best result so far).</summary>
+    private static void DecorateLevelStars(TextMeshProUGUI rowLabel, int levelIndex)
+    {
+        var rowRt = rowLabel != null ? rowLabel.transform.parent as RectTransform : null;
+        if (rowRt == null)
+            return;
+        bool tablet = DeviceLayout.IsTabletLike();
+        float s = tablet ? 34f : 30f;
+        float w = s * 3f + 16f;
+        var box = UiKit.Rect("Stars", rowRt, new Vector2(1f, 0f), new Vector2(1f, 1f));
+        box.pivot = new Vector2(1f, 0.5f);
+        box.sizeDelta = new Vector2(w, 0f);
+        box.anchoredPosition = new Vector2(-14f, 0f);
+        UiKit.Stars(box, Vector2.zero, Vector2.one, ProgressStore.StarsFor(levelIndex), s);
+        var trt = rowLabel.rectTransform;
+        trt.offsetMax = new Vector2(-(w + 18f), trt.offsetMax.y);
+        trt.offsetMin = new Vector2(w + 18f, trt.offsetMin.y);
+    }
+
+    /// <summary>Adds the daily challenge row to the category list. Returns false if there is no pool.</summary>
+    private bool BuildDailyRow()
+    {
+        var spec = ProgressStore.TodaysChallenge();
+        if (!spec.IsValid)
+            return false;
+        bool done = ProgressStore.DailyDoneToday;
+        int streak = ProgressStore.CurrentDailyStreak;
+        string title = done
+            ? LocalizationManager.Get("daily.done_title", "Daily challenge done. Back tomorrow!")
+            : string.Format(LocalizationManager.Get("daily.title", "Daily challenge: {0}"),
+                GameLevelCatalog.GetLocalizedDisplayName(spec.LevelIndex));
+        string sub = done
+            ? string.Format(LocalizationManager.Get("daily.streak", "Streak: {0} day(s)"), streak)
+            : DailyChallengeSession.GoalText(spec.Goal) +
+              (streak > 0 ? "   |   " + string.Format(LocalizationManager.Get("daily.streak", "Streak: {0} day(s)"), streak) : "");
+        var tmp = CreateLevelButton(_levelContentRt, $"<b>{title}</b>\n<size=72%><color=#d9d2ff>{sub}</color></size>",
+            () =>
+            {
+                if (done)
+                {
+                    FeelDirector.Play(SfxId.Locked, 0.5f);
+                    return;
+                }
+                DailyChallengeSession.Begin(spec);
+                LevelSelection.SetSelectedLevel(spec.LevelIndex);
+                SceneTransitionHost.LoadSingleScene("Game");
+            },
+            new Color(0.27f, 0.22f, 0.5f, 0.97f));
+        tmp.richText = true;
+        var rowRt = tmp.transform.parent as RectTransform;
+        bool tablet = DeviceLayout.IsTabletLike();
+        var le = rowRt.GetComponent<LayoutElement>();
+        if (le != null)
+        {
+            le.preferredHeight = tablet ? 124f : 116f;
+            le.minHeight = le.preferredHeight;
+        }
+        var icon = StarGlyph.Add(rowRt, "DailyIcon", done ? StarGlyph.Calendar : StarGlyph.Flame,
+            done ? UiKit.Mint : UiKit.Gold, new Vector2(52f, 52f));
+        icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+        icon.rectTransform.pivot = new Vector2(0f, 0.5f);
+        icon.rectTransform.anchoredPosition = new Vector2(20f, 0f);
+        var trt = tmp.rectTransform;
+        trt.offsetMin = new Vector2(84f, trt.offsetMin.y);
+        trt.offsetMax = new Vector2(-84f, trt.offsetMax.y);
+        return true;
     }
 
     private const string ComingSoonOverlayName = "ComingSoonOverlayRoot";

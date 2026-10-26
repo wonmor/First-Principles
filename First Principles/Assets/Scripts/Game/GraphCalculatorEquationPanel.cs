@@ -130,7 +130,7 @@ public static class GraphCalculatorEquationPanel
         phRt.offsetMin = Vector2.zero;
         phRt.offsetMax = Vector2.zero;
         var ph = phGo.AddComponent<TextMeshProUGUI>();
-        ph.text = LocalizationManager.Get("graph.placeholder", "x^2 + sin(x) · ln(x) for x>0 · min(x,3)...");
+        ph.text = LocalizationManager.Get("graph.placeholder", "x^2 + sin(x)*ln(x) for x>0 | min(x,3)...");
         ph.fontSize = UiTypography.Scale(tablet ? 24 : 21);
         ph.color = new Color(1f, 1f, 1f, 0.32f);
         ph.fontStyle = FontStyles.Bold | FontStyles.Italic;
@@ -216,7 +216,7 @@ public static class GraphCalculatorEquationPanel
         }
         if (placeholderTmp != null)
         {
-            placeholderTmp.text = LocalizationManager.Get("graph.placeholder", "x^2 + sin(x) · ln(x) for x>0 · min(x,3)...");
+            placeholderTmp.text = LocalizationManager.Get("graph.placeholder", "x^2 + sin(x)*ln(x) for x>0 | min(x,3)...");
             LocalizationManager.ApplyTextDirection(placeholderTmp);
         }
         if (statusTmp != null && statusTmp.text.IndexOf("#ff9a9a", StringComparison.Ordinal) < 0)

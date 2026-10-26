@@ -13,12 +13,12 @@ ui.move=移動
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（キーボード：矢印／スペース）</color></size>
 hud.stage=ステージ
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x) （x>0）· min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x) （x>0）| min(x,3)...
 graph.status_enter=Enter／外側タップでグラフ描画
 graph.status_graphed=<color=#8fd9b3>描画済み</color>
 graph.line1=<b>グラフ電卓モード</b>
 graph.line2=<size=88%><color=#c4d0e8>下に<b>f(u)</b>を入力（欄内の変数<b>x</b>は内側の u）。次に：</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · ダブルタップ <b>+</b> · 長押し <b>−</b> · <b>Scale</b> はタップで拡大／長押しで縮小 · 2本指<b>ピンチ</b></size>
+graph.line3=<size=92%><b>Trans</b> → {0} | ダブルタップ <b>+</b> | 長押し <b>−</b> | <b>Scale</b> はタップで拡大／長押しで縮小 | 2本指<b>ピンチ</b></size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x は [{4},{5}]</color></size>
 graph.param_a=A（縦スケール）
 graph.param_k=k（横スケール）
@@ -64,7 +64,7 @@ level.32=BC：b^x と d/dx b^x
 level.33=円：(x−h)² + (y−k)² = R²
 level.34=物理C：熱力学（断熱P–V、γはNから）
 level.35=航空：揚力C_L(α) 線形＋失速
-level.36=航空：抗力極曲線（プロファイル·誘導·合計）
+level.36=航空：抗力極曲線（プロファイル/誘導/合計）
 level.37=航空：等温大気 ρ(h)
 level.38=航空：フゴイド／減衰ピッチ・上下動
 level.39=航空：ニュートン流 Cp ~ sin²α
@@ -91,9 +91,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=フルゲームをアンロック
 paywall.body=無料で{0}レベルを遊べます。1回の購入で全{1}レベルが解放されます：AP微積分BC・物理C、航空宇宙、経済、変換、ビッグO、4体のラスボス — 今後追加されるレベルもすべて。
-paywall.promise=買い切り · 広告なし · サブスクなし
+paywall.promise=買い切り | 広告なし | サブスクなし
 paywall.buy=全レベルをアンロック
-paywall.buy_price=全レベルをアンロック · {0}
+paywall.buy_price=全レベルをアンロック | {0}
 paywall.restore=購入を復元
 paywall.not_now=あとで
 paywall.status.connecting=ストアに接続中…

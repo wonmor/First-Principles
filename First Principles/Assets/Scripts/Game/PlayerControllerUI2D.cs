@@ -101,6 +101,9 @@ public class PlayerControllerUI2D : MonoBehaviour
 
     public Vector2 PlayerCenterGrid => posGrid;
 
+    /// <summary>Current collision world (hint markers read its platforms / gaps).</summary>
+    public GraphWorld World => world;
+
     /// <summary>Root <see cref="RectTransform"/> for the avatar (grid-anchored). For screen-space UI positioning.</summary>
     public RectTransform PlayerVisualRect => playerRect;
 
@@ -261,11 +264,13 @@ public class PlayerControllerUI2D : MonoBehaviour
                 }
                 velGrid.y = jv;
                 grounded = false;
+                GameFeel.RaiseJump(false);
             }
             else if (CanUseDerivativeAirJump())
             {
                 velGrid.y = jumpVelocityGridPerSec * doubleJumpVelocityMultiplier;
                 derivativeAirJumpConsumedThisBand = true;
+                GameFeel.RaiseJump(true);
             }
         }
 
@@ -300,6 +305,8 @@ public class PlayerControllerUI2D : MonoBehaviour
         if (IsInFinishZone(nextPos))
         {
             isFinished = true;
+            if (playerRect != null)
+                GameFeel.RaiseFinish(playerRect.position);
             finishCallback?.Invoke();
             return;
         }
@@ -373,6 +380,7 @@ public class PlayerControllerUI2D : MonoBehaviour
         if (touching && !wasTouchingDerivativeLine)
         {
             derivativeLineGrazeScoringCallback?.Invoke();
+            GameFeel.RaiseGraze();
             PlayDerivativeLineHitFeedback();
             PulseDerivativeBackgroundTint();
         }
@@ -697,6 +705,7 @@ public class PlayerControllerUI2D : MonoBehaviour
             return;
         float refSpeed = Mathf.Max(0.1f, bounceVelocityCutoffGridPerSec * 3f);
         float intensity = Mathf.Clamp01(downwardSpeed / refSpeed);
+        GameFeel.RaiseLand(intensity);
         squashTimer = Mathf.Max(squashTimer, landingSquashSeconds * intensity);
     }
 
@@ -725,6 +734,8 @@ public class PlayerControllerUI2D : MonoBehaviour
             return;
 
         isDead = true;
+        if (playerRect != null)
+            GameFeel.RaiseDeath(playerRect.position);
         deathCallback?.Invoke();
     }
 }

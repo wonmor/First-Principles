@@ -13,12 +13,12 @@ ui.move=Mover
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(teclado: flechas / Espacio)</color></size>
 hud.stage=FASE
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x) para x>0 · min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x) para x>0 | min(x,3)...
 graph.status_enter=Intro / tocar fuera para graficar
 graph.status_graphed=<color=#8fd9b3>Graficado</color>
 graph.line1=<b>Modo calculadora gráfica</b>
 graph.line2=<size=88%><color=#c4d0e8>Escribe <b>f(u)</b> abajo (la variable <b>x</b> en el cuadro = u interior). Luego:</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · doble toque <b>+</b> · mantén <b>−</b> · <b>Escala</b> acercar / mantén alejar · <b>pellizco</b> con dos dedos</size>
+graph.line3=<size=92%><b>Trans</b> → {0} | doble toque <b>+</b> | mantén <b>−</b> | <b>Escala</b> acercar / mantén alejar | <b>pellizco</b> con dos dedos</size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x en [{4},{5}]</color></size>
 graph.param_a=A (escala vertical)
 graph.param_k=k (escala horizontal)
@@ -91,9 +91,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=Desbloquear el juego completo
 paywall.body=Tienes {0} niveles gratis. Una sola compra abre los {1}: AP Cálculo BC y Física C, aeroespacial, economía, transformadas, Big O, los cuatro jefes finales — y todos los niveles futuros.
-paywall.promise=Pago único · Sin anuncios · Sin suscripción
+paywall.promise=Pago único | Sin anuncios | Sin suscripción
 paywall.buy=Desbloquear todos los niveles
-paywall.buy_price=Desbloquear todos los niveles · {0}
+paywall.buy_price=Desbloquear todos los niveles | {0}
 paywall.restore=Restaurar compras
 paywall.not_now=Ahora no
 paywall.status.connecting=Conectando con la tienda…

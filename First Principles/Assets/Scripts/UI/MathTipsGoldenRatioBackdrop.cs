@@ -23,7 +23,7 @@ public class MathTipsGoldenRatioBackdrop : MonoBehaviour
 
     private static readonly string[] SymbolPool =
     {
-        "φ", "Φ", "≈", "·", "+",
+        "φ", "Φ", "≈", "+",
         "1", "2", "3", "5", "8", "13", "21", "34", "55",
     };
 

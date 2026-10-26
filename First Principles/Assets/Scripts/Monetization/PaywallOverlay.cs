@@ -5,104 +5,88 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 // -----------------------------------------------------------------------------
-// PaywallOverlay — "Unlock the full game" sheet (runtime-built uGUI, RuntimeUiPolish style)
+// PaywallOverlay — upgrade sheet (runtime-built uGUI, RuntimeUiPolish style)
 // -----------------------------------------------------------------------------
-// Opened from Level Select (locked category/level, unlock chip) and when the player
-// clears the last free level. Contains Buy (localized store price), Restore Purchases
-// (App Review requirement for non-consumables) and Not now. Live-updates from
-// Entitlements.Changed; closes itself and invokes onUnlocked once the game is owned.
+// Plans: First Principles Plus yearly / monthly (auto-renewable) and the one-time Full Game.
+// Shows live store prices, Restore Purchases, auto-renew terms, Terms of Use (EULA) and
+// Privacy Policy links (App Store guideline 3.1.2 / Google Play subscription policy).
+// Players who already own the Full Game only see Plus (their levels stay unlocked forever).
+// Opened from Level Select (locked level / unlock chip), after the last free level, and from
+// the in-game Hint button when the free daily hints are used up.
 // Development builds: tap the title 7× to toggle the debug unlock override.
 // -----------------------------------------------------------------------------
 
 public static class PaywallOverlay
 {
+    public enum Reason
+    {
+        Levels,
+        Hints,
+    }
+
+    public const string PrivacyPolicyUrl = "https://github.com/rkaissi/First-Principles/blob/main/privacy-policy.md";
+    public const string AppleEulaUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+    public const string GooglePlayTermsUrl = "https://play.google.com/about/play-terms/";
+
     const string RootName = "PaywallOverlayRoot";
 
     static GameObject _root;
     static Action _onUnlocked;
-    static TextMeshProUGUI _buyTmp;
-    static Button _buyBtn;
-    static Image _buyImg;
+    static Reason _reason;
     static TextMeshProUGUI _statusTmp;
     static Button _restoreBtn;
+    static PlanRow[] _plans = new PlanRow[0];
     static bool _busy;
     static int _titleTaps;
 
+    sealed class PlanRow
+    {
+        public string ProductId;
+        public Button Button;
+        public TextMeshProUGUI Title;
+        public TextMeshProUGUI Detail;
+    }
+
     public static bool IsOpen => _root != null;
 
-    /// <param name="onUnlocked">Called once if the player owns the game while the sheet is open (purchase or restore).</param>
-    public static void Open(Transform canvasTransform, Action onUnlocked = null)
+    /// <param name="onUnlocked">Called once if the player gains what this sheet sells while it is open.</param>
+    public static void Open(Transform canvasTransform, Action onUnlocked = null, Reason reason = Reason.Levels)
     {
         if (canvasTransform == null)
             return;
         Close();
 
         _onUnlocked = onUnlocked;
+        _reason = reason;
         _busy = false;
         _titleTaps = 0;
         Entitlements.RetryConnectIfUnavailable();
 
         bool tablet = DeviceLayout.IsTabletLike();
-
-        _root = new GameObject(RootName);
-        var rootRt = _root.AddComponent<RectTransform>();
-        rootRt.SetParent(canvasTransform, false);
-        rootRt.anchorMin = Vector2.zero;
-        rootRt.anchorMax = Vector2.one;
-        rootRt.offsetMin = Vector2.zero;
-        rootRt.offsetMax = Vector2.zero;
-        rootRt.SetAsLastSibling();
-
-        var dim = _root.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.05f, 0.1f, 0.9f);
-        dim.raycastTarget = true;
-        var dimBtn = _root.AddComponent<Button>();
-        dimBtn.targetGraphic = dim;
-        dimBtn.transition = Selectable.Transition.None;
-        dimBtn.onClick.AddListener(() => { if (!_busy) Close(); });
-
-        // Panel ----------------------------------------------------------------
-        var panelGo = new GameObject("Panel");
-        var panelRt = panelGo.AddComponent<RectTransform>();
-        panelRt.SetParent(_root.transform, false);
-        // Fractional anchors so the sheet fits both the landscape mobile build and portrait/desktop windows.
         bool landscape = Screen.width >= Screen.height;
-        panelRt.anchorMin = landscape ? new Vector2(0.2f, 0.05f) : new Vector2(0.06f, 0.17f);
-        panelRt.anchorMax = landscape ? new Vector2(0.8f, 0.95f) : new Vector2(0.94f, 0.83f);
-        panelRt.offsetMin = Vector2.zero;
-        panelRt.offsetMax = Vector2.zero;
-        var panelImg = panelGo.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(panelImg);
-        panelImg.color = RuntimeUiPolish.PanelMid;
-        panelImg.raycastTarget = true;
-        // A no-op click handler on the panel stops taps bubbling up to the dim layer's close button.
-        var panelSwallow = panelGo.AddComponent<Button>();
-        panelSwallow.targetGraphic = panelImg;
-        panelSwallow.transition = Selectable.Transition.None;
-        RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(3f, -5f), 0.34f);
 
-        // Coral accent bar
-        var accent = NewRect("Accent", panelRt, new Vector2(0f, 1f), new Vector2(1f, 1f));
+        var rootRt = UiKit.FullScreenDim(RootName, canvasTransform, 0.9f, () => { if (!_busy) Close(); });
+        _root = rootRt.gameObject;
+
+        var panel = UiKit.Panel(rootRt,
+            landscape ? new Vector2(0.18f, 0.03f) : new Vector2(0.04f, 0.08f),
+            landscape ? new Vector2(0.82f, 0.97f) : new Vector2(0.96f, 0.92f));
+
+        var accent = UiKit.Rect("Accent", panel, new Vector2(0f, 1f), new Vector2(1f, 1f));
         accent.pivot = new Vector2(0.5f, 1f);
         accent.sizeDelta = new Vector2(-48f, 8f);
-        accent.anchoredPosition = new Vector2(0f, -20f);
+        accent.anchoredPosition = new Vector2(0f, -18f);
         var accentImg = accent.gameObject.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(accentImg);
-        accentImg.color = RuntimeUiPolish.AccentCoral;
+        accentImg.color = UiKit.PlusViolet;
         accentImg.raycastTarget = false;
 
-        // Lock icon
-        var iconRt = NewRect("Icon", panelRt, new Vector2(0.3f, 0.82f), new Vector2(0.7f, 0.95f));
-        var icon = iconRt.gameObject.AddComponent<Image>();
-        icon.sprite = Entitlements.HasFullGame ? LockGlyph.Unlocked : LockGlyph.Locked;
-        icon.preserveAspect = true;
-        icon.color = RuntimeUiPolish.AccentCoral;
-        icon.raycastTarget = false;
-
-        // Title (7-tap debug toggle in dev builds)
-        var title = AddText(panelRt, "Title", new Vector2(0.06f, 0.70f), new Vector2(0.94f, 0.81f),
-            LocalizationManager.Get("paywall.title", "Unlock the full game"),
-            UiTypography.Scale(tablet ? 44 : 40), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
+        bool ownsFull = Entitlements.OwnsFullGameOutright;
+        string titleText = reason == Reason.Hints
+            ? LocalizationManager.Get("paywall.hints.title", "Out of hints for today")
+            : LocalizationManager.Get("paywall.plus.title", "Go further with First Principles");
+        var title = UiKit.Text(panel, "Title", new Vector2(0.05f, 0.875f), new Vector2(0.95f, 0.955f), titleText,
+            UiTypography.Scale(tablet ? 40 : 36), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
         if (Application.isEditor || Debug.isDebugBuild)
         {
             title.raycastTarget = true;
@@ -111,69 +95,101 @@ public static class PaywallOverlay
             tapBtn.onClick.AddListener(OnTitleTapped);
         }
 
-        int total = LevelManagerPlayableLevelCount();
-        string bodyFmt = LocalizationManager.Get("paywall.body",
-            "You've got {0} free levels. One purchase opens all {1}: AP Calculus BC & Physics C, aerospace, " +
-            "economics, transforms, Big O, the four final bosses — and every level we add later.");
-        AddText(panelRt, "Body", new Vector2(0.08f, 0.50f), new Vector2(0.92f, 0.70f),
-            SafeFormat(bodyFmt, LevelAccessPolicy.FreeLevelCount, total),
-            UiTypography.Scale(tablet ? 26 : 23), new Color(0.82f, 0.86f, 0.94f, 1f), FontStyles.Normal);
+        int total = PlayableLevelCount();
+        string body;
+        if (reason == Reason.Hints)
+            body = string.Format(LocalizationManager.Get("paywall.hints.body",
+                "You get {0} free hints every day; they refill tomorrow. Plus gives you unlimited hints, every level and a daily-streak shield."),
+                ProgressRules.FreeHintsPerDay);
+        else if (ownsFull)
+            body = LocalizationManager.Get("paywall.owner.body",
+                "You own the Full Game, so every level stays yours forever. Plus adds unlimited hints and a shield that saves your daily streak once a week.");
+        else
+            body = string.Format(LocalizationManager.Get("paywall.plus.body",
+                "You've got {0} free levels, the daily challenge and {1} hints a day. Unlock all {2} levels: AP Calculus BC & Physics C, aerospace, economics, transforms, Big O and the four final bosses."),
+                LevelAccessPolicy.FreeLevelCount, ProgressRules.FreeHintsPerDay, total);
+        UiKit.Text(panel, "Body", new Vector2(0.07f, 0.74f), new Vector2(0.93f, 0.875f), body,
+            UiTypography.Scale(tablet ? 22 : 20), new Color(0.82f, 0.86f, 0.94f, 1f));
 
-        AddText(panelRt, "Promise", new Vector2(0.08f, 0.43f), new Vector2(0.92f, 0.50f),
-            LocalizationManager.Get("paywall.promise", "One-time purchase · No ads · No subscription"),
-            UiTypography.Scale(tablet ? 22 : 20), new Color(0.55f, 0.85f, 0.82f, 1f), FontStyles.Bold);
+        // Plans ------------------------------------------------------------------
+        var rows = new System.Collections.Generic.List<PlanRow>();
+        float top = 0.725f;
+        float h = ownsFull ? 0.135f : 0.115f;
+        float gap = 0.012f;
+        rows.Add(AddPlan(panel, LevelAccessPolicy.PlusYearlyProductId, top, h, UiKit.PlusViolet, tablet, true));
+        top -= h + gap;
+        rows.Add(AddPlan(panel, LevelAccessPolicy.PlusMonthlyProductId, top, h, new Color(0.3f, 0.27f, 0.55f, 0.98f), tablet, false));
+        top -= h + gap;
+        if (!ownsFull)
+        {
+            rows.Add(AddPlan(panel, LevelAccessPolicy.FullGameProductId, top, h, RuntimeUiPolish.AccentCoral, tablet, false));
+            top -= h + gap;
+        }
+        _plans = rows.ToArray();
 
-        // Buy button
-        var buyRt = NewRect("BuyButton", panelRt, new Vector2(0.08f, 0.29f), new Vector2(0.92f, 0.40f));
-        _buyImg = buyRt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(_buyImg);
-        _buyImg.color = RuntimeUiPolish.AccentCoral;
-        _buyBtn = buyRt.gameObject.AddComponent<Button>();
-        _buyBtn.targetGraphic = _buyImg;
-        RuntimeUiPolish.ApplyButtonTransitions(_buyBtn, RuntimeUiPolish.AccentCoral,
-            Color.Lerp(RuntimeUiPolish.AccentCoral, Color.white, 0.18f),
-            Color.Lerp(RuntimeUiPolish.AccentCoral, Color.black, 0.22f));
-        RuntimeUiPolish.ApplyDropShadow(buyRt, new Vector2(2f, -3f), 0.3f);
-        _buyTmp = AddText(buyRt, "Text", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.92f), "",
-            UiTypography.Scale(tablet ? 32 : 29), Color.white, FontStyles.Bold);
-        _buyBtn.onClick.AddListener(OnBuy);
+        // Restore + Not now -------------------------------------------------------
+        float by1 = top - 0.075f;
+        var restoreBtn = UiKit.Button(panel, "RestoreButton", new Vector2(0.07f, by1), new Vector2(0.49f, top - 0.005f),
+            LocalizationManager.Get("paywall.restore", "Restore purchases"), RuntimeUiPolish.ButtonNeutral, OnRestore, tablet ? 22 : 20);
+        _restoreBtn = restoreBtn;
+        var laterBtn = UiKit.Button(panel, "NotNowButton", new Vector2(0.51f, by1), new Vector2(0.93f, top - 0.005f),
+            LocalizationManager.Get("paywall.not_now", "Not now"), new Color(0.15f, 0.17f, 0.24f, 0.96f),
+            () => { if (!_busy) Close(); }, tablet ? 22 : 20);
+        OverlayCancelHandler.Attach(_root, laterBtn, _plans.Length > 0 ? _plans[0].Button : laterBtn);
 
-        // Restore + Not now
-        var restoreRt = NewRect("RestoreButton", panelRt, new Vector2(0.08f, 0.17f), new Vector2(0.49f, 0.26f));
-        var restoreImg = restoreRt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(restoreImg);
-        restoreImg.color = RuntimeUiPolish.ButtonNeutral;
-        _restoreBtn = restoreRt.gameObject.AddComponent<Button>();
-        _restoreBtn.targetGraphic = restoreImg;
-        RuntimeUiPolish.ApplyButtonTransitions(_restoreBtn, RuntimeUiPolish.ButtonNeutral,
-            RuntimeUiPolish.ButtonNeutralHover, RuntimeUiPolish.PanelDeep);
-        AddText(restoreRt, "Text", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.92f),
-            LocalizationManager.Get("paywall.restore", "Restore purchases"),
-            UiTypography.Scale(tablet ? 24 : 21), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
-        _restoreBtn.onClick.AddListener(OnRestore);
+        // Status + legal ----------------------------------------------------------
+        _statusTmp = UiKit.Text(panel, "Status", new Vector2(0.06f, by1 - 0.055f), new Vector2(0.94f, by1 - 0.005f), "",
+            UiTypography.Scale(tablet ? 19 : 17), new Color(0.75f, 0.8f, 0.92f, 0.9f), FontStyles.Italic);
 
-        var laterRt = NewRect("NotNowButton", panelRt, new Vector2(0.51f, 0.17f), new Vector2(0.92f, 0.26f));
-        var laterImg = laterRt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(laterImg);
-        laterImg.color = new Color(0.15f, 0.17f, 0.24f, 0.96f);
-        var laterBtn = laterRt.gameObject.AddComponent<Button>();
-        laterBtn.targetGraphic = laterImg;
-        RuntimeUiPolish.ApplyButtonTransitions(laterBtn, laterImg.color,
-            RuntimeUiPolish.ButtonNeutralHover, RuntimeUiPolish.PanelDeep);
-        AddText(laterRt, "Text", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.92f),
-            LocalizationManager.Get("paywall.not_now", "Not now"),
-            UiTypography.Scale(tablet ? 24 : 21), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
-        laterBtn.onClick.AddListener(() => { if (!_busy) Close(); });
-        // Escape / gamepad B / Android back = "Not now"; controller focus starts on Buy.
-        OverlayCancelHandler.Attach(_root, laterBtn, _buyBtn);
+        bool apple = Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.OSXPlayer
+                     || Application.platform == RuntimePlatform.VisionOS || Application.platform == RuntimePlatform.tvOS
+                     || Application.platform == RuntimePlatform.OSXEditor;
+        string account = apple ? "Apple Account" : "Google Play account";
+        string legal = string.Format(LocalizationManager.Get("paywall.legal",
+            "Plus is an auto-renewing subscription. Payment is charged to your {0} at confirmation. It renews automatically at the same price for the same period unless cancelled at least 24 hours before the end of the current period; manage or cancel any time in your account settings. The Full Game is a one-time purchase."),
+            account);
+        UiKit.Text(panel, "Legal", new Vector2(0.06f, 0.075f), new Vector2(0.94f, by1 - 0.06f), legal,
+            UiTypography.Scale(tablet ? 15 : 13), new Color(0.62f, 0.67f, 0.78f, 0.95f));
 
-        _statusTmp = AddText(panelRt, "Status", new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.15f), "",
-            UiTypography.Scale(tablet ? 21 : 19), new Color(0.75f, 0.8f, 0.92f, 0.9f), FontStyles.Italic);
+        UiKit.Button(panel, "TermsLink", new Vector2(0.07f, 0.018f), new Vector2(0.49f, 0.068f),
+            LocalizationManager.Get("paywall.terms", "Terms of Use (EULA)"), new Color(0.12f, 0.13f, 0.19f, 0.9f),
+            () => UiKit.OpenUrl(apple ? AppleEulaUrl : GooglePlayTermsUrl), tablet ? 17 : 15, new Color(0.7f, 0.82f, 1f, 1f));
+        UiKit.Button(panel, "PrivacyLink", new Vector2(0.51f, 0.018f), new Vector2(0.93f, 0.068f),
+            LocalizationManager.Get("paywall.privacy", "Privacy Policy"), new Color(0.12f, 0.13f, 0.19f, 0.9f),
+            () => UiKit.OpenUrl(PrivacyPolicyUrl), tablet ? 17 : 15, new Color(0.7f, 0.82f, 1f, 1f));
 
         Entitlements.Changed += Refresh;
         Entitlements.PurchaseFinished += OnPurchaseFinished;
         LocalizationManager.LanguageChanged += Refresh;
         Refresh();
+    }
+
+    static PlanRow AddPlan(RectTransform panel, string productId, float top, float h, Color bg, bool tablet, bool bestValue)
+    {
+        var row = new PlanRow { ProductId = productId };
+        var btn = UiKit.Button(panel, "Plan_" + productId, new Vector2(0.07f, top - h), new Vector2(0.93f, top), "", bg,
+            () => OnBuy(productId), tablet ? 26 : 24, Color.white);
+        // Replace the default centered label with a title + detail pair.
+        Object.Destroy(btn.transform.Find("Text").gameObject);
+        row.Button = btn;
+        row.Title = UiKit.Text(btn.transform, "PlanTitle", new Vector2(0.04f, 0.5f), new Vector2(0.96f, 0.95f), "",
+            UiTypography.Scale(tablet ? 26 : 24), Color.white, FontStyles.Bold);
+        row.Detail = UiKit.Text(btn.transform, "PlanDetail", new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.5f), "",
+            UiTypography.Scale(tablet ? 18 : 16), new Color(1f, 1f, 1f, 0.86f));
+        if (bestValue)
+        {
+            var tag = UiKit.Rect("BestValue", btn.transform, new Vector2(1f, 1f), new Vector2(1f, 1f));
+            tag.pivot = new Vector2(1f, 0.5f);
+            tag.sizeDelta = new Vector2(tablet ? 190f : 170f, 34f);
+            tag.anchoredPosition = new Vector2(-14f, 0f);
+            var timg = tag.gameObject.AddComponent<Image>();
+            RuntimeUiPolish.UseRoundedSliced(timg);
+            timg.color = UiKit.Gold;
+            timg.raycastTarget = false;
+            UiKit.Text(tag, "T", new Vector2(0.04f, 0.05f), new Vector2(0.96f, 0.95f),
+                LocalizationManager.Get("paywall.best_value", "Best value"), UiTypography.Scale(16), new Color(0.2f, 0.14f, 0.02f, 1f), FontStyles.Bold);
+        }
+        return row;
     }
 
     public static void Close()
@@ -184,41 +200,64 @@ public static class PaywallOverlay
         if (_root != null)
             Object.Destroy(_root);
         _root = null;
-        _buyTmp = null;
-        _buyBtn = null;
-        _buyImg = null;
         _statusTmp = null;
         _restoreBtn = null;
+        _plans = new PlanRow[0];
         _busy = false;
     }
 
     // ------------------------------------------------------------------ state
+
+    static bool Satisfied() => _reason == Reason.Hints ? Entitlements.HasPlus : Entitlements.HasFullGame;
 
     static void Refresh()
     {
         if (_root == null)
             return;
 
-        if (Entitlements.HasFullGame)
+        if (Satisfied())
         {
             var cb = _onUnlocked;
             _onUnlocked = null;
             Close();
+            FeelDirector.Play(SfxId.Achievement, 0.8f);
             cb?.Invoke();
             return;
         }
 
-        string price = Entitlements.LocalizedPrice;
         bool ready = Entitlements.Availability == StoreAvailability.Ready;
-        if (_buyTmp != null)
+        foreach (var p in _plans)
         {
-            _buyTmp.text = !string.IsNullOrEmpty(price)
-                ? SafeFormat(LocalizationManager.Get("paywall.buy_price", "Unlock all levels · {0}"), price)
-                : LocalizationManager.Get("paywall.buy", "Unlock all levels");
-            LocalizationManager.ApplyTextDirection(_buyTmp);
+            string price = Entitlements.PriceFor(p.ProductId);
+            bool has = !string.IsNullOrEmpty(price);
+            switch (p.ProductId)
+            {
+                case LevelAccessPolicy.PlusYearlyProductId:
+                    p.Title.text = has
+                        ? string.Format(LocalizationManager.Get("paywall.plan.yearly", "Plus yearly   {0} / year"), price)
+                        : LocalizationManager.Get("paywall.plan.yearly_np", "Plus yearly");
+                    p.Detail.text = LocalizationManager.Get("paywall.plan.plus_detail",
+                        "Every level and new chapter, unlimited hints, daily-streak shield. Auto-renews.");
+                    break;
+                case LevelAccessPolicy.PlusMonthlyProductId:
+                    p.Title.text = has
+                        ? string.Format(LocalizationManager.Get("paywall.plan.monthly", "Plus monthly   {0} / month"), price)
+                        : LocalizationManager.Get("paywall.plan.monthly_np", "Plus monthly");
+                    p.Detail.text = LocalizationManager.Get("paywall.plan.plus_detail_m",
+                        "Everything in Plus, billed monthly. Auto-renews; cancel any time.");
+                    break;
+                default:
+                    p.Title.text = has
+                        ? string.Format(LocalizationManager.Get("paywall.plan.full", "Full Game   {0} once"), price)
+                        : LocalizationManager.Get("paywall.plan.full_np", "Full Game (one-time)");
+                    p.Detail.text = LocalizationManager.Get("paywall.plan.full_detail",
+                        "All levels forever, including chapters we add later. No subscription.");
+                    break;
+            }
+            LocalizationManager.ApplyTextDirection(p.Title);
+            LocalizationManager.ApplyTextDirection(p.Detail);
+            p.Button.interactable = ready && !_busy && Entitlements.IsProductAvailable(p.ProductId);
         }
-        if (_buyBtn != null)
-            _buyBtn.interactable = ready && !_busy;
         if (_restoreBtn != null)
             _restoreBtn.interactable = !_busy && Entitlements.Availability != StoreAvailability.NotRequired;
 
@@ -240,14 +279,14 @@ public static class PaywallOverlay
         }
     }
 
-    static void OnBuy()
+    static void OnBuy(string productId)
     {
-        if (_busy || !Entitlements.CanPurchase)
+        if (_busy || Entitlements.Availability != StoreAvailability.Ready)
             return;
         _busy = true;
         SetStatus(LocalizationManager.Get("paywall.status.purchasing", "Waiting for the store…"));
         Refresh();
-        Entitlements.BuyFullGame();
+        Entitlements.Buy(productId);
     }
 
     static void OnRestore()
@@ -262,7 +301,7 @@ public static class PaywallOverlay
             if (_root == null)
                 return;
             _busy = false;
-            if (Entitlements.HasFullGame)
+            if (Satisfied())
             {
                 Refresh(); // closes + callback
                 return;
@@ -279,7 +318,7 @@ public static class PaywallOverlay
         if (_root == null)
             return;
         _busy = false;
-        if (Entitlements.HasFullGame)
+        if (Satisfied())
         {
             Refresh();
             return;
@@ -292,11 +331,11 @@ public static class PaywallOverlay
                 break;
             case PurchaseOutcome.Deferred:
                 SetStatus(LocalizationManager.Get("paywall.status.deferred",
-                    "Purchase is waiting for approval. Levels unlock automatically once it's approved."));
+                    "Purchase is waiting for approval. It unlocks automatically once it's approved."));
                 break;
             case PurchaseOutcome.Failed:
                 SetStatus(detail == "already_owned_restore"
-                    ? LocalizationManager.Get("paywall.status.already_owned", "You already own this — tap Restore purchases.")
+                    ? LocalizationManager.Get("paywall.status.already_owned", "You already own this. Tap Restore purchases.")
                     : LocalizationManager.Get("paywall.status.failed", "The purchase didn't go through. You haven't been charged."));
                 break;
         }
@@ -309,12 +348,12 @@ public static class PaywallOverlay
         _titleTaps = 0;
         bool unlocked = Entitlements.DebugOverride == true;
         Entitlements.DebugOverride = unlocked ? (bool?)null : true;
-        Debug.Log($"Entitlements: debug override {(unlocked ? "cleared" : "→ unlocked")}");
+        Debug.Log($"Entitlements: debug override {(unlocked ? "cleared" : "-> unlocked")}");
     }
 
     // ------------------------------------------------------------------ helpers
 
-    static int LevelManagerPlayableLevelCount()
+    static int PlayableLevelCount()
     {
         int n = 0;
         for (int i = 0; i < GameLevelCatalog.LevelCount; i++)
@@ -323,50 +362,11 @@ public static class PaywallOverlay
         return n;
     }
 
-    static string SafeFormat(string fmt, params object[] args)
-    {
-        try { return string.Format(fmt, args); }
-        catch (FormatException) { return fmt; }
-    }
-
     static void SetStatus(string s)
     {
         if (_statusTmp == null)
             return;
         _statusTmp.text = s ?? "";
         LocalizationManager.ApplyTextDirection(_statusTmp);
-    }
-
-    static RectTransform NewRect(string name, RectTransform parent, Vector2 anchorMin, Vector2 anchorMax)
-    {
-        var go = new GameObject(name);
-        var rt = go.AddComponent<RectTransform>();
-        rt.SetParent(parent, false);
-        rt.anchorMin = anchorMin;
-        rt.anchorMax = anchorMax;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-        return rt;
-    }
-
-    static TextMeshProUGUI AddText(RectTransform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
-        string text, float size, Color color, FontStyles style)
-    {
-        var rt = NewRect(name, parent, anchorMin, anchorMax);
-        var tmp = rt.gameObject.AddComponent<TextMeshProUGUI>();
-        UiTypography.ApplyDefaultFontAsset(tmp);
-        tmp.text = text;
-        tmp.enableAutoSizing = true;
-        tmp.fontSizeMax = size;
-        tmp.fontSizeMin = Mathf.Max(12f, size * 0.55f);
-        tmp.fontSize = size;
-        tmp.fontStyle = style;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = color;
-        tmp.textWrappingMode = TextWrappingModes.Normal;
-        tmp.overflowMode = TextOverflowModes.Overflow;
-        tmp.raycastTarget = false;
-        LocalizationManager.ApplyTextDirection(tmp);
-        return tmp;
     }
 }

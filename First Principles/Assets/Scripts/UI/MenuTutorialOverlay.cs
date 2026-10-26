@@ -208,11 +208,11 @@ public static class MenuTutorialOverlay
             "<b>Goal</b>\n" +
             "Move along the graph, use platforms (green), avoid red hazards, and reach the bright exit on the right.\n\n" +
             "<b>Controls</b>\n" +
-            "• <b>Move</b> — arrows / WASD, or on a phone hold the <b>left</b> / <b>right half</b> of the screen.\n" +
-            "• <b>Jump</b> — Space, or on a phone <b>tap with a second finger</b> while holding left/right. You jump from solid platforms.\n\n" +
+            "– <b>Move</b> — arrows / WASD, or on a phone hold the <b>left</b> / <b>right half</b> of the screen.\n" +
+            "– <b>Jump</b> — Space, or on a phone <b>tap with a second finger</b> while holding left/right. You jump from solid platforms.\n\n" +
             "<b>The two curves</b>\n" +
-            "• <color=#c4b5fd>Main curve</color> — the function you walk on.\n" +
-            "• <color=#fdba74>Derivative \\(f'\\)</color> — slope information; it’s drawn as a second line.\n\n" +
+            "– <color=#c4b5fd>Main curve</color> — the function you walk on.\n" +
+            "– <color=#fdba74>Derivative \\(f'\\)</color> — slope information; it’s drawn as a second line.\n\n" +
             "<b>Air jump on the derivative</b>\n" +
             "While you are <b>in the air</b>, if your character overlaps the <b>derivative curve</b>, you can press <b>Jump again</b> for an extra hop.\n\n" +
             "<size=94%><color=#a8b2d1>The derivative line brightens when you touch it. You get <b>one</b> bonus jump each time you brush it until you leave the curve or land. On phones you may feel a short vibration when you touch \\(f'\\); on PC a sound plays instead when vibration isn’t available.</color></size>\n\n" +

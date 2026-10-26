@@ -13,12 +13,12 @@ ui.move=Bewegen
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(Tastatur: Pfeile / Leertaste)</color></size>
 hud.stage=PHASE
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x) für x>0 · min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x) für x>0 | min(x,3)...
 graph.status_enter=Eingabe / außerhalb tippen zum Zeichnen
 graph.status_graphed=<color=#8fd9b3>Gezeichnet</color>
 graph.line1=<b>Grafikrechner-Modus</b>
 graph.line2=<size=88%><color=#c4d0e8>Geben Sie unten <b>f(u)</b> ein (Variable <b>x</b> im Feld = inneres u). Dann:</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · Doppeltipp <b>+</b> · halten <b>−</b> · <b>Maßstab</b> hereinzoomen / halten herauszoomen · Zweifinger-<b>Pinch</b></size>
+graph.line3=<size=92%><b>Trans</b> → {0} | Doppeltipp <b>+</b> | halten <b>−</b> | <b>Maßstab</b> hereinzoomen / halten herauszoomen | Zweifinger-<b>Pinch</b></size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x in [{4},{5}]</color></size>
 graph.param_a=A (vertikaler Maßstab)
 graph.param_k=k (horizontaler Maßstab)
@@ -91,9 +91,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=Vollversion freischalten
 paywall.body=Du hast {0} kostenlose Level. Ein Kauf schaltet alle {1} frei: AP Calculus BC & Physics C, Luft- und Raumfahrt, Wirtschaft, Transformationen, Big O, die vier Endbosse — und jedes künftige Level.
-paywall.promise=Einmalkauf · Keine Werbung · Kein Abo
+paywall.promise=Einmalkauf | Keine Werbung | Kein Abo
 paywall.buy=Alle Level freischalten
-paywall.buy_price=Alle Level freischalten · {0}
+paywall.buy_price=Alle Level freischalten | {0}
 paywall.restore=Käufe wiederherstellen
 paywall.not_now=Später
 paywall.status.connecting=Verbindung zum Store…

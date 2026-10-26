@@ -14,12 +14,12 @@ ui.move=चलें
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(कीबोर्ड: तीर / स्पेस)</color></size>
 hud.stage=चरण
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x) जब x>0 · min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x) जब x>0 | min(x,3)...
 graph.status_enter=Enter / ग्राफ़ के लिए बाहर टैप करें
 graph.status_graphed=<color=#8fd9b3>ग्राफ़ तैयार</color>
 graph.line1=<b>ग्राफ़िंग कैलकुलेटर मोड</b>
 graph.line2=<size=88%><color=#c4d0e8>नीचे <b>f(u)</b> लिखें (बॉक्स में चर <b>x</b> = आंतरिक u)। फिर:</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · <b>+</b> पर डबल-टैप · <b>−</b> दबाकर रखें · <b>Scale</b> ज़ूम इन / आउट दबाकर रखें · दो उंगलियों से <b>पिंच</b></size>
+graph.line3=<size=92%><b>Trans</b> → {0} | <b>+</b> पर डबल-टैप | <b>−</b> दबाकर रखें | <b>Scale</b> ज़ूम इन / आउट दबाकर रखें | दो उंगलियों से <b>पिंच</b></size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
 graph.param_a=A (लंबवत स्केल)
 graph.param_k=k (क्षैतिज स्केल)
@@ -93,9 +93,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=पूरा गेम अनलॉक करें
 paywall.body=आपके पास {0} मुफ़्त लेवल हैं। एक बार की खरीद से सभी {1} लेवल खुल जाते हैं: AP कैलकुलस BC और फ़िज़िक्स C, एयरोस्पेस, अर्थशास्त्र, ट्रांसफ़ॉर्म, Big O, चार फ़ाइनल बॉस — और आगे जुड़ने वाले सभी लेवल।
-paywall.promise=एक बार की खरीद · कोई विज्ञापन नहीं · कोई सदस्यता नहीं
+paywall.promise=एक बार की खरीद | कोई विज्ञापन नहीं | कोई सदस्यता नहीं
 paywall.buy=सभी लेवल अनलॉक करें
-paywall.buy_price=सभी लेवल अनलॉक करें · {0}
+paywall.buy_price=सभी लेवल अनलॉक करें | {0}
 paywall.restore=खरीदारी बहाल करें
 paywall.not_now=अभी नहीं
 paywall.status.connecting=स्टोर से कनेक्ट हो रहा है…

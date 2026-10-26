@@ -7,7 +7,9 @@ using UnityEngine;
 // Entitlements — single source of truth for "does this player own the full game?"
 // -----------------------------------------------------------------------------
 // Sources (any one unlocks; see LevelAccessPolicy.ResolveHasFullGame):
-//   1. Platform: desktop / non-store builds are always unlocked.
+//   1. Platform: desktop / non-store builds (Steam premium) are always unlocked, Plus features included.
+//   1b. First Principles Plus (auto-renewable subscription, monthly / yearly) unlocks every level plus
+//       unlimited hints and the daily-streak shield while active. Full Game buyers keep every level forever.
 //   2. Store: Unity IAP (StoreKit 2 / Play Billing) reports the non-consumable as owned
 //      at startup (FetchPurchases), after a purchase, or after Restore Purchases.
 //   3. Local cache: a device-bound token in PlayerPrefs so the game opens unlocked
@@ -40,8 +42,10 @@ public enum PurchaseOutcome
 public interface IEntitlementStore
 {
     void Connect();
-    string LocalizedPrice { get; }
-    void PurchaseFullGame();
+    /// <summary>Localized store price for <paramref name="productId"/> or null until the store answers.</summary>
+    string PriceFor(string productId);
+    bool IsAvailable(string productId);
+    void Purchase(string productId);
     void Restore(Action<bool, string> onDone);
 }
 
@@ -52,11 +56,16 @@ public static class Entitlements
     const string GrandfatherKey = "fp_ent_legacy";
     const string EvaluatedMarkerKey = "fp_ent_seen";
     const string CacheSalt = "FirstPrinciples.Entitlements.v1";
+    const string PlusUntilKey = "fp_ent_plus_until";
+    const string PlusTokenKey = "fp_ent_plus_tok";
+    /// <summary>Offline grace when the store did not report an expiry (renewals re-confirm on every launch).</summary>
+    const int PlusFallbackGraceDays = 3;
 
     static bool _initialized;
     static bool _hadLegacyPrefsAtBoot;
     static bool _purchasedOrCached;
     static bool _grandfathered;
+    static long _plusUntilUnix;
     static IEntitlementStore _store;
 
     public static EntitlementPlatformMode Mode { get; private set; } = EntitlementPlatformMode.EditorGated;
@@ -76,13 +85,59 @@ public static class Entitlements
 #if FP_UNLOCK_ALL
             return true;
 #else
-            return LevelAccessPolicy.ResolveHasFullGame(Mode, DebugOverride, _purchasedOrCached, _grandfathered);
+            return LevelAccessPolicy.ResolveHasFullGame(Mode, DebugOverride, _purchasedOrCached || PlusActiveRaw, _grandfathered);
 #endif
         }
     }
 
-    /// <summary>Localized store price (e.g. "$4.99", "₩6,600") or null until the store answers.</summary>
-    public static string LocalizedPrice => _store?.LocalizedPrice;
+    /// <summary>The one-time Full Game is owned (purchase or grandfathered) — independent of Plus.</summary>
+    public static bool OwnsFullGameOutright
+    {
+        get
+        {
+            EnsureInitialized();
+            return Mode == EntitlementPlatformMode.AlwaysUnlocked || _purchasedOrCached || _grandfathered || DebugOverride == true;
+        }
+    }
+
+    /// <summary>
+    /// First Principles Plus features (unlimited hints, daily streak shield). True while a Plus subscription is
+    /// active, and on premium desktop builds (Steam), which include everything.
+    /// </summary>
+    public static bool HasPlus
+    {
+        get
+        {
+            EnsureInitialized();
+#if FP_UNLOCK_ALL
+            return true;
+#else
+            if (DebugOverride.HasValue)
+                return DebugOverride.Value;
+            return Mode == EntitlementPlatformMode.AlwaysUnlocked || PlusActiveRaw;
+#endif
+        }
+    }
+
+    /// <summary>A store subscription is active (not counting desktop premium).</summary>
+    public static bool HasPlusSubscription
+    {
+        get
+        {
+            EnsureInitialized();
+            return PlusActiveRaw;
+        }
+    }
+
+    static bool PlusActiveRaw => _plusUntilUnix > DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+    /// <summary>Localized store price of the Full Game (e.g. "$4.99", "₩6,600") or null until the store answers.</summary>
+    public static string LocalizedPrice => _store?.PriceFor(LevelAccessPolicy.FullGameProductId);
+
+    public static string PriceFor(string productId) => _store?.PriceFor(productId);
+
+    public static bool IsProductAvailable(string productId) =>
+        _store != null && Availability == StoreAvailability.Ready && _store.IsAvailable(productId);
 
     public static bool CanPurchase => Availability == StoreAvailability.Ready && !HasFullGame;
 
@@ -129,6 +184,7 @@ public static class Entitlements
             gateStandalone);
 
         _purchasedOrCached = PlayerPrefs.GetString(CacheKey, "") == ExpectedCacheToken();
+        _plusUntilUnix = ReadPlusCache();
 
         bool evaluated = PlayerPrefs.GetInt(EvaluatedMarkerKey, 0) == 1;
         if (LevelAccessPolicy.ShouldGrandfather(Application.isEditor, evaluated, _hadLegacyPrefsAtBoot))
@@ -186,6 +242,53 @@ public static class Entitlements
         RaiseChanged();
     }
 
+    /// <summary>The store reports an active Plus subscription. <paramref name="expiresUtc"/> null = unknown (short grace).</summary>
+    internal static void GrantPlus(DateTime? expiresUtc)
+    {
+        long until = expiresUtc.HasValue && expiresUtc.Value > DateTime.UtcNow
+            ? new DateTimeOffset(DateTime.SpecifyKind(expiresUtc.Value, DateTimeKind.Utc)).ToUnixTimeSeconds()
+            : DateTimeOffset.UtcNow.AddDays(PlusFallbackGraceDays).ToUnixTimeSeconds();
+        // Never shorten a known later expiry because one source lacked a date.
+        if (!expiresUtc.HasValue && until < _plusUntilUnix)
+            until = _plusUntilUnix;
+        bool before = PlusActiveRaw;
+        _plusUntilUnix = until;
+        WritePlusCache(until);
+        if (!before)
+            Debug.Log("Entitlements: Plus active.");
+        RaiseChanged();
+    }
+
+    /// <summary>The store says no Plus subscription is active for this account (expired / cancelled / refunded).</summary>
+    internal static void RevokePlus()
+    {
+        if (_plusUntilUnix == 0)
+            return;
+        _plusUntilUnix = 0;
+        PlayerPrefs.DeleteKey(PlusUntilKey);
+        PlayerPrefs.DeleteKey(PlusTokenKey);
+        PlayerPrefs.Save();
+        RaiseChanged();
+    }
+
+    static long ReadPlusCache()
+    {
+        string raw = PlayerPrefs.GetString(PlusUntilKey, "");
+        if (!long.TryParse(raw, out long until))
+            return 0;
+        return PlayerPrefs.GetString(PlusTokenKey, "") == CacheTokenFor(SystemInfo.deviceUniqueIdentifier + "|plus|" + raw)
+            ? until
+            : 0;
+    }
+
+    static void WritePlusCache(long until)
+    {
+        string raw = until.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        PlayerPrefs.SetString(PlusUntilKey, raw);
+        PlayerPrefs.SetString(PlusTokenKey, CacheTokenFor(SystemInfo.deviceUniqueIdentifier + "|plus|" + raw));
+        PlayerPrefs.Save();
+    }
+
     internal static void ReportPurchase(PurchaseOutcome outcome, string message)
     {
         PurchaseFinished?.Invoke(outcome, message);
@@ -208,7 +311,29 @@ public static class Entitlements
             ReportPurchase(PurchaseOutcome.Failed, "store_unavailable");
             return;
         }
-        _store.PurchaseFullGame();
+        _store.Purchase(LevelAccessPolicy.FullGameProductId);
+    }
+
+    /// <summary>Buy any catalog product (Full Game or a Plus plan).</summary>
+    public static void Buy(string productId)
+    {
+        EnsureInitialized();
+        if (productId == LevelAccessPolicy.FullGameProductId)
+        {
+            BuyFullGame();
+            return;
+        }
+        if (HasPlusSubscription)
+        {
+            ReportPurchase(PurchaseOutcome.Succeeded, null);
+            return;
+        }
+        if (_store == null || Availability != StoreAvailability.Ready || !_store.IsAvailable(productId))
+        {
+            ReportPurchase(PurchaseOutcome.Failed, "store_unavailable");
+            return;
+        }
+        _store.Purchase(productId);
     }
 
     /// <summary>Restore Purchases (required by App Review for non-consumables).</summary>
@@ -261,13 +386,27 @@ public static class Entitlements
         }
     }
 
+    /// <summary>QA screenshots (development builds only): use a simulated store that reports prices.</summary>
+    public static void InstallQaStore(IEntitlementStore store)
+    {
+        if (!Application.isEditor && !Debug.isDebugBuild)
+            return;
+        EnsureInitialized();
+        _store = store;
+        Availability = StoreAvailability.Ready;
+        RaiseChanged();
+    }
+
     /// <summary>Forget the cached purchase + grandfather flag (debug / QA). The store re-grants on next fetch if owned.</summary>
     public static void ClearLocalCacheForTesting()
     {
         PlayerPrefs.DeleteKey(CacheKey);
         PlayerPrefs.DeleteKey(GrandfatherKey);
         PlayerPrefs.DeleteKey(EvaluatedMarkerKey);
+        PlayerPrefs.DeleteKey(PlusUntilKey);
+        PlayerPrefs.DeleteKey(PlusTokenKey);
         PlayerPrefs.Save();
+        _plusUntilUnix = 0;
         _purchasedOrCached = false;
         _grandfathered = false;
         RaiseChanged();

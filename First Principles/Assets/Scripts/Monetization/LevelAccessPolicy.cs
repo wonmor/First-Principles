@@ -38,6 +38,15 @@ public static class LevelAccessPolicy
     /// <summary>Store product id (identical on App Store Connect and Google Play Console).</summary>
     public const string FullGameProductId = "firstprinciples_full_unlock";
 
+    /// <summary>First Principles Plus, monthly auto-renewable subscription (same id on App Store and Google Play).</summary>
+    public const string PlusMonthlyProductId = "firstprinciples_plus_monthly";
+
+    /// <summary>First Principles Plus, yearly auto-renewable subscription.</summary>
+    public const string PlusYearlyProductId = "firstprinciples_plus_yearly";
+
+    public static bool IsPlusProduct(string productId) =>
+        productId == PlusMonthlyProductId || productId == PlusYearlyProductId;
+
     /// <summary>Inclusive last free level index (0..13 = Core &amp; series + Multivar &amp; integration).</summary>
     public const int FreeLevelLastIndexInclusive = 13;
 

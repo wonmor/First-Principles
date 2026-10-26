@@ -14,12 +14,12 @@ ui.move=حرکت
 ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(کی بورڈ: تیر / اسپیس)</color></size>
 hud.stage=اسٹیج
 graph.label_fu=f(u) =
-graph.placeholder=x^2 + sin(x) · ln(x) جب x>0 · min(x,3)...
+graph.placeholder=x^2 + sin(x)*ln(x) جب x>0 | min(x,3)...
 graph.status_enter=Enter / گراف کے لیے باہر تھپتھپائیں
 graph.status_graphed=<color=#8fd9b3>گراف مکمل</color>
 graph.line1=<b>گرافنگ کیلکولیٹر موڈ</b>
 graph.line2=<size=88%><color=#c4d0e8><b>f(u)</b> نیچے لکھیں (باکس میں متغیر <b>x</b> = اندرونی u)۔ پھر:</color></size>
-graph.line3=<size=92%><b>Trans</b> → {0} · <b>+</b> پر ڈبل-تھپتھی · <b>−</b> دبائے رکھیں · <b>Scale</b> زوم اندر / باہر دبائے رکھیں · دو انگلیوں سے <b>پنچ</b></size>
+graph.line3=<size=92%><b>Trans</b> → {0} | <b>+</b> پر ڈبل-تھپتھی | <b>−</b> دبائے رکھیں | <b>Scale</b> زوم اندر / باہر دبائے رکھیں | دو انگلیوں سے <b>پنچ</b></size>
 graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
 graph.param_a=A (عمودی پیمانہ)
 graph.param_k=k (افقی پیمانہ)
@@ -93,9 +93,9 @@ level.58=Big O: O(2ⁿ) — exponential (base 2)
 # Paywall / full-game unlock (Monetization/PaywallOverlay.cs)
 paywall.title=مکمل گیم ان لاک کریں
 paywall.body=آپ کے پاس {0} مفت لیولز ہیں۔ ایک ہی خریداری سے تمام {1} لیولز کھل جاتے ہیں: AP کیلکولس BC اور فزکس C، ایرو اسپیس، معاشیات، ٹرانسفارمز، Big O، چار فائنل باس — اور آئندہ شامل ہونے والا ہر لیول۔
-paywall.promise=ایک بار کی خریداری · کوئی اشتہار نہیں · کوئی سبسکرپشن نہیں
+paywall.promise=ایک بار کی خریداری | کوئی اشتہار نہیں | کوئی سبسکرپشن نہیں
 paywall.buy=تمام لیولز ان لاک کریں
-paywall.buy_price=تمام لیولز ان لاک کریں · {0}
+paywall.buy_price=تمام لیولز ان لاک کریں | {0}
 paywall.restore=خریداریاں بحال کریں
 paywall.not_now=ابھی نہیں
 paywall.status.connecting=اسٹور سے رابطہ ہو رہا ہے…

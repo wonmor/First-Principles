@@ -24,7 +24,7 @@ public class LevelSelectFallingSymbolsBackdrop : MonoBehaviour
 
     private static readonly string[] SymbolPool =
     {
-        "+", "−", "×", "÷", "=", "x", "y", "π", "∑", "∫", "√", "±", "%", "∞", "Δ", "θ", "·", "/", "(", ")", "[", "]",
+        "+", "−", "×", "÷", "=", "x", "y", "π", "∑", "∫", "√", "±", "%", "∞", "Δ", "θ", "/", "(", ")", "[", "]",
     };
 
     private readonly List<GlyphEntry> _glyphs = new List<GlyphEntry>();

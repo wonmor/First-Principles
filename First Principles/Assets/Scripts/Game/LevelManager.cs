@@ -112,6 +112,25 @@ public class LevelManager : MonoBehaviour
     /// <summary>Graphing calculator mode: transforms, scale zoom, pinch — no platformer.</summary>
     private bool graphCalculatorMode;
 
+    // --- Run tracking (stars / level-complete card) ---
+    private int fallsThisLevel;
+    private float levelStartTime;
+    private bool levelCompleteShowing;
+    private LevelRunDirector runDirector;
+
+    public int CurrentLevelIndex => currentLevelIndex;
+    public int CurrentScore => gameplayScore;
+    public int FallsThisLevel => fallsThisLevel;
+    public bool IsGraphCalculatorMode => graphCalculatorMode;
+    public PlayerControllerUI2D Player => playerController;
+    public RectTransform ObstaclesRoot => obstaclesRoot;
+    public RectTransform CartesianPlane => cartesianPlaneRect;
+    public LevelDefinition CurrentDefinition =>
+        currentLevelIndex >= 0 && currentLevelIndex < levels.Count ? levels[currentLevelIndex] : null;
+
+    /// <summary>Raised when a level (re)starts: (levelIndex, isRestartAfterFall).</summary>
+    public event Action<int, bool> LevelStarted;
+
     private void Awake()
     {
         // Keep things single-scene: if another instance somehow appears, destroy it.
@@ -187,7 +206,7 @@ public class LevelManager : MonoBehaviour
         {
             storyText.text = TmpLatex.Process(LocalizationManager.Get("graph.calculator_intro",
                 "<b>Graphing calculator mode</b>\n" +
-                "<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> · <b>pinch</b> zoom the window.</size>"));
+                "<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> / <b>pinch</b> zoom the window.</size>"));
             LocalizationManager.ApplyTextDirection(storyText);
             return;
         }
@@ -276,7 +295,13 @@ public class LevelManager : MonoBehaviour
         CreateStoryTextIfNeeded();
         CreateGameplayHudIfNeeded();
         if (!graphCalculatorMode)
+        {
             HideLegacyGraphTuningButtons();
+            runDirector = GetComponent<LevelRunDirector>();
+            if (runDirector == null)
+                runDirector = gameObject.AddComponent<LevelRunDirector>();
+            runDirector.Bind(this);
+        }
         EnsureRiemannRenderer();
         var mainCanvas = FindAnyObjectByType<Canvas>();
         // Always create the layer on phones/tablets; disable in graphing calculator so a later level load
@@ -2862,10 +2887,19 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>Loads a level by index, applies theme, fades story, rebuilds collision world.</summary>
-    private void LoadLevel(int index)
+    private void LoadLevel(int index) => LoadLevel(index, false);
+
+    private void LoadLevel(int index, bool isRestartAfterFall)
     {
         if (levels.Count == 0 || functionPlotter == null)
             return;
+
+        levelCompleteShowing = false;
+        if (!isRestartAfterFall || index != currentLevelIndex)
+        {
+            fallsThisLevel = 0;
+            levelStartTime = Time.time;
+        }
 
         if (!graphCalculatorMode)
             ResetGameplayScoreForNewLevel();
@@ -2886,6 +2920,7 @@ public class LevelManager : MonoBehaviour
         if (levelFlowRoutine != null)
             StopCoroutine(levelFlowRoutine);
         levelFlowRoutine = StartCoroutine(LoadLevelFullRoutine(def));
+        LevelStarted?.Invoke(currentLevelIndex, isRestartAfterFall);
     }
 
     /// <summary>
@@ -3501,6 +3536,7 @@ public class LevelManager : MonoBehaviour
             {
                 var popColor = nextStageIndex < stagePopColors.Count ? stagePopColors[nextStageIndex] : derivRenderer.color;
                 popAnimator.Pop(popColor);
+                GameFeel.RaiseStagePop(popColor);
                 derivRenderer.color = popColor;
                 nextStageIndex++;
             }
@@ -3513,9 +3549,10 @@ public class LevelManager : MonoBehaviour
 
     private void RestartCurrentLevel()
     {
-        if (isRestarting)
+        if (isRestarting || levelCompleteShowing)
             return;
 
+        fallsThisLevel++;
         StartCoroutine(RestartRoutine());
     }
 
@@ -3525,11 +3562,44 @@ public class LevelManager : MonoBehaviour
         yield return new WaitForSeconds(restartDelaySeconds);
         skipNextStageIntro = true;
         skipSpawnSpotlight = true;
-        LoadLevel(currentLevelIndex);
+        LoadLevel(currentLevelIndex, true);
     }
 
     private void AdvanceLevel()
     {
+        if (levels.Count == 0 || levelCompleteShowing)
+            return;
+
+        levelCompleteShowing = true;
+        if (playerController != null)
+            playerController.SetInputLocked(true);
+        var result = new RunResult(currentLevelIndex, gameplayScore, fallsThisLevel,
+            Time.time - levelStartTime, runDirector != null ? runDirector.HintsUsedThisLevel : 0);
+        var daily = DailyChallengeSession.Active;
+        var outcome = ProgressStore.RecordClear(result, daily);
+        var canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+        {
+            GoToNextLevel();
+            return;
+        }
+        LevelCompleteOverlay.Open(canvas.transform, result, outcome, daily,
+            onNext: GoToNextLevel,
+            onReplay: () =>
+            {
+                skipNextStageIntro = true;
+                LoadLevel(currentLevelIndex);
+            },
+            onLevels: () =>
+            {
+                DailyChallengeSession.End();
+                SceneTransitionHost.LoadSingleScene("LevelSelect");
+            });
+    }
+
+    private void GoToNextLevel()
+    {
+        DailyChallengeSession.End();
         if (levels.Count == 0)
             return;
 
