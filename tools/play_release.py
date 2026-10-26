@@ -90,7 +90,7 @@ def main():
     r = call(API + f"/onetimeproducts/firstprinciples_full_unlock?allowMissing=true&regionsVersion.version={rv}"
              "&updateMask=listings,purchaseOptions", "PATCH", body)
     print("full game product", r.get("productId") or r)
-    r = call(API + "/onetimeproducts/firstprinciples_full_unlock/purchaseOptions:batchUpdateStates", "POST",
+    r = call(API + "/oneTimeProducts/firstprinciples_full_unlock/purchaseOptions:batchUpdateStates", "POST",
              {"requests": [{"activatePurchaseOptionRequest": {"packageName": PKG,
                                                               "productId": "firstprinciples_full_unlock",
                                                               "purchaseOptionId": "buy"}}]})

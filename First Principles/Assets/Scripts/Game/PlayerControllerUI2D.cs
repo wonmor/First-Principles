@@ -31,7 +31,7 @@ public class PlayerControllerUI2D : MonoBehaviour
     [Tooltip("A jump pressed this long before landing still fires on touchdown.")]
     [SerializeField] private float jumpBufferSeconds = 0.13f;
     [Tooltip("Releasing jump while rising cuts the upward speed (short hop). Holding gives the full, level-tuned arc.")]
-    [Range(0.2f, 1f)] [SerializeField] private float jumpCutMultiplier = 0.5f;
+    [Range(0.2f, 1f)] [SerializeField] private float jumpCutMultiplier = 0.6f;
     [Tooltip("Gravity multiplier near the apex while jump is held (a touch of hang time).")]
     [Range(0.3f, 1f)] [SerializeField] private float apexGravityMultiplier = 0.7f;
     [SerializeField] private float apexSpeedBand = 1.6f;
