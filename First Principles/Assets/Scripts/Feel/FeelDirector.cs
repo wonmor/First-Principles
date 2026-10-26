@@ -38,9 +38,6 @@ public class FeelDirector : MonoBehaviour
     readonly List<AudioSource> _voices = new List<AudioSource>();
     int _nextVoice;
 
-    RectTransform _shakeTarget;
-    Vector2 _shakeBase;
-    Vector2 _lastOffset;
     float _shakeTime;
     float _shakeDuration;
     float _shakeAmp;
@@ -166,39 +163,26 @@ public class FeelDirector : MonoBehaviour
 
     // ------------------------------------------------------------------ shake / hit-stop / flash
 
-    /// <summary>Shake the gameplay plane (or a given rect) for <paramref name="duration"/> seconds.</summary>
-    public void Shake(float duration, float amplitudePx, RectTransform target = null)
+    /// <summary>Current shake offset in UI pixels; LevelManager adds it to the fitted Cartesian plane position.</summary>
+    public static Vector2 ShakeOffset { get; private set; }
+
+    /// <summary>Shake the gameplay plane for <paramref name="duration"/> seconds.</summary>
+    public void Shake(float duration, float amplitudePx)
     {
-        if (target == null)
-            target = FindShakeTarget();
-        if (target == null)
-            return;
-        if (_shakeTarget != target || _shakeTime <= 0f)
+        if (_shakeTime <= 0f)
         {
-            RestoreShake();
-            _shakeTarget = target;
-            _shakeBase = target.anchoredPosition;
-            _lastOffset = Vector2.zero;
+            _shakeDuration = duration;
+            _shakeAmp = amplitudePx;
         }
-        _shakeDuration = Mathf.Max(_shakeTime > 0f ? _shakeDuration : 0f, duration);
+        else
+        {
+            _shakeDuration = Mathf.Max(_shakeTime, duration);
+            _shakeAmp = Mathf.Max(_shakeAmp * (_shakeTime / Mathf.Max(0.001f, _shakeDuration)), amplitudePx);
+        }
         _shakeTime = _shakeDuration;
-        _shakeAmp = Mathf.Max(_shakeTime > 0f ? _shakeAmp : 0f, amplitudePx);
     }
 
-    static RectTransform FindShakeTarget()
-    {
-        var go = GameObject.Find("Cartesian Plane");
-        return go != null ? go.GetComponent<RectTransform>() : null;
-    }
-
-    void RestoreShake()
-    {
-        if (_shakeTarget != null)
-            _shakeTarget.anchoredPosition = _shakeTarget.anchoredPosition - _lastOffset;
-        _lastOffset = Vector2.zero;
-    }
-
-    void LateUpdate()
+    void Update()
     {
         if (_hitStopUntil > 0f && Time.unscaledTime >= _hitStopUntil)
         {
@@ -206,29 +190,22 @@ public class FeelDirector : MonoBehaviour
             Time.timeScale = _savedTimeScale;
         }
 
-        if (_shakeTime <= 0f || _shakeTarget == null)
-            return;
-
-        _shakeTime -= Time.unscaledDeltaTime;
-        // Someone else moved the plane (layout refit) — adopt it as the new base.
-        Vector2 cur = _shakeTarget.anchoredPosition - _lastOffset;
-        _shakeBase = cur;
-
         if (_shakeTime <= 0f)
         {
-            _shakeTarget.anchoredPosition = _shakeBase;
-            _lastOffset = Vector2.zero;
-            _shakeTime = 0f;
-            _shakeAmp = 0f;
+            ShakeOffset = Vector2.zero;
             return;
         }
-
+        _shakeTime -= Time.unscaledDeltaTime;
+        if (_shakeTime <= 0f)
+        {
+            _shakeTime = 0f;
+            ShakeOffset = Vector2.zero;
+            return;
+        }
         float k = _shakeTime / Mathf.Max(0.001f, _shakeDuration);
         float amp = _shakeAmp * k * k;
         float t = Time.unscaledTime * 55f;
-        var off = new Vector2(Mathf.PerlinNoise(t, 0.3f) - 0.5f, Mathf.PerlinNoise(0.7f, t) - 0.5f) * 2f * amp;
-        _shakeTarget.anchoredPosition = _shakeBase + off;
-        _lastOffset = off;
+        ShakeOffset = new Vector2(Mathf.PerlinNoise(t, 0.3f) - 0.5f, Mathf.PerlinNoise(0.7f, t) - 0.5f) * 2f * amp;
     }
 
     public void HitStop(float seconds)

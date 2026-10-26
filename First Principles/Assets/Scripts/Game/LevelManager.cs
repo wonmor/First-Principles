@@ -378,12 +378,14 @@ public class LevelManager : MonoBehaviour
         cartesianPlaneRect.anchorMax = new Vector2(0.5f, 0.5f);
         cartesianPlaneRect.pivot = new Vector2(0.5f, 0.5f);
 
+        // Screen shake (FeelDirector) rides on top of the fitted position.
+        Vector2 targetPos = new Vector2(0f, yNudge) + FeelDirector.ShakeOffset;
         if ((cartesianPlaneRect.sizeDelta - newSize).sqrMagnitude < 0.25f &&
-            Mathf.Abs(cartesianPlaneRect.anchoredPosition.y - yNudge) < 0.5f)
+            (cartesianPlaneRect.anchoredPosition - targetPos).sqrMagnitude < 0.01f)
             return;
 
         cartesianPlaneRect.sizeDelta = newSize;
-        cartesianPlaneRect.anchoredPosition = new Vector2(0f, yNudge);
+        cartesianPlaneRect.anchoredPosition = targetPos;
     }
 
     /// <summary>
