@@ -115,9 +115,29 @@ public static class BuildHelper
         PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, IosBundleId);
         PlayerSettings.iOS.appleDeveloperTeamID = AppleTeamId;
         PlayerSettings.iOS.appleEnableAutomaticSigning = true;
+        PlayerSettings.iOS.sdkVersion = iOSSdkVersion.DeviceSDK;
         SetSteamDefine(NamedBuildTarget.iOS, false);
         EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
         Run(BuildTarget.iOS, "../Builds/iOS", BuildOptions.None);
+    }
+
+    /// <summary>Development iOS Simulator build for automated QA screenshots (QaShots).</summary>
+    [MenuItem("Build/iOS Simulator (Dev, QA screenshots)")]
+    public static void BuildIOSSimulatorDev()
+    {
+        ApplyCommonPlayerSettings();
+        PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, IosBundleId);
+        PlayerSettings.iOS.sdkVersion = iOSSdkVersion.SimulatorSDK;
+        SetSteamDefine(NamedBuildTarget.iOS, false);
+        EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
+        try
+        {
+            Run(BuildTarget.iOS, "../Builds/iOS-Sim", BuildOptions.Development);
+        }
+        finally
+        {
+            PlayerSettings.iOS.sdkVersion = iOSSdkVersion.DeviceSDK;
+        }
     }
 
     static void SetSteamDefine(NamedBuildTarget target, bool on)

@@ -6,7 +6,7 @@ permalink: /privacy-policy/
 
 # Privacy Policy — First Principles
 
-**Last updated:** March 22, 2026
+**Last updated:** October 26, 2026
 
 *This page mirrors the repository root [`privacy-policy.md`](../privacy-policy.md). Update both when the policy changes.*
 
@@ -30,6 +30,10 @@ The App may save **non-sensitive preferences** using the platform’s local stor
 - **Optional cosmetic settings** (e.g. player glyph), if you change them in the App
 
 This data **stays on your device** unless the operating system backs it up according to **your** phone or tablet settings (e.g. iCloud or Google backup). We do not operate a login system or cloud sync for this data in the App as shipped in this repository.
+
+Since version 1.3 the App also keeps your **game progress** on the device in a small file (`progress.json`): stars and best scores per level, play statistics (for example jumps and falls), your daily-challenge streak, hints used today, achievements and whether you finished the tutorial. It contains no personal information. On the **Steam** edition this file is also synced through **Steam Cloud** under Valve's terms so your progress follows your Steam account.
+
+**Purchases and subscriptions** (the one-time Full Game and the optional First Principles Plus subscription) are processed entirely by **Apple** or **Google**. We never see your payment details; the App only receives a confirmation from the store that a purchase or subscription is active, and caches that confirmation on the device. You manage or cancel subscriptions in your App Store or Google Play account settings.
 
 **Deleting the App** usually removes local app data; use your device settings if you want to clear app data without uninstalling (where the OS allows).
 

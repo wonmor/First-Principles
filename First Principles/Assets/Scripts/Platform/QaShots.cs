@@ -26,7 +26,9 @@ public class QaShots : MonoBehaviour
         {
             if (!Debug.isDebugBuild && !Application.isEditor)
                 return false;
-            return Array.IndexOf(Environment.GetCommandLineArgs(), "-fpShots") >= 0;
+            // Desktop: -fpShots <dir>. iOS Simulator: SIMCTL_CHILD_FP_SHOTS=1 xcrun simctl launch …
+            return Array.IndexOf(Environment.GetCommandLineArgs(), "-fpShots") >= 0
+                   || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("FP_SHOTS"));
         }
     }
 
@@ -55,7 +57,7 @@ public class QaShots : MonoBehaviour
     {
         Application.runInBackground = true;
         _dir = Arg("-fpShots") ?? Path.Combine(Application.persistentDataPath, "qa-shots");
-        int.TryParse(Arg("-fpShotScale") ?? "2", out _scale);
+        int.TryParse(Arg("-fpShotScale") ?? Environment.GetEnvironmentVariable("FP_SHOT_SCALE") ?? "1", out _scale);
         Directory.CreateDirectory(_dir);
         Debug.Log($"QaShots: writing to {_dir} at {Screen.width}x{Screen.height} x{_scale}");
 
@@ -141,8 +143,10 @@ public class QaShots : MonoBehaviour
     IEnumerator Shot(string name)
     {
         yield return new WaitForEndOfFrame();
-        string path = Path.Combine(_dir, $"{++_n:00}-{name}.png");
-        ScreenCapture.CaptureScreenshot(path, Mathf.Max(1, _scale));
+        string file = $"{++_n:00}-{name}.png";
+        string path = Path.Combine(_dir, file);
+        // Mobile players treat the path as relative to persistentDataPath.
+        ScreenCapture.CaptureScreenshot(Application.isMobilePlatform ? "qa-shots/" + file : path, Mathf.Max(1, _scale));
         Debug.Log($"QaShots: {path}");
         yield return new WaitForSecondsRealtime(0.4f);
     }
