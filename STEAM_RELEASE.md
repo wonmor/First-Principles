@@ -93,6 +93,21 @@ xcrun stapler staple "Builds/Steam/macOS/First Principles.app"
   `STEAM_APPID=... STEAM_DEPOT_WIN=... STEAM_DEPOT_MAC=... STEAM_USER=... tools/steam/upload.sh`
   (downloads steamcmd for macOS on first run; asks for the password and Steam Guard code).
 
+## 2c. Status on 2026-10-27
+
+- The app exists and is **released** (since 17 Oct, $4.99, package 1593154):
+  "First Principles: A Calculus Platformer", **App ID 4570070** (now in `SteamBridge.cs` and
+  `First Principles/steam_appid.txt`). Live on `default`: BuildID 25466608 "v1.2" (Windows only).
+- Depots: **4570071** Windows (existing, in the store package), **4570072** macOS (new, only in
+  the Developer Comp package 1593152 so far, not in the store package).
+- Saved but NOT yet published in Steamworks (Publish tab): macOS depot, Steam Cloud (1 MB / 4
+  files), launch option 1 `First Principles.app` (macOS, beta branch only), stats `stars`,
+  `levels_cleared`, `daily_best_streak` (INT, client). Achievements are not created yet (need
+  256x256 icons; they become visible to players as soon as they are published).
+- No `beta` branch yet: create it in SteamPipe > Builds ("Create new app branch", name `beta`,
+  set a password so it stays private) before running `tools/steam/upload.sh`.
+- Upload: `STEAM_APPID=4570070 STEAM_DEPOT_WIN=4570071 STEAM_DEPOT_MAC=4570072 STEAM_USER=<login> tools/steam/upload.sh`
+
 ## 3. Upload with steamcmd (ContentBuilder)
 
 Create `steam/app_build_<appid>.vdf`:

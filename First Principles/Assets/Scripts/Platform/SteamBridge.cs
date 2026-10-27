@@ -15,13 +15,13 @@ using Steamworks;
 //   * Steam Cloud: progress.json is written with ISteamRemoteStorage on every save and
 //     merged (best-of-both) from the cloud copy at startup.
 // The Steam build is premium: Entitlements treats standalone builds as fully unlocked.
-// Set SteamAppId once the store app exists (0 = skip the restart-through-Steam check).
+// SteamAppId 4570070 = "First Principles: A Calculus Platformer" (0 would skip RestartAppIfNecessary).
 // -----------------------------------------------------------------------------
 
 public static class SteamBridge
 {
     /// <summary>Steam App ID from Steamworks (owner fills in). 0 = development: no RestartAppIfNecessary.</summary>
-    public const uint SteamAppId = 0;
+    public const uint SteamAppId = 4570070;
 
     public static bool IsActive { get; private set; }
 
