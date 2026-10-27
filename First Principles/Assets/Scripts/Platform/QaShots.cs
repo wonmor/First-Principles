@@ -75,6 +75,19 @@ public class QaShots : MonoBehaviour
         yield return new WaitForSecondsRealtime(4f);
         yield return Shot("menu");
 
+        var menuCanvas = FindAnyObjectByType<Canvas>();
+        if (menuCanvas != null)
+        {
+            MenuPlayerGlyphPickerOverlay.Open(menuCanvas.transform);
+            yield return new WaitForSecondsRealtime(0.8f);
+            yield return Shot("menu-player-icon");
+            GameObject.Find("MenuPlayerGlyphPickerRoot")?.SetActive(false);
+            MenuTutorialOverlay.Open(menuCanvas.transform);
+            yield return new WaitForSecondsRealtime(0.8f);
+            yield return Shot("menu-how-to-play");
+            GameObject.Find("MenuTutorialOverlayRoot")?.SetActive(false);
+        }
+
         // World map, arriving back from a first clear of level 7 (2 stars): stars pop, the path
         // fills, the Core trial opens (19/18 stars) and the marker hops to level 8.
         var d = ProgressStore.Data;
@@ -97,14 +110,14 @@ public class QaShots : MonoBehaviour
         var canvas = FindAnyObjectByType<Canvas>();
         if (map != null)
         {
-            MapLevelSheet.Open(canvas.transform, 2, ChallengeKind.None, "core", new Color(0.22f, 0.66f, 0.62f), null, null, null, null);
+            MapLevelSheet.Open(canvas.transform, 2, ChallengeKind.None, "core", Bauhaus.Blue, null, null, null, null);
             yield return new WaitForSecondsRealtime(0.8f);
             yield return Shot("level-sheet");
             MapLevelSheet.Close();
 
             map.ScrollToLevel(8, true);
             bool open = map.IsTrialOpenForRegionEnding(8, out string key, out string req);
-            MapLevelSheet.Open(canvas.transform, 8, ChallengeKind.RegionTrial, key, new Color(0.22f, 0.66f, 0.62f), () => open, req, null, null);
+            MapLevelSheet.Open(canvas.transform, 8, ChallengeKind.RegionTrial, key, Bauhaus.Blue, () => open, req, null, null);
             yield return new WaitForSecondsRealtime(0.8f);
             yield return Shot("trial-sheet");
             MapLevelSheet.Close();
@@ -140,10 +153,20 @@ public class QaShots : MonoBehaviour
         yield return Shot("paywall");
         PaywallOverlay.Close();
 
+        PaywallOverlay.Open(canvas.transform, null, PaywallOverlay.Reason.Hints);
+        yield return new WaitForSecondsRealtime(1.2f);
+        yield return Shot("paywall-plus");
+        PaywallOverlay.Close();
+
         AchievementsOverlay.Open(canvas.transform);
         yield return new WaitForSecondsRealtime(1f);
         yield return Shot("achievements");
         AchievementsOverlay.Close();
+
+        MathArticlesOverlay.Open(canvas.transform);
+        yield return new WaitForSecondsRealtime(1f);
+        yield return Shot("math-tips");
+        GameObject.Find("MathArticlesOverlayRoot")?.SetActive(false);
 
         // Gameplay: today's daily challenge on a free level, with autopilot.
         var spec = ProgressStore.TodaysChallenge();
@@ -162,6 +185,18 @@ public class QaShots : MonoBehaviour
         }
         yield return Shot("gameplay");
         MobileHoldAxis.Clear();
+
+        // Pause sheet (normally opened when focus is lost or a controller unplugs).
+        var pause = typeof(GamepadSupport).GetMethod("PauseMatch", BindingFlags.Static | BindingFlags.NonPublic);
+        var resume = typeof(GamepadSupport).GetMethod("ResumeMatch", BindingFlags.Static | BindingFlags.NonPublic);
+        if (pause != null && resume != null)
+        {
+            pause.Invoke(null, new object[] { LocalizationManager.Get("ui.paused", "Paused") });
+            yield return new WaitForSecondsRealtime(0.6f);
+            yield return Shot("pause");
+            resume.Invoke(null, null);
+            yield return new WaitForSecondsRealtime(0.3f);
+        }
 
         var hint = GameObject.Find("HintButton");
         hint?.GetComponent<Button>()?.onClick.Invoke();
@@ -218,6 +253,23 @@ public class QaShots : MonoBehaviour
             yield return Shot("level-tour-" + step);
             tour.Next();
         }
+
+        // Graphing calculator mode: type an expression, then add f′ and the ∫ area strips.
+        GraphCalculatorSession.RequestEnterFromMenu();
+        SceneManager.LoadScene("Game");
+        yield return new WaitForSecondsRealtime(3f);
+        yield return Shot("calculator");
+        var input = GameObject.Find(GraphCalculatorEquationPanel.EquationRootObjectName)?.GetComponentInChildren<TMPro.TMP_InputField>();
+        if (input != null)
+        {
+            input.text = "sin(x)*x/2";
+            input.onSubmit.Invoke(input.text);
+        }
+        yield return new WaitForSecondsRealtime(0.6f);
+        GameObject.Find("GraphCalcDerivButton")?.GetComponent<Button>()?.onClick.Invoke();
+        GameObject.Find("GraphCalcIntegralButton")?.GetComponent<Button>()?.onClick.Invoke();
+        yield return new WaitForSecondsRealtime(1.5f);
+        yield return Shot("calculator-analysis");
 
         Debug.Log("QaShots: done");
         Application.Quit();

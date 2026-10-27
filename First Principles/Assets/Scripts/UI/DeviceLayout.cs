@@ -16,8 +16,46 @@ public static class DeviceLayout
     private static Rect _lastSafeArea;
     private static Vector2 _lastScreen;
 
+    // --- QA screenshots only ---------------------------------------------------------------
+    // Development desktop builds launched with "-fpDevice phone|tablet" lay the UI out as on a
+    // touch device (on-screen controls, tablet sizing, notch safe area) so batch screenshots
+    // match iPhone / iPad. Release builds ignore the flag.
+    private static int _qaDevice = -1; // 0 = off, 1 = phone, 2 = tablet
+
+    public static int QaDevice
+    {
+        get
+        {
+            if (_qaDevice >= 0)
+                return _qaDevice;
+            _qaDevice = 0;
+            if (!Debug.isDebugBuild || Application.isEditor)
+                return _qaDevice;
+            var a = System.Environment.GetCommandLineArgs();
+            int i = System.Array.IndexOf(a, "-fpDevice");
+            if (i >= 0 && i + 1 < a.Length)
+                _qaDevice = a[i + 1] == "tablet" ? 2 : a[i + 1] == "phone" ? 1 : 0;
+            return _qaDevice;
+        }
+    }
+
+    /// <summary><see cref="Screen.safeArea"/>, or a simulated landscape-iPhone notch inset under <c>-fpDevice phone</c>.</summary>
+    public static Rect SafeArea
+    {
+        get
+        {
+            if (QaDevice != 1)
+                return Screen.safeArea;
+            // iPhone 16 Pro Max landscape: 62 pt each side, 21 pt home indicator (956 x 440 pt).
+            float w = Screen.width, h = Screen.height;
+            float side = w * (62f / 956f), bottom = h * (21f / 440f);
+            return new Rect(side, bottom, w - side * 2f, h - bottom);
+        }
+    }
+
     /// <summary>True when we show on-screen move/jump controls in the Game scene.</summary>
     public static bool PreferOnScreenGameControls =>
+        QaDevice > 0 ||
         Application.isMobilePlatform ||
         SystemInfo.deviceType == DeviceType.Handheld ||
         HasTouchscreenDevice();
@@ -41,6 +79,8 @@ public static class DeviceLayout
     {
         if (!PreferOnScreenGameControls)
             return false;
+        if (QaDevice > 0)
+            return QaDevice == 2;
 
         float dpi = Screen.dpi > 1f ? Screen.dpi : 163f;
         float minPx = Mathf.Min(Screen.width, Screen.height);
@@ -102,7 +142,7 @@ public static class DeviceLayout
         if (rt == null)
             return;
 
-        Rect sa = Screen.safeArea;
+        Rect sa = SafeArea;
         float w = Mathf.Max(1f, Screen.width);
         float h = Mathf.Max(1f, Screen.height);
 
@@ -117,7 +157,7 @@ public static class DeviceLayout
 
     public static bool SafeAreaOrScreenChanged()
     {
-        Rect sa = Screen.safeArea;
+        Rect sa = SafeArea;
         Vector2 s = new Vector2(Screen.width, Screen.height);
         if (sa != _lastSafeArea || s != _lastScreen)
         {
