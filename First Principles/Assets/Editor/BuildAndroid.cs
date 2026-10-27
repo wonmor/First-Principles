@@ -22,8 +22,8 @@ using UnityEngine;
 public static class BuildHelper
 {
     public const string Version = "1.3";
-    public const int IosBuildNumber = 4;
-    public const int AndroidVersionCode = 3;
+    public const int IosBuildNumber = 5;
+    public const int AndroidVersionCode = 4;
     public const string IosBundleId = "com.orchestrsim.FirstPrinciples";
     public const string AndroidPackage = "com.OrchAerospaceandGameGenesis.FirstPrinciples";
     public const string AppleTeamId = "Z64KRUX3W3";

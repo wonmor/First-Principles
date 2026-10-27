@@ -18,6 +18,9 @@ mkdir -p "$OUT"
 grep -v "steam_api.bundle" "$PBX" > "$PBX.tmp" && mv "$PBX.tmp" "$PBX"
 rm -rf "$PROJ_DIR/First Principles/PlugIns/steam_api.bundle"
 
+# Export compliance: the game uses no non-exempt encryption (same as iOS).
+/usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PROJ_DIR/First Principles/Info.plist" 2>/dev/null || true
+
 cat > "$PROJ_DIR/MAS.entitlements" <<'PL'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
