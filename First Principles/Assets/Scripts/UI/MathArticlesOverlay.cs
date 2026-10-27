@@ -45,7 +45,7 @@ public static class MathArticlesOverlay
         EnsureGoldenRatioBackdrop(root.transform);
 
         var dim = root.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.05f, 0.11f, 0.93f);
+        dim.color = Bauhaus.Scrim;
         dim.raycastTarget = true;
 
         void Close()
@@ -67,8 +67,7 @@ public static class MathArticlesOverlay
         ApplySafeAreaToPanel(panelRt, outerMargin: tablet ? 14f : 10f);
 
         var panelBg = panel.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(panelBg);
-        panelBg.color = RuntimeUiPolish.PanelMid;
+        Bauhaus.Panel(panelBg); // card + thick black rule
         RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(3f, -5f), 0.34f);
 
         var closeBtnGo = new GameObject("CloseButton");
@@ -103,7 +102,7 @@ public static class MathArticlesOverlay
         closeButtonTmp.fontSize = UiTypography.Scale(tablet ? 32 : 28);
         closeButtonTmp.fontStyle = FontStyles.Bold;
         closeButtonTmp.alignment = TextAlignmentOptions.Center;
-        closeButtonTmp.color = Color.white;
+        closeButtonTmp.color = Bauhaus.Ink;
         CopyFont(closeButtonTmp);
         closeButtonTmp.fontStyle = FontStyles.Bold;
         LocalizationManager.ApplyTextDirection(closeButtonTmp);
@@ -167,7 +166,7 @@ public static class MathArticlesOverlay
         body.fontSize = UiTypography.Scale(tablet ? 27 : (Screen.height <= 950 ? 22 : 25));
         body.lineSpacing = 4f;
         body.alignment = TextAlignmentOptions.TopLeft;
-        body.color = new Color(0.92f, 0.93f, 0.96f, 1f);
+        body.color = Bauhaus.Ink;
         body.textWrappingMode = TextWrappingModes.Normal;
         body.overflowMode = TextOverflowModes.Overflow;
         body.richText = true;
@@ -184,10 +183,13 @@ public static class MathArticlesOverlay
         root.transform.SetAsLastSibling();
     }
 
+    const bool ShowGoldenBackdrop = false;
+
     /// <summary>Full-screen gold φ / Fibonacci drift behind the dim (first sibling so panel stays on top).</summary>
     private static void EnsureGoldenRatioBackdrop(Transform overlayRoot)
     {
-        if (overlayRoot == null || overlayRoot.Find("GoldenRatioBackdrop") != null)
+        // Bauhaus (1.4): the drifting gold φ backdrop is retired; the sheet sits on a flat scrim.
+        if (!ShowGoldenBackdrop || overlayRoot == null || overlayRoot.Find("GoldenRatioBackdrop") != null)
             return;
 
         var goldenGo = new GameObject("GoldenRatioBackdrop");
@@ -284,7 +286,7 @@ public static class MathArticlesOverlay
 
     private static void ApplySafeAreaToPanel(RectTransform panelRt, float outerMargin)
     {
-        Rect sa = Screen.safeArea;
+        Rect sa = DeviceLayout.SafeArea;
         float w = Mathf.Max(1f, Screen.width);
         float h = Mathf.Max(1f, Screen.height);
         float m = outerMargin;

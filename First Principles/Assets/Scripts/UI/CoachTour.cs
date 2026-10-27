@@ -32,7 +32,7 @@ public sealed class CoachStep
 public class CoachTour : MonoBehaviour
 {
     const string RootName = "CoachTourRoot";
-    static readonly Color Dim = new Color(0.02f, 0.03f, 0.07f, 0.8f);
+    static readonly Color Dim = Bauhaus.Scrim;
 
     List<CoachStep> _steps;
     Action<bool> _onFinish;
@@ -87,42 +87,35 @@ public class CoachTour : MonoBehaviour
         _ring = UiKit.Rect("FocusRing", _root, Vector2.zero, Vector2.zero);
         _ring.pivot = new Vector2(0.5f, 0.5f);
         _ringImg = _ring.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(_ringImg);
-        _ringImg.fillCenter = false;
-        _ringImg.color = UiKit.Gold;
+        _ringImg.sprite = Bauhaus.Frame;
+        _ringImg.type = Image.Type.Sliced;
+        _ringImg.color = Bauhaus.Yellow;
         _ringImg.raycastTarget = false;
 
         bool tablet = DeviceLayout.IsTabletLike();
-        _card = UiKit.Panel(_root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Color(0.11f, 0.13f, 0.2f, 0.98f));
+        _card = UiKit.Panel(_root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Bauhaus.Card);
         _card.pivot = new Vector2(0.5f, 0.5f);
         _card.sizeDelta = new Vector2(tablet ? 900f : 860f, tablet ? 330f : 310f);
-        var accent = UiKit.Rect("Accent", _card, new Vector2(0f, 1f), new Vector2(1f, 1f));
-        accent.pivot = new Vector2(0.5f, 1f);
-        accent.sizeDelta = new Vector2(-40f, 6f);
-        accent.anchoredPosition = new Vector2(0f, -16f);
-        var aimg = accent.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(aimg);
-        aimg.color = UiKit.Gold;
-        aimg.raycastTarget = false;
+        UiKit.Band(_card, Bauhaus.Yellow, 14f);
 
-        var bulb = StarGlyph.Add(_card, "Glyph", StarGlyph.Bulb, UiKit.Gold, new Vector2(44f, 44f));
+        var bulb = StarGlyph.Add(_card, "Glyph", StarGlyph.Bulb, Bauhaus.Ink, new Vector2(44f, 44f));
         bulb.rectTransform.anchorMin = bulb.rectTransform.anchorMax = new Vector2(0f, 1f);
         bulb.rectTransform.pivot = new Vector2(0f, 1f);
         bulb.rectTransform.anchoredPosition = new Vector2(28f, -36f);
 
         _title = UiKit.Text(_card, "Title", new Vector2(0.1f, 0.72f), new Vector2(0.8f, 0.9f), "",
-            UiTypography.Scale(tablet ? 34 : 32), RuntimeUiPolish.TitleIvory, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
+            UiTypography.Scale(tablet ? 34 : 32), Bauhaus.Ink, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
         _counter = UiKit.Text(_card, "Counter", new Vector2(0.8f, 0.72f), new Vector2(0.96f, 0.9f), "",
             UiTypography.Scale(20), UiKit.Muted, FontStyles.Bold, TextAlignmentOptions.MidlineRight);
         _body = UiKit.Text(_card, "Body", new Vector2(0.05f, 0.3f), new Vector2(0.95f, 0.72f), "",
-            UiTypography.Scale(tablet ? 25 : 24), new Color(0.88f, 0.92f, 1f, 1f), FontStyles.Normal, TextAlignmentOptions.TopLeft);
+            UiTypography.Scale(tablet ? 25 : 24), Bauhaus.Ink, FontStyles.Normal, TextAlignmentOptions.TopLeft);
 
         _skip = UiKit.Button(_card, "Skip", new Vector2(0.04f, 0.06f), new Vector2(0.28f, 0.25f),
-            LocalizationManager.Get("tour.skip", "Skip"), new Color(0.16f, 0.18f, 0.25f, 0.98f), () => Finish(false), 24);
+            LocalizationManager.Get("tour.skip", "Skip"), Bauhaus.Tone.Paper, () => Finish(false), 24);
         _back = UiKit.Button(_card, "Back", new Vector2(0.44f, 0.06f), new Vector2(0.66f, 0.25f),
-            LocalizationManager.Get("tour.back", "Back"), new Color(0.2f, 0.23f, 0.32f, 0.98f), () => Go(_index - 1), 24);
+            LocalizationManager.Get("tour.back", "Back"), Bauhaus.Tone.Paper, () => Go(_index - 1), 24);
         _next = UiKit.Button(_card, "Next", new Vector2(0.68f, 0.06f), new Vector2(0.96f, 0.25f),
-            LocalizationManager.Get("tour.next", "Next"), RuntimeUiPolish.AccentCoral, () => Advance(), 26, Color.white);
+            LocalizationManager.Get("tour.next", "Next"), Bauhaus.Tone.Red, () => Advance(), 26);
         _nextLabel = _next.GetComponentInChildren<TextMeshProUGUI>();
 
         // Controller: B / Esc → Skip (GamepadSupport), focus starts on Next so A advances.
@@ -269,7 +262,7 @@ public class CoachTour : MonoBehaviour
         if (_ringImg != null && _ringImg.gameObject.activeSelf)
         {
             float k = 0.65f + 0.35f * Mathf.Sin(Time.unscaledTime * 4f);
-            _ringImg.color = new Color(UiKit.Gold.r, UiKit.Gold.g, UiKit.Gold.b, k);
+            _ringImg.color = Bauhaus.WithAlpha(Bauhaus.Yellow, k);
         }
         // Keep the spotlight glued to targets that move (e.g. a bobbing marker or a scrolling map).
         if (_target != null && _placing == null && Time.frameCount % 10 == 0)

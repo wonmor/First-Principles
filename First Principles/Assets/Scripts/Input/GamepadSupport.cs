@@ -380,7 +380,7 @@ public class GamepadSupport : MonoBehaviour
         rootRt.SetAsLastSibling();
 
         var dim = root.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.05f, 0.11f, 0.9f);
+        dim.color = Bauhaus.Scrim;
         dim.raycastTarget = true;
 
         bool tablet = DeviceLayout.IsTabletLike();
@@ -392,10 +392,10 @@ public class GamepadSupport : MonoBehaviour
         panelRt.pivot = new Vector2(0.5f, 0.5f);
         panelRt.sizeDelta = new Vector2(tablet ? 560f : 480f, tablet ? 240f : 210f);
 
+        // Bauhaus sheet: card, thick black rule, red band on top (pause / quit are interruptions).
         var panelImg = panelGo.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(panelImg);
-        panelImg.color = RuntimeUiPolish.PanelMid;
-        RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(3f, -5f), 0.34f);
+        Bauhaus.Panel(panelImg);
+        UiKit.Band(panelRt, Bauhaus.Red, 16f);
 
         var titleGo = new GameObject("Title");
         var titleRt = titleGo.AddComponent<RectTransform>();
@@ -409,11 +409,10 @@ public class GamepadSupport : MonoBehaviour
         titleTmp.text = title;
         titleTmp.fontSize = UiTypography.Scale(tablet ? 36 : 30);
         titleTmp.alignment = TextAlignmentOptions.Center;
-        titleTmp.color = RuntimeUiPolish.TitleIvory;
+        titleTmp.color = Bauhaus.Ink;
         titleTmp.fontStyle = FontStyles.Bold;
         titleTmp.raycastTarget = false;
-        if (TMP_Settings.defaultFontAsset != null)
-            titleTmp.font = TMP_Settings.defaultFontAsset;
+        UiTypography.ApplyDefaultFontAsset(titleTmp);
         LocalizationManager.ApplyTextDirection(titleTmp);
 
         return root;
@@ -431,12 +430,8 @@ public class GamepadSupport : MonoBehaviour
         rt.offsetMax = Vector2.zero;
 
         var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = RuntimeUiPolish.ButtonNeutral;
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, RuntimeUiPolish.ButtonNeutral,
-            RuntimeUiPolish.ButtonNeutralHover, RuntimeUiPolish.PanelDeep);
         btn.onClick.AddListener(onClick);
 
         var txtGo = new GameObject("Text");
@@ -451,12 +446,12 @@ public class GamepadSupport : MonoBehaviour
         tmp.text = label;
         tmp.fontSize = UiTypography.Scale(DeviceLayout.IsTabletLike() ? 28 : 24);
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = RuntimeUiPolish.TitleIvory;
         tmp.fontStyle = FontStyles.Bold;
         tmp.raycastTarget = false;
-        if (TMP_Settings.defaultFontAsset != null)
-            tmp.font = TMP_Settings.defaultFontAsset;
+        UiTypography.ApplyDefaultFontAsset(tmp);
         LocalizationManager.ApplyTextDirection(tmp);
+        // Primary action (Resume / Quit) is the red block; Cancel stays paper.
+        Bauhaus.Button(btn, name == "CancelButton" ? Bauhaus.Tone.Paper : Bauhaus.Tone.Red);
 
         return btn;
     }

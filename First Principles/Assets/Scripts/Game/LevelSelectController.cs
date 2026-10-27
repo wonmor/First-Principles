@@ -20,8 +20,8 @@ using TMPro;
 public class LevelSelectController : MonoBehaviour
 {
     [Tooltip("Full-screen panel tint (defaults match RuntimeUiPolish theme).")]
-    [SerializeField] private Color backgroundColor = new Color(0.09f, 0.10f, 0.14f, 0.97f);
-    [SerializeField] private Color buttonColor = new Color(0.20f, 0.23f, 0.30f, 0.95f);
+    [SerializeField] private Color backgroundColor = new Color(0.09f, 0.10f, 0.14f, 0.97f); // unused since 1.4 (Bauhaus paper)
+    [SerializeField] private Color buttonColor = new Color(0.20f, 0.23f, 0.30f, 0.95f);     // unused since 1.4
 
     private TextMeshProUGUI titleTmp;
     private TextMeshProUGUI howToPlayTmp;
@@ -141,19 +141,10 @@ public class LevelSelectController : MonoBehaviour
         prt.offsetMax = Vector2.zero;
         _panelRt = prt;
 
+        // Bauhaus: plain paper page (the 1.3 falling-symbols backdrop is retired for a clean grid).
         var pimg = panel.AddComponent<Image>();
-        pimg.color = backgroundColor;
+        pimg.color = Bauhaus.Paper;
         pimg.raycastTarget = true;
-
-        var backdropGo = new GameObject("FallingSymbolsBackdrop");
-        var backdropRt = backdropGo.AddComponent<RectTransform>();
-        backdropRt.SetParent(prt, false);
-        backdropRt.anchorMin = Vector2.zero;
-        backdropRt.anchorMax = Vector2.one;
-        backdropRt.offsetMin = Vector2.zero;
-        backdropRt.offsetMax = Vector2.zero;
-        backdropGo.AddComponent<LevelSelectFallingSymbolsBackdrop>();
-        backdropGo.transform.SetAsFirstSibling();
 
         bool tablet = DeviceLayout.IsTabletLike();
         var titleGo = new GameObject("Title");
@@ -171,13 +162,24 @@ public class LevelSelectController : MonoBehaviour
         titleTmp.fontSizeMin = UiTypography.Scale(24);
         titleTmp.fontSizeMax = UiTypography.Scale(tablet ? 44 : 40);
         titleTmp.alignment = TextAlignmentOptions.Center;
-        titleTmp.color = RuntimeUiPolish.TitleIvory;
+        titleTmp.fontStyle = FontStyles.Bold;
+        titleTmp.color = Bauhaus.Ink;
         CopyFontFromAny(titleTmp);
         LocalizationManager.ApplyTextDirection(titleTmp);
 
         CreateLevelSelectLanguagePicker(panel.transform);
         CreateProgressChip(panel.transform, canvas.transform);
         RefreshUnlockChip();
+
+        // Bauhaus grid: thick black rules frame the map band between the top and bottom bars.
+        foreach (float y in new[] { tablet ? 0.905f : 0.893f, tablet ? 0.118f : 0.128f })
+        {
+            var rule = UiKit.Rect("Rule", panel.transform, new Vector2(0f, y), new Vector2(1f, y));
+            rule.sizeDelta = new Vector2(0f, 6f);
+            var ri = rule.gameObject.AddComponent<Image>();
+            ri.color = Bauhaus.Ink;
+            ri.raycastTarget = false;
+        }
 
         // World map fills the middle band.
         var mapHost = UiKit.Rect("MapHost", panel.transform, new Vector2(0f, tablet ? 0.13f : 0.14f), new Vector2(1f, tablet ? 0.9f : 0.885f));
@@ -324,7 +326,7 @@ public class LevelSelectController : MonoBehaviour
         rt.sizeDelta = new Vector2(tablet ? 340f : 320f, tablet ? 64f : 56f);
         rt.anchoredPosition = new Vector2(-((tablet ? 14f : 10f) + (tablet ? 400f : 370f) + 12f), tablet ? -10f : -8f);
         unlockChipTmp = btn.GetComponentInChildren<TextMeshProUGUI>();
-        var lk = StarGlyph.Add(rt, "Lock", LockGlyph.Unlocked, Color.white, new Vector2(30f, 30f));
+        var lk = StarGlyph.Add(rt, "Lock", LockGlyph.Unlocked, Bauhaus.Card, new Vector2(30f, 30f));
         lk.rectTransform.anchorMin = lk.rectTransform.anchorMax = new Vector2(0f, 0.5f);
         lk.rectTransform.pivot = new Vector2(0f, 0.5f);
         lk.rectTransform.anchoredPosition = new Vector2(12f, 0f);
@@ -349,15 +351,8 @@ public class LevelSelectController : MonoBehaviour
         rt.anchoredPosition = new Vector2(-margin, margin + 4f);
 
         var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.24f, 0.30f, 0.55f, 0.96f);
-
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color,
-            Color.Lerp(img.color, Color.white, 0.2f),
-            Color.Lerp(img.color, Color.black, 0.18f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.26f);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -382,6 +377,8 @@ public class LevelSelectController : MonoBehaviour
         CopyFontFromAny(howToPlayTmp);
         howToPlayTmp.fontStyle = FontStyles.Bold;
         LocalizationManager.ApplyTextDirection(howToPlayTmp);
+        Bauhaus.Button(btn, Bauhaus.Tone.Paper);
+        Bauhaus.LeadGlyph(rt, howToPlayTmp, StarGlyph.Help, 30f);
 
         btn.onClick.AddListener(() =>
         {
@@ -406,15 +403,8 @@ public class LevelSelectController : MonoBehaviour
         rt.anchoredPosition = new Vector2(-(margin + (tablet ? 260f : 240f) + 12f), margin + 4f);
 
         var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = RuntimeUiPolish.AccentTeal;
-
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, RuntimeUiPolish.AccentTeal,
-            Color.Lerp(RuntimeUiPolish.AccentTeal, Color.white, 0.2f),
-            Color.Lerp(RuntimeUiPolish.AccentTeal, Color.black, 0.22f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.28f);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -438,6 +428,8 @@ public class LevelSelectController : MonoBehaviour
         CopyFontFromAny(mathTipsTmp);
         mathTipsTmp.fontStyle = FontStyles.Bold;
         LocalizationManager.ApplyTextDirection(mathTipsTmp);
+        Bauhaus.Button(btn, Bauhaus.Tone.Blue);
+        Bauhaus.LeadGlyph(rt, mathTipsTmp, StarGlyph.Book, 30f);
 
         btn.onClick.AddListener(() => MathArticlesOverlay.Open(canvasTransform));
     }
@@ -452,11 +444,8 @@ public class LevelSelectController : MonoBehaviour
         rt.sizeDelta = new Vector2(tablet ? 400f : 370f, tablet ? 64f : 56f);
         _progressChipRt = rt;
         var img = rt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.16f, 0.2f, 0.28f, 0.92f);
         var btn = rt.gameObject.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color, Color.Lerp(img.color, Color.white, 0.15f), Color.Lerp(img.color, Color.black, 0.2f));
         btn.onClick.AddListener(() =>
         {
             FeelDirector.Play(SfxId.Click, 0.6f);
@@ -464,16 +453,19 @@ public class LevelSelectController : MonoBehaviour
         });
         int maxStars = ProgressStore.PlayableLevelCount * ProgressRules.MaxStars;
         float fs = UiTypography.Scale(tablet ? 22 : 20);
-        AddChipStat(rt, "Stars", StarGlyph.Filled, UiKit.Gold, 0f, 0.42f, $"{ProgressStore.TotalStars}/{maxStars}", fs);
-        AddChipStat(rt, "Medals", StarGlyph.Medal, UiKit.Gold, 0.42f, 0.66f, ProgressStore.MedalCount.ToString(), fs);
-        AddChipStat(rt, "Ach", StarGlyph.Trophy, UiKit.Mint, 0.66f, 1f,
+        AddChipStat(rt, "Stars", null, Bauhaus.Ink, 0f, 0.42f, $"{ProgressStore.TotalStars}/{maxStars}", fs);
+        AddChipStat(rt, "Medals", StarGlyph.Medal, Bauhaus.Ink, 0.42f, 0.66f, ProgressStore.MedalCount.ToString(), fs);
+        AddChipStat(rt, "Ach", StarGlyph.Trophy, Bauhaus.Ink, 0.66f, 1f,
             $"{ProgressStore.Data.achievements.Count}/{AchievementCatalog.All.Length}", fs);
+        Bauhaus.Button(btn, Bauhaus.Tone.Paper);
     }
 
     private static void AddChipStat(RectTransform chip, string name, Sprite glyph, Color c, float x0, float x1, string text, float size)
     {
         var cell = UiKit.Rect(name, chip, new Vector2(x0, 0f), new Vector2(x1, 1f));
-        var icon = StarGlyph.Add(cell, "Glyph", glyph, c, new Vector2(32f, 32f));
+        // Stars use the Bauhaus star (yellow with an ink rim); other stats are ink line glyphs.
+        var icon = glyph == null ? StarGlyph.AddStar(cell, "Star", true, new Vector2(32f, 32f))
+            : StarGlyph.Add(cell, "Glyph", glyph, c, new Vector2(32f, 32f));
         icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(0f, 0.5f);
         icon.rectTransform.pivot = new Vector2(0f, 0.5f);
         icon.rectTransform.anchoredPosition = new Vector2(10f, 0f);
@@ -498,14 +490,8 @@ public class LevelSelectController : MonoBehaviour
         rt.sizeDelta = new Vector2(tablet ? 380f : 340f, tablet ? 64f : 56f);
 
         var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.16f, 0.2f, 0.28f, 0.92f);
-
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color,
-            Color.Lerp(img.color, Color.white, 0.15f),
-            Color.Lerp(img.color, Color.black, 0.2f));
         btn.onClick.AddListener(LocalizationManager.CycleNext);
 
         var textGo = new GameObject("Text");
@@ -522,11 +508,13 @@ public class LevelSelectController : MonoBehaviour
         levelSelectLangTmp.fontSizeMax = UiTypography.Scale(tablet ? 26 : 22);
         levelSelectLangTmp.fontSize = levelSelectLangTmp.fontSizeMax;
         levelSelectLangTmp.alignment = TextAlignmentOptions.Center;
-        levelSelectLangTmp.color = new Color(0.93f, 0.96f, 1f, 1f);
-        levelSelectLangTmp.textWrappingMode = TextWrappingModes.Normal;
-        levelSelectLangTmp.overflowMode = TextOverflowModes.Overflow;
+        levelSelectLangTmp.alignment = TextAlignmentOptions.MidlineLeft;
+        levelSelectLangTmp.textWrappingMode = TextWrappingModes.NoWrap;
+        levelSelectLangTmp.overflowMode = TextOverflowModes.Ellipsis;
         CopyFontFromAny(levelSelectLangTmp);
         RefreshLevelSelectLanguageLabel();
+        Bauhaus.Button(btn, Bauhaus.Tone.Paper);
+        Bauhaus.LeadGlyph(rt, levelSelectLangTmp, StarGlyph.Globe, 30f);
     }
 
     private static void CopyFontFromAny(TextMeshProUGUI target)
@@ -561,15 +549,8 @@ public class LevelSelectController : MonoBehaviour
         rt.anchoredPosition = new Vector2(margin, margin + 4f);
 
         var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = buttonColor;
-
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, buttonColor,
-            RuntimeUiPolish.ButtonNeutralHover,
-            new Color(0.12f, 0.13f, 0.16f, 1f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(1.5f, -2.5f), 0.22f);
 
         var textGo = new GameObject("Text");
         var trt = textGo.AddComponent<RectTransform>();
@@ -587,7 +568,12 @@ public class LevelSelectController : MonoBehaviour
         backTmp.color = RuntimeUiPolish.TitleIvory;
         CopyFontFromAny(backTmp);
         backTmp.fontStyle = FontStyles.Bold;
+        backTmp.enableAutoSizing = true;
+        backTmp.fontSizeMin = UiTypography.Scale(14);
+        backTmp.fontSizeMax = backTmp.fontSize;
         LocalizationManager.ApplyTextDirection(backTmp);
+        Bauhaus.Button(btn, Bauhaus.Tone.Paper);
+        Bauhaus.LeadGlyph(rt, backTmp, StarGlyph.ArrowLeft, 30f);
 
         btn.onClick.AddListener(() => SceneTransitionHost.LoadSingleScene("Menu"));
     }
@@ -633,8 +619,7 @@ public class LevelSelectController : MonoBehaviour
             ? string.Format(LocalizationManager.Get("daily.streak", "Streak: {0} day(s)"), streak)
             : DailyChallengeSession.GoalText(spec.Goal) +
               (streak > 0 ? "   |   " + string.Format(LocalizationManager.Get("daily.streak", "Streak: {0} day(s)"), streak) : "");
-        var bg = new Color(0.27f, 0.22f, 0.5f, 0.97f);
-        var btn = UiKit.Button(panelRoot, "DailyCard", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), "", bg, () =>
+        var btn = UiKit.Button(panelRoot, "DailyCard", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), "", Bauhaus.Tone.Yellow, () =>
         {
             if (done)
             {
@@ -654,13 +639,13 @@ public class LevelSelectController : MonoBehaviour
         rt.anchoredPosition = new Vector2(tablet ? -130f : -140f, margin - 2f);
         _dailyRt = rt;
         var icon = StarGlyph.Add(rt, "DailyIcon", done ? StarGlyph.Calendar : StarGlyph.Flame,
-            done ? UiKit.Mint : UiKit.Gold, new Vector2(46f, 46f));
+            Bauhaus.Ink, new Vector2(46f, 46f));
         icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(0f, 0.5f);
         icon.rectTransform.pivot = new Vector2(0f, 0.5f);
         icon.rectTransform.anchoredPosition = new Vector2(16f, 0f);
         _dailyTmp = UiKit.Text(rt, "Label", new Vector2(0f, 0.06f), new Vector2(1f, 0.94f),
-            $"<b>{title}</b>\n<size=76%><color=#d9d2ff>{sub}</color></size>",
-            UiTypography.Scale(tablet ? 24 : 22), RuntimeUiPolish.TitleIvory, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
+            $"<b>{title}</b>\n<size=76%>{sub}</size>",
+            UiTypography.Scale(tablet ? 24 : 22), Bauhaus.Ink, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
         _dailyTmp.rectTransform.offsetMin = new Vector2(76f, 0f);
         _dailyTmp.rectTransform.offsetMax = new Vector2(-14f, 0f);
     }
@@ -688,7 +673,7 @@ public class LevelSelectController : MonoBehaviour
         rootRt.SetAsLastSibling();
 
         var dim = root.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.05f, 0.1f, 0.88f);
+        dim.color = Bauhaus.Scrim;
         dim.raycastTarget = true;
 
         var dimBtn = root.AddComponent<Button>();
@@ -706,8 +691,7 @@ public class LevelSelectController : MonoBehaviour
         panelRt.sizeDelta = new Vector2(tablet ? 560f : 480f, tablet ? 200f : 176f);
 
         var panelImg = panelGo.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(panelImg);
-        panelImg.color = new Color(0.12f, 0.14f, 0.2f, 0.98f);
+        Bauhaus.Panel(panelImg);
         panelImg.raycastTarget = true;
 
         var panelBtn = panelGo.AddComponent<Button>();
@@ -746,10 +730,10 @@ public class LevelSelectController : MonoBehaviour
         okTmp.text = LocalizationManager.Get("ui.coming_soon_tap", "Tap anywhere to close");
         okTmp.fontSize = UiTypography.Scale(tablet ? 22 : 19);
         okTmp.alignment = TextAlignmentOptions.Center;
-        okTmp.color = new Color(0.75f, 0.8f, 0.92f, 0.85f);
+        okTmp.color = Bauhaus.InkSoft;
         okTmp.raycastTarget = false;
         CopyFontFromAny(okTmp);
-        okTmp.fontStyle = FontStyles.Italic;
+        okTmp.fontStyle = FontStyles.Normal;
         LocalizationManager.ApplyTextDirection(okTmp);
     }
 }

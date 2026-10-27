@@ -27,18 +27,19 @@ public static class AchievementsOverlay
             landscape ? new Vector2(0.16f, 0.04f) : new Vector2(0.04f, 0.08f),
             landscape ? new Vector2(0.84f, 0.96f) : new Vector2(0.96f, 0.92f));
 
-        UiKit.Text(panel, "Title", new Vector2(0.05f, 0.9f), new Vector2(0.95f, 0.97f),
+        UiKit.Band(panel, Bauhaus.Blue, 18f);
+        UiKit.Text(panel, "Title", new Vector2(0.05f, 0.88f), new Vector2(0.95f, 0.955f),
             LocalizationManager.Get("ach.title", "Progress & achievements"),
-            UiTypography.Scale(tablet ? 40 : 36), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
+            UiTypography.Scale(tablet ? 40 : 36), Bauhaus.Ink, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
 
         var d = ProgressStore.Data;
         int maxStars = ProgressStore.PlayableLevelCount * ProgressRules.MaxStars;
         string summary = string.Format(LocalizationManager.Get("ach.summary",
-                "<color=#ffd15c><b>{0}/{1}</b> stars</color>   |   <b>{6}</b> medals   |   <b>{2}</b> levels cleared   |   streak <b>{3}</b> (best {4})   |   <b>{5}</b> f′ double jumps"),
+                "<color=#D7261E><b>{0}/{1}</b> stars</color>   |   <b>{6}</b> medals   |   <b>{2}</b> levels cleared   |   streak <b>{3}</b> (best {4})   |   <b>{5}</b> f′ double jumps"),
             ProgressStore.TotalStars, maxStars, ProgressStore.Snapshot().LevelsCleared,
             ProgressStore.CurrentDailyStreak, d.dailyBestStreak, d.airJumps, ProgressStore.MedalCount);
-        UiKit.Text(panel, "Summary", new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.9f), summary,
-            UiTypography.Scale(tablet ? 21 : 19), UiKit.Muted);
+        UiKit.Text(panel, "Summary", new Vector2(0.05f, 0.815f), new Vector2(0.95f, 0.88f), summary,
+            UiTypography.Scale(tablet ? 21 : 19), UiKit.Muted, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
 
         // Scroll list -------------------------------------------------------------
         var scrollRt = UiKit.Rect("Scroll", panel, new Vector2(0.04f, 0.14f), new Vector2(0.96f, 0.81f));
@@ -71,11 +72,21 @@ public static class AchievementsOverlay
             rrt.SetParent(content, false);
             var le = row.AddComponent<LayoutElement>();
             le.preferredHeight = tablet ? 86f : 80f;
+            // Unlocked: white row with a yellow block behind the trophy. Locked: paper row, grey glyph.
             var bg = row.AddComponent<Image>();
-            RuntimeUiPolish.UseRoundedSliced(bg);
-            bg.color = got ? new Color(0.2f, 0.27f, 0.3f, 0.95f) : new Color(0.13f, 0.15f, 0.2f, 0.9f);
+            Bauhaus.Panel(bg, got ? Color.white : Bauhaus.Paper, 2f);
             bg.raycastTarget = false;
-            var icon = StarGlyph.Add(rrt, "Icon", StarGlyph.Trophy, got ? UiKit.Gold : UiKit.GoldDim, new Vector2(50f, 50f));
+            if (got)
+            {
+                var block = UiKit.Rect("Block", rrt, new Vector2(0f, 0f), new Vector2(0f, 1f));
+                block.pivot = new Vector2(0f, 0.5f);
+                block.sizeDelta = new Vector2(78f, 0f);
+                var bimg = block.gameObject.AddComponent<Image>();
+                bimg.sprite = Bauhaus.Square;
+                bimg.color = Bauhaus.Yellow;
+                bimg.raycastTarget = false;
+            }
+            var icon = StarGlyph.Add(rrt, "Icon", StarGlyph.Trophy, got ? Bauhaus.Ink : UiKit.GoldDim, new Vector2(50f, 50f));
             icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(0f, 0.5f);
             icon.rectTransform.pivot = new Vector2(0f, 0.5f);
             icon.rectTransform.anchoredPosition = new Vector2(16f, 0f);
@@ -90,7 +101,7 @@ public static class AchievementsOverlay
         // Footer: sound toggle + close --------------------------------------------
         TextMeshProUGUI soundLabel = null;
         var soundBtn = UiKit.Button(panel, "Sound", new Vector2(0.04f, 0.03f), new Vector2(0.35f, 0.115f), "",
-            RuntimeUiPolish.ButtonNeutral, () =>
+            Bauhaus.Tone.Paper, () =>
             {
                 ProgressStore.SfxMuted = !ProgressStore.SfxMuted;
                 SetSoundLabel(soundLabel);
@@ -98,13 +109,13 @@ public static class AchievementsOverlay
         soundLabel = soundBtn.GetComponentInChildren<TextMeshProUGUI>();
         SetSoundLabel(soundLabel);
         UiKit.Button(panel, "ShowTutorial", new Vector2(0.37f, 0.03f), new Vector2(0.66f, 0.115f),
-            LocalizationManager.Get("ui.show_tutorial", "Show tutorial"), new Color(0.27f, 0.23f, 0.48f, 0.98f), () =>
+            LocalizationManager.Get("ui.show_tutorial", "Show tutorial"), Bauhaus.Tone.Blue, () =>
             {
                 Close();
                 LevelSelectController.ReplayTutorials();
             }, tablet ? 24 : 22);
         var close = UiKit.Button(panel, "Close", new Vector2(0.68f, 0.03f), new Vector2(0.96f, 0.115f),
-            LocalizationManager.Get("ui.close", "Close"), RuntimeUiPolish.AccentTeal, Close, tablet ? 24 : 22);
+            LocalizationManager.Get("ui.close", "Close"), Bauhaus.Tone.Ink, Close, tablet ? 24 : 22);
         OverlayCancelHandler.Attach(_root, close, close);
     }
 
@@ -173,19 +184,25 @@ public class AchievementToaster : MonoBehaviour
         var rt = UiKit.Rect("AchievementToast", canvas.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
         rt.pivot = new Vector2(0.5f, 1f);
         rt.sizeDelta = new Vector2(tablet ? 640f : 580f, tablet ? 104f : 96f);
+        // Bauhaus toast: white card, black rule, yellow block holding the trophy.
         var img = rt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.12f, 0.15f, 0.2f, 0.97f);
+        Bauhaus.Panel(img, Color.white, Bauhaus.ButtonRule);
         img.raycastTarget = false;
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -4f), 0.35f);
-        var icon = StarGlyph.Add(rt, "Icon", StarGlyph.Trophy, UiKit.Gold, new Vector2(56f, 56f));
+        var block = UiKit.Rect("Block", rt, new Vector2(0f, 0f), new Vector2(0f, 1f));
+        block.pivot = new Vector2(0f, 0.5f);
+        block.sizeDelta = new Vector2(84f, 0f);
+        var bimg = block.gameObject.AddComponent<Image>();
+        bimg.sprite = Bauhaus.Square;
+        bimg.color = Bauhaus.Yellow;
+        bimg.raycastTarget = false;
+        var icon = StarGlyph.Add(rt, "Icon", StarGlyph.Trophy, Bauhaus.Ink, new Vector2(52f, 52f));
         icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(0f, 0.5f);
         icon.rectTransform.pivot = new Vector2(0f, 0.5f);
         icon.rectTransform.anchoredPosition = new Vector2(18f, 0f);
         var t = UiKit.Text(rt, "Text", Vector2.zero, Vector2.one,
-            $"<size=70%><color=#ffd15c>{LocalizationManager.Get("ach.unlocked", "Achievement unlocked")}</color></size>\n<b>{LocalizationManager.Get("ach." + def.Id + ".t", def.Title)}</b>",
-            UiTypography.Scale(tablet ? 28 : 26), RuntimeUiPolish.TitleIvory, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
-        t.rectTransform.offsetMin = new Vector2(90f, 6f);
+            $"<size=70%><color=#D7261E><b>{LocalizationManager.Get("ach.unlocked", "Achievement unlocked")}</b></color></size>\n<b>{LocalizationManager.Get("ach." + def.Id + ".t", def.Title)}</b>",
+            UiTypography.Scale(tablet ? 28 : 26), Bauhaus.Ink, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
+        t.rectTransform.offsetMin = new Vector2(102f, 6f);
         t.rectTransform.offsetMax = new Vector2(-16f, -6f);
         FeelDirector.Play(SfxId.Achievement, 0.8f);
 

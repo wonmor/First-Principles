@@ -25,7 +25,7 @@ public class SceneFader : MonoBehaviour
 
 	private TextMeshProUGUI graphicCalculatorMenuButtonText;
 	private TextMeshProUGUI menuLanguageButtonLabel;
-	private Image playerIconMenuButtonImage;
+	private Image playerIconMenuButtonImage; // kept for the picker refresh hook
 	private TextMeshProUGUI playerIconMenuGlyphTmp;
 
 	public float fadeSpeed = 0.8f;
@@ -151,11 +151,11 @@ public class SceneFader : MonoBehaviour
         tmp.text = LocalizationManager.Get("ui.loading", "Loading…");
         tmp.fontSize = UiTypography.Scale(36);
         tmp.alignment = TextAlignmentOptions.Bottom;
-        tmp.color = new Color(0.92f, 0.94f, 0.98f, 0.95f);
+        tmp.color = Bauhaus.Ink;
+        tmp.fontStyle = FontStyles.Bold;
         tmp.textWrappingMode = TextWrappingModes.NoWrap;
         tmp.raycastTarget = false;
-        if (TMP_Settings.defaultFontAsset != null)
-            tmp.font = TMP_Settings.defaultFontAsset;
+        UiTypography.ApplyDefaultFontAsset(tmp);
         LocalizationManager.ApplyTextDirection(tmp);
     }
     #endregion
@@ -165,12 +165,13 @@ public class SceneFader : MonoBehaviour
     private IEnumerator SpawnMenuExtrasNextFrame()
     {
         yield return null;
-        TrySpawnGraphicCalculatorMenuButton();
-        TrySpawnLanguagePicker();
-        // Spawn last so it stays above sibling buttons under the play row for clicks.
-        TrySpawnPlayerIconPickerButton();
+        BuildBauhausMenu();
         RefreshMenuLocalizedControls();
     }
+
+    private TextMeshProUGUI menuTitleTmp;
+    private TextMeshProUGUI menuTaglineTmp;
+    private TextMeshProUGUI menuPlayTmp;
 
     private void RefreshMenuLocalizedControls()
     {
@@ -186,6 +187,18 @@ public class SceneFader : MonoBehaviour
             LocalizationManager.ApplyLanguagePickerTextDirection(menuLanguageButtonLabel);
         }
 
+        if (menuTaglineTmp != null)
+        {
+            menuTaglineTmp.text = LocalizationManager.Get("menu.tagline", "A calculus platformer");
+            LocalizationManager.ApplyTextDirection(menuTaglineTmp);
+        }
+
+        if (menuPlayTmp != null)
+        {
+            menuPlayTmp.text = LocalizationManager.Get("menu.play", "Play");
+            LocalizationManager.ApplyTextDirection(menuPlayTmp);
+        }
+
         RefreshPlayerIconMenuButton();
 
         if (string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))
@@ -194,85 +207,179 @@ public class SceneFader : MonoBehaviour
             var creditsTmp = creditsGo != null ? creditsGo.GetComponent<TextMeshProUGUI>() : null;
             if (creditsTmp != null)
             {
-                creditsTmp.text = SceneCreditsFooter.BuildMenuFooterRichText();
+                creditsTmp.text = SceneCreditsFooter.BuildMenuFooterCompact();
                 LocalizationManager.ApplyTextDirection(creditsTmp);
             }
         }
     }
 
-    /// <summary>Runtime entry for graphing calculator mode (no extra scene objects required).</summary>
-    private void TrySpawnGraphicCalculatorMenuButton()
+    // ------------------------------------------------------------------ Bauhaus main menu (1.4)
+    // Paper page on a two-column grid. Left: a yellow panel holding the lim h→0 logo in a black-ruled
+    // frame. Right: the title set large with a thick black rule, then the three actions as flat primary
+    // blocks (Play red, Graphing calculator blue, Player icon paper), credits at the foot. Language chip
+    // top-right. Portrait windows stack the two columns.
+
+    private void BuildBauhausMenu()
     {
         if (!string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))
             return;
-        if (GameObject.Find("GraphicCalculatorEntryButton") != null)
+        if (GameObject.Find("BauhausMenu") != null)
             return;
-
+        var canvas = Object.FindAnyObjectByType<Canvas>();
         var play = GameObject.FindGameObjectWithTag("PlayButton");
-        if (play == null)
+        if (canvas == null || play == null)
             return;
 
-        var playRt = play.GetComponent<RectTransform>();
-        if (playRt == null)
-            return;
-
-        var go = new GameObject("GraphicCalculatorEntryButton");
-        var rt = go.AddComponent<RectTransform>();
-        rt.SetParent(playRt.parent, false);
-        rt.localScale = Vector3.one;
-        rt.anchorMin = playRt.anchorMin;
-        rt.anchorMax = playRt.anchorMax;
-        rt.pivot = playRt.pivot;
-        rt.sizeDelta = playRt.sizeDelta;
-        // Former "Exit" slot: mirror Play button on the right (Play is at x=-180, exit was x=+180).
-        rt.anchoredPosition = playRt.anchoredPosition + new Vector2(360f, 0f);
-
-        var playImg = play.GetComponent<Image>();
-        var img = go.AddComponent<Image>();
-        if (playImg != null && playImg.sprite != null)
-        {
-            img.sprite = playImg.sprite;
-            img.type = playImg.type;
-        }
-
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.16f, 0.48f, 0.40f, 0.98f);
-
-        var btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color,
-            Color.Lerp(img.color, Color.white, 0.2f),
-            Color.Lerp(img.color, Color.black, 0.18f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.28f);
-        btn.onClick.AddListener(LoadGraphCalculator);
-
-        var textGo = new GameObject("Text");
-        var trt = textGo.AddComponent<RectTransform>();
-        trt.SetParent(go.transform, false);
-        trt.anchorMin = Vector2.zero;
-        trt.anchorMax = Vector2.one;
-        trt.offsetMin = new Vector2(12f, 6f);
-        trt.offsetMax = new Vector2(-12f, -6f);
-
-        graphicCalculatorMenuButtonText = textGo.AddComponent<TextMeshProUGUI>();
+        var safe = MobileUiRoots.GetSafeContentParent(canvas.transform);
+        bool portrait = Screen.height > Screen.width;
         bool tablet = DeviceLayout.IsTabletLike();
+
+        // Full-bleed paper behind everything (the safe area insets stay paper too).
+        var page = UiKit.Rect("BauhausPage", canvas.transform, Vector2.zero, Vector2.one);
+        page.SetAsFirstSibling();
+        var pageImg = page.gameObject.AddComponent<Image>();
+        pageImg.color = Bauhaus.Paper;
+        pageImg.raycastTarget = false;
+
+        var root = UiKit.Rect("BauhausMenu", safe, Vector2.zero, Vector2.one);
+        root.SetAsLastSibling();
+
+        // Left / top: yellow panel with the logo.
+        var logoPanel = portrait
+            ? UiKit.Rect("LogoPanel", root, new Vector2(0.06f, 0.56f), new Vector2(0.94f, 0.95f))
+            : UiKit.Rect("LogoPanel", root, new Vector2(0.035f, 0.07f), new Vector2(0.42f, 0.93f));
+        var lp = logoPanel.gameObject.AddComponent<Image>();
+        Bauhaus.Panel(lp, Bauhaus.Yellow, Bauhaus.PanelRule);
+        lp.raycastTarget = false;
+        PlaceMenuLogo(logoPanel);
+
+        // Right / bottom column.
+        var col = portrait
+            ? UiKit.Rect("Column", root, new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.53f))
+            : UiKit.Rect("Column", root, new Vector2(0.47f, 0.07f), new Vector2(0.965f, 0.93f));
+
+        menuTitleTmp = UiKit.Text(col, "Title", new Vector2(0f, 0.82f), new Vector2(1f, 1f), "First Principles",
+            UiTypography.Scale(tablet ? 92 : 84), Bauhaus.Ink, FontStyles.Bold, TextAlignmentOptions.BottomLeft);
+        menuTitleTmp.textWrappingMode = TextWrappingModes.NoWrap;
+        menuTitleTmp.characterSpacing = -2f;
+        menuTitleTmp.fontSizeMin = 28f;
+        menuTaglineTmp = UiKit.Text(col, "Tagline", new Vector2(0f, 0.745f), new Vector2(1f, 0.82f),
+            LocalizationManager.Get("menu.tagline", "A calculus platformer"),
+            UiTypography.Scale(tablet ? 30 : 28), Bauhaus.InkSoft, FontStyles.Normal, TextAlignmentOptions.TopLeft);
+        var rule = UiKit.Rect("Rule", col, new Vector2(0f, 0.715f), new Vector2(1f, 0.715f));
+        rule.sizeDelta = new Vector2(0f, 8f);
+        var ruleImg = rule.gameObject.AddComponent<Image>();
+        ruleImg.color = Bauhaus.Ink;
+        ruleImg.raycastTarget = false;
+
+        // Play: the scene button keeps its onClick, re-skinned as a red block with a label + arrow glyph.
+        var playRt = play.GetComponent<RectTransform>();
+        playRt.SetParent(col, false);
+        playRt.anchorMin = new Vector2(0f, 0.48f);
+        playRt.anchorMax = new Vector2(1f, 0.675f);
+        playRt.pivot = new Vector2(0.5f, 0.5f);
+        playRt.offsetMin = Vector2.zero;
+        playRt.offsetMax = Vector2.zero;
+        playRt.localScale = Vector3.one;
+        foreach (Transform c in playRt)
+            c.gameObject.SetActive(false);
+        menuPlayTmp = UiKit.Text(playRt, "Label", new Vector2(0.06f, 0.08f), new Vector2(0.8f, 0.92f),
+            LocalizationManager.Get("menu.play", "Play"), UiTypography.Scale(tablet ? 54 : 50), Bauhaus.Card,
+            FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
+        var arrow = StarGlyph.Add(playRt, "Glyph", StarGlyph.ArrowRight, Bauhaus.Card, new Vector2(64f, 64f));
+        arrow.rectTransform.anchorMin = arrow.rectTransform.anchorMax = new Vector2(1f, 0.5f);
+        arrow.rectTransform.pivot = new Vector2(1f, 0.5f);
+        arrow.rectTransform.anchoredPosition = new Vector2(-28f, 0f);
+        var playBtn = play.GetComponent<Button>();
+        playBtn.transition = Selectable.Transition.ColorTint;
+        Bauhaus.Button(playBtn, Bauhaus.Tone.Red, Bauhaus.PanelRule);
+
+        // Second row: graphing calculator (blue) + player icon (paper).
+        var calc = MenuBlockButton(col, "GraphicCalculatorEntryButton", new Vector2(0f, 0.255f), new Vector2(0.49f, 0.45f),
+            Bauhaus.Tone.Blue, StarGlyph.Calculator, out graphicCalculatorMenuButtonText, LoadGraphCalculator, tablet);
         graphicCalculatorMenuButtonText.text = LocalizationManager.Get("ui.graphing_calculator_mode", "Graphing\ncalculator");
-        graphicCalculatorMenuButtonText.fontSize = UiTypography.Scale(tablet ? 30 : 26);
-        graphicCalculatorMenuButtonText.fontStyle = FontStyles.Bold;
-        graphicCalculatorMenuButtonText.alignment = TextAlignmentOptions.Center;
-        graphicCalculatorMenuButtonText.color = new Color(0.92f, 0.98f, 1f, 1f);
-        graphicCalculatorMenuButtonText.textWrappingMode = TextWrappingModes.Normal;
-        graphicCalculatorMenuButtonText.richText = true;
-        LocalizationManager.ApplyTextDirection(graphicCalculatorMenuButtonText);
-        var refTmp = play.GetComponentInChildren<TextMeshProUGUI>();
-        if (refTmp != null && refTmp.font != null)
+        var iconBtn = MenuBlockButton(col, "MenuPlayerIconButton", new Vector2(0.51f, 0.255f), new Vector2(1f, 0.45f),
+            Bauhaus.Tone.Paper, null, out playerIconMenuGlyphTmp, OpenMenuPlayerGlyphPickerOverlay, tablet);
+        playerIconMenuButtonImage = iconBtn.GetComponent<Image>();
+
+        // Credits at the foot of the column.
+        var credits = GameObject.Find("MenuCreditsBlock");
+        if (credits != null)
         {
-            graphicCalculatorMenuButtonText.font = refTmp.font;
-            if (refTmp.fontSharedMaterial != null)
-                graphicCalculatorMenuButtonText.fontSharedMaterial = refTmp.fontSharedMaterial;
+            var crt = credits.GetComponent<RectTransform>();
+            crt.SetParent(col, false);
+            crt.anchorMin = new Vector2(0f, 0f);
+            crt.anchorMax = new Vector2(1f, 0.215f);
+            crt.pivot = new Vector2(0.5f, 0.5f);
+            crt.offsetMin = Vector2.zero;
+            crt.offsetMax = Vector2.zero;
+            var ctmp = credits.GetComponent<TextMeshProUGUI>();
+            if (ctmp != null)
+            {
+                Bauhaus.Label(ctmp, Bauhaus.Ink);
+                ctmp.enableAutoSizing = true;
+                ctmp.fontSizeMax = UiTypography.Scale(22);
+                ctmp.fontSizeMin = 14f;
+                ctmp.alignment = TextAlignmentOptions.BottomLeft;
+                ctmp.textWrappingMode = TextWrappingModes.Normal;
+                ctmp.text = SceneCreditsFooter.BuildMenuFooterCompact();
+            }
         }
-        else if (TMP_Settings.defaultFontAsset != null)
-            graphicCalculatorMenuButtonText.font = TMP_Settings.defaultFontAsset;
+
+        // Language chip, top-right of the page.
+        TrySpawnLanguagePicker();
+
+        // The old centred container (logo bevels, offsets) is no longer used for layout.
+        var container = GameObject.Find("MainUIContainer");
+        if (container != null)
+            container.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+    }
+
+    /// <summary>Re-homes the scene logo (video in a frame) into the panel: black-ruled frame, no grey bevel or offset shadow.</summary>
+    private static void PlaceMenuLogo(RectTransform panel)
+    {
+        var logo = GameObject.Find("Logo");
+        if (logo == null)
+            return;
+        var rt = logo.GetComponent<RectTransform>();
+        rt.SetParent(panel, false);
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        float side = Mathf.Max(200f, Mathf.Min(panel.rect.width, panel.rect.height) * 0.82f);
+        if (side < 1f || float.IsNaN(side))
+            side = 400f;
+        rt.localScale = Vector3.one * (side / 400f);
+        BauhausSceneSkin.SkinLogoFrame(logo.transform);
+    }
+
+    private Button MenuBlockButton(RectTransform parent, string name, Vector2 aMin, Vector2 aMax, Bauhaus.Tone tone,
+        Sprite glyph, out TextMeshProUGUI label, UnityEngine.Events.UnityAction onClick, bool tablet)
+    {
+        var existing = GameObject.Find(name);
+        if (existing != null)
+            Destroy(existing);
+        var rt = UiKit.Rect(name, parent, aMin, aMax);
+        var img = rt.gameObject.AddComponent<Image>();
+        var btn = rt.gameObject.AddComponent<Button>();
+        btn.targetGraphic = img;
+        btn.onClick.AddListener(() => FeelDirector.Play(SfxId.Click, 0.6f));
+        btn.onClick.AddListener(onClick);
+        float pad = glyph != null ? 96f : 20f;
+        label = UiKit.Text(rt, "Text", new Vector2(0f, 0f), new Vector2(1f, 1f), "",
+            UiTypography.Scale(tablet ? 30 : 27), Bauhaus.OnFill(tone), FontStyles.Bold,
+            glyph != null ? TextAlignmentOptions.MidlineLeft : TextAlignmentOptions.Center);
+        label.rectTransform.offsetMin = new Vector2(pad, 10f);
+        label.rectTransform.offsetMax = new Vector2(-16f, -10f);
+        if (glyph != null)
+        {
+            var g = StarGlyph.Add(rt, "Glyph", glyph, Bauhaus.OnFill(tone), new Vector2(56f, 56f));
+            g.rectTransform.anchorMin = g.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+            g.rectTransform.pivot = new Vector2(0f, 0.5f);
+            g.rectTransform.anchoredPosition = new Vector2(24f, 0f);
+        }
+        Bauhaus.Button(btn, tone, Bauhaus.PanelRule);
+        return btn;
     }
 
     private void RefreshPlayerIconMenuButton()
@@ -281,105 +388,10 @@ public class SceneFader : MonoBehaviour
         {
             string g = PlayerGlyphSettings.GetSelectedGlyph();
             string setLabel = LocalizationManager.Get("menu.player_icon_set", "Player icon");
-            playerIconMenuGlyphTmp.text =
-                $"<size=188%><b><color=#fffef9>{g}</color></b></size>\n<size=82%><b>{setLabel}</b></size>";
+            playerIconMenuGlyphTmp.text = $"<size=170%><b>{g}</b></size>\n<size=86%><b>{setLabel}</b></size>";
+            playerIconMenuGlyphTmp.lineSpacing = -18f;
             LocalizationManager.ApplyTextDirection(playerIconMenuGlyphTmp);
         }
-
-        if (playerIconMenuButtonImage != null)
-        {
-            playerIconMenuButtonImage.color =
-                RuntimeUiPolish.BrightenPlayerAccent(PlayerGlyphSettings.GetAccentForCurrentSelection());
-        }
-    }
-
-    /// <summary>Above Play, screen-centered horizontally (Play may be offset in scene art).</summary>
-    private void TrySpawnPlayerIconPickerButton()
-    {
-        if (!string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))
-            return;
-        if (GameObject.Find("MenuPlayerIconButton") != null)
-            return;
-
-        var play = GameObject.FindGameObjectWithTag("PlayButton");
-        if (play == null)
-            return;
-
-        var playRt = play.GetComponent<RectTransform>();
-        if (playRt == null)
-            return;
-
-        bool tablet = DeviceLayout.IsTabletLike();
-        // Lower toward Play (smaller gap above the Play button).
-        float aboveOffset = tablet ? 38f : 30f;
-
-        var go = new GameObject("MenuPlayerIconButton");
-        var rt = go.AddComponent<RectTransform>();
-        rt.SetParent(playRt.parent, false);
-        rt.localScale = Vector3.one;
-        rt.anchorMin = new Vector2(0.5f, 0.5f);
-        rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        // Slightly narrower than Play width; keep enough height so two-line label isn’t cramped (not short vertically).
-        float iconWidth = playRt.sizeDelta.x * (tablet ? 1.02f : 1.06f);
-        rt.sizeDelta = new Vector2(iconWidth, tablet ? 112f : 102f);
-        float stackY = playRt.anchoredPosition.y + aboveOffset + playRt.sizeDelta.y * 0.5f + rt.sizeDelta.y * 0.5f;
-        rt.anchoredPosition = new Vector2(0f, stackY);
-        rt.SetAsLastSibling();
-
-        var playImg = play.GetComponent<Image>();
-        var img = go.AddComponent<Image>();
-        if (playImg != null && playImg.sprite != null)
-        {
-            img.sprite = playImg.sprite;
-            img.type = playImg.type;
-        }
-
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = RuntimeUiPolish.BrightenPlayerAccent(PlayerGlyphSettings.GetAccentForCurrentSelection());
-        playerIconMenuButtonImage = img;
-
-        var btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color,
-            Color.Lerp(img.color, Color.white, 0.2f),
-            Color.Lerp(img.color, Color.black, 0.18f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.28f);
-        btn.onClick.AddListener(OpenMenuPlayerGlyphPickerOverlay);
-
-        var textGo = new GameObject("Text");
-        var trt = textGo.AddComponent<RectTransform>();
-        trt.SetParent(go.transform, false);
-        trt.anchorMin = Vector2.zero;
-        trt.anchorMax = Vector2.one;
-        // Extra bottom inset so two-line label has comfortable space below the words.
-        trt.offsetMin = new Vector2(10f, tablet ? 16f : 14f);
-        trt.offsetMax = new Vector2(-10f, -8f);
-
-        playerIconMenuGlyphTmp = textGo.AddComponent<TextMeshProUGUI>();
-        playerIconMenuGlyphTmp.fontSize = UiTypography.Scale(tablet ? 29 : 26);
-        playerIconMenuGlyphTmp.fontStyle = FontStyles.Bold;
-        playerIconMenuGlyphTmp.enableAutoSizing = false;
-        playerIconMenuGlyphTmp.alignment = TextAlignmentOptions.Center;
-        playerIconMenuGlyphTmp.color = new Color(0.98f, 0.99f, 1f, 1f);
-        playerIconMenuGlyphTmp.outlineWidth = 0.22f;
-        playerIconMenuGlyphTmp.outlineColor = new Color(0f, 0f, 0f, 0.38f);
-        playerIconMenuGlyphTmp.textWrappingMode = TextWrappingModes.Normal;
-        playerIconMenuGlyphTmp.overflowMode = TextOverflowModes.Overflow;
-        playerIconMenuGlyphTmp.richText = true;
-        LocalizationManager.ApplyTextDirection(playerIconMenuGlyphTmp);
-
-        var refTmp = play.GetComponentInChildren<TextMeshProUGUI>();
-        if (refTmp != null && refTmp.font != null)
-        {
-            playerIconMenuGlyphTmp.font = refTmp.font;
-            if (refTmp.fontSharedMaterial != null)
-                playerIconMenuGlyphTmp.fontSharedMaterial = refTmp.fontSharedMaterial;
-        }
-        else if (TMP_Settings.defaultFontAsset != null)
-            playerIconMenuGlyphTmp.font = TMP_Settings.defaultFontAsset;
-
-        playerIconMenuGlyphTmp.fontStyle = FontStyles.Bold;
     }
 
     private static void OpenMenuPlayerGlyphPickerOverlay()
@@ -390,7 +402,7 @@ public class SceneFader : MonoBehaviour
         MenuPlayerGlyphPickerOverlay.Open(canvas.transform);
     }
 
-    /// <summary>Tappable control to cycle UI language (compact for phones).</summary>
+    /// <summary>Language cycle chip: paper block, globe glyph, top-right of the safe area.</summary>
     private void TrySpawnLanguagePicker()
     {
         if (!string.Equals(SceneManager.GetActiveScene().name, "Menu", System.StringComparison.Ordinal))
@@ -410,21 +422,15 @@ public class SceneFader : MonoBehaviour
         var go = new GameObject("MenuLanguagePicker");
         var rt = go.AddComponent<RectTransform>();
         rt.SetParent(parentRt, false);
-        rt.anchorMin = new Vector2(0f, 1f);
-        rt.anchorMax = new Vector2(0f, 1f);
-        rt.pivot = new Vector2(0f, 1f);
-        rt.anchoredPosition = new Vector2(tablet ? 22f : 16f, tablet ? -20f : -16f);
-        rt.sizeDelta = new Vector2(tablet ? 400f : 360f, tablet ? 68f : 60f);
+        rt.anchorMin = new Vector2(1f, 1f);
+        rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(1f, 1f);
+        rt.anchoredPosition = new Vector2(tablet ? -22f : -18f, tablet ? -20f : -16f);
+        rt.sizeDelta = new Vector2(tablet ? 400f : 370f, tablet ? 68f : 60f);
 
         var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.16f, 0.2f, 0.28f, 0.92f);
-
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, img.color,
-            Color.Lerp(img.color, Color.white, 0.15f),
-            Color.Lerp(img.color, Color.black, 0.2f));
         btn.onClick.AddListener(LocalizationManager.CycleNext);
 
         var textGo = new GameObject("Text");
@@ -432,30 +438,26 @@ public class SceneFader : MonoBehaviour
         trt.SetParent(go.transform, false);
         trt.anchorMin = Vector2.zero;
         trt.anchorMax = Vector2.one;
-        trt.offsetMin = new Vector2(12f, 6f);
-        trt.offsetMax = new Vector2(-12f, -6f);
+        trt.offsetMin = new Vector2(58f, 6f);
+        trt.offsetMax = new Vector2(-14f, -6f);
 
         menuLanguageButtonLabel = textGo.AddComponent<TextMeshProUGUI>();
+        UiTypography.ApplyDefaultFontAsset(menuLanguageButtonLabel);
         menuLanguageButtonLabel.enableAutoSizing = true;
-        menuLanguageButtonLabel.fontSizeMin = Mathf.Max(12, UiTypography.Scale(14));
-        menuLanguageButtonLabel.fontSizeMax = UiTypography.Scale(tablet ? 28 : 24);
+        menuLanguageButtonLabel.fontSizeMin = Mathf.Max(14, UiTypography.Scale(14));
+        menuLanguageButtonLabel.fontSizeMax = UiTypography.Scale(tablet ? 26 : 23);
         menuLanguageButtonLabel.fontSize = menuLanguageButtonLabel.fontSizeMax;
-        menuLanguageButtonLabel.alignment = TextAlignmentOptions.Center;
-        menuLanguageButtonLabel.color = new Color(0.93f, 0.96f, 1f, 1f);
-        menuLanguageButtonLabel.textWrappingMode = TextWrappingModes.Normal;
-        menuLanguageButtonLabel.overflowMode = TextOverflowModes.Overflow;
-
-        var refTmp = Object.FindAnyObjectByType<TextMeshProUGUI>();
-        if (refTmp != null && refTmp.font != null)
-        {
-            menuLanguageButtonLabel.font = refTmp.font;
-            if (refTmp.fontSharedMaterial != null)
-                menuLanguageButtonLabel.fontSharedMaterial = refTmp.fontSharedMaterial;
-        }
-        else if (TMP_Settings.defaultFontAsset != null)
-            menuLanguageButtonLabel.font = TMP_Settings.defaultFontAsset;
-
+        menuLanguageButtonLabel.alignment = TextAlignmentOptions.MidlineLeft;
+        menuLanguageButtonLabel.textWrappingMode = TextWrappingModes.NoWrap;
+        menuLanguageButtonLabel.overflowMode = TextOverflowModes.Ellipsis;
         menuLanguageButtonLabel.fontStyle = FontStyles.Bold;
+
+        var globe = StarGlyph.Add(rt, "Glyph", StarGlyph.Globe, Bauhaus.Ink, new Vector2(34f, 34f));
+        globe.rectTransform.anchorMin = globe.rectTransform.anchorMax = new Vector2(0f, 0.5f);
+        globe.rectTransform.pivot = new Vector2(0f, 0.5f);
+        globe.rectTransform.anchoredPosition = new Vector2(14f, 0f);
+
+        Bauhaus.Button(btn, Bauhaus.Tone.Paper);
     }
 
     public void LoadGame()

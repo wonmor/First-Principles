@@ -36,7 +36,7 @@ public static class MenuTutorialOverlay
         rootRt.offsetMax = Vector2.zero;
 
         var dim = root.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.05f, 0.11f, 0.93f);
+        dim.color = Bauhaus.Scrim;
         dim.raycastTarget = true;
 
         void Close()
@@ -59,8 +59,7 @@ public static class MenuTutorialOverlay
         ApplySafeArea(panelRt, tablet ? 14f : 10f);
 
         var panelBg = panel.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(panelBg);
-        panelBg.color = RuntimeUiPolish.PanelMid;
+        Bauhaus.Panel(panelBg); // card + thick black rule
         RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(3f, -5f), 0.34f);
 
         var titleGo = new GameObject("Title");
@@ -112,7 +111,7 @@ public static class MenuTutorialOverlay
         closeButtonTmp.fontSize = UiTypography.Scale(tablet ? 26 : 22);
         closeButtonTmp.fontStyle = FontStyles.Bold;
         closeButtonTmp.alignment = TextAlignmentOptions.Center;
-        closeButtonTmp.color = Color.white;
+        closeButtonTmp.color = Bauhaus.Ink;
         CopyFont(closeButtonTmp);
         closeButtonTmp.fontStyle = FontStyles.Bold;
         LocalizationManager.ApplyTextDirection(closeButtonTmp);
@@ -171,7 +170,7 @@ public static class MenuTutorialOverlay
         bodyTmp.fontSize = UiTypography.Scale(tablet ? 26 : (Screen.height <= 950 ? 21 : 24));
         bodyTmp.lineSpacing = 2f;
         bodyTmp.alignment = TextAlignmentOptions.TopLeft;
-        bodyTmp.color = new Color(0.92f, 0.93f, 0.96f, 1f);
+        bodyTmp.color = Bauhaus.Ink;
         bodyTmp.textWrappingMode = TextWrappingModes.Normal;
         bodyTmp.richText = true;
         bodyTmp.margin = new Vector4(10f, 10f, 10f, 10f);
@@ -206,16 +205,16 @@ public static class MenuTutorialOverlay
     {
         return
             "<b>Goal</b>\n" +
-            "Move along the graph, use platforms (green), avoid red hazards, and reach the bright exit on the right.\n\n" +
+            "Move along the graph, use the blue platforms, avoid red hazards, and reach the yellow exit on the right.\n\n" +
             "<b>Controls</b>\n" +
             "– <b>Move</b> — arrows / WASD, or on a phone hold the <b>left</b> / <b>right half</b> of the screen.\n" +
             "– <b>Jump</b> — Space, or on a phone <b>tap with a second finger</b> while holding left/right. You jump from solid platforms.\n\n" +
             "<b>The two curves</b>\n" +
-            "– <color=#c4b5fd>Main curve</color> — the function you walk on.\n" +
-            "– <color=#fdba74>Derivative \\(f'\\)</color> — slope information; it’s drawn as a second line.\n\n" +
+            "– <color=#1F4FA0>Main curve</color> — the function you walk on.\n" +
+            "– <color=#D7261E>Derivative \\(f'\\)</color> — slope information; it’s drawn as a second line.\n\n" +
             "<b>Air jump on the derivative</b>\n" +
             "While you are <b>in the air</b>, if your character overlaps the <b>derivative curve</b>, you can press <b>Jump again</b> for an extra hop.\n\n" +
-            "<size=94%><color=#a8b2d1>The derivative line brightens when you touch it. You get <b>one</b> bonus jump each time you brush it until you leave the curve or land. On phones you may feel a short vibration when you touch \\(f'\\); on PC a sound plays instead when vibration isn’t available.</color></size>\n\n" +
+            "<size=94%><color=#57534A>The derivative line brightens when you touch it. You get <b>one</b> bonus jump each time you brush it until you leave the curve or land. On phones you may feel a short vibration when you touch \\(f'\\); on PC a sound plays instead when vibration isn’t available.</color></size>\n\n" +
             "<b>Select level</b>\n" +
             "<size=94%>On this screen, stages are grouped (Core, Engineering, AP Calculus, Aerospace …). Tap <b>How to play</b> at the bottom to reopen this help. Pick a group, then a level.</size>";
     }
@@ -263,7 +262,7 @@ public static class MenuTutorialOverlay
 
     private static void ApplySafeArea(RectTransform panelRt, float outerMargin)
     {
-        Rect sa = Screen.safeArea;
+        Rect sa = DeviceLayout.SafeArea;
         float w = Mathf.Max(1f, Screen.width);
         float h = Mathf.Max(1f, Screen.height);
         float m = outerMargin;

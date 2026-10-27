@@ -72,21 +72,14 @@ public static class PaywallOverlay
             landscape ? new Vector2(0.18f, 0.03f) : new Vector2(0.04f, 0.08f),
             landscape ? new Vector2(0.82f, 0.97f) : new Vector2(0.96f, 0.92f));
 
-        var accent = UiKit.Rect("Accent", panel, new Vector2(0f, 1f), new Vector2(1f, 1f));
-        accent.pivot = new Vector2(0.5f, 1f);
-        accent.sizeDelta = new Vector2(-48f, 8f);
-        accent.anchoredPosition = new Vector2(0f, -18f);
-        var accentImg = accent.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(accentImg);
-        accentImg.color = UiKit.PlusViolet;
-        accentImg.raycastTarget = false;
+        UiKit.Band(panel, Bauhaus.Blue, 18f);
 
         bool ownsFull = Entitlements.OwnsFullGameOutright;
         string titleText = reason == Reason.Hints
             ? LocalizationManager.Get("paywall.hints.title", "Out of hints for today")
             : LocalizationManager.Get("paywall.plus.title", "Go further with First Principles");
         var title = UiKit.Text(panel, "Title", new Vector2(0.05f, 0.875f), new Vector2(0.95f, 0.955f), titleText,
-            UiTypography.Scale(tablet ? 40 : 36), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
+            UiTypography.Scale(tablet ? 40 : 36), Bauhaus.Ink, FontStyles.Bold);
         if (Application.isEditor || Debug.isDebugBuild)
         {
             title.raycastTarget = true;
@@ -109,20 +102,20 @@ public static class PaywallOverlay
                 "You've got {0} free levels, the daily challenge and {1} hints a day. Unlock all {2} levels: AP Calculus BC & Physics C, aerospace, economics, transforms, Big O and the four final bosses."),
                 LevelAccessPolicy.FreeLevelCount, ProgressRules.FreeHintsPerDay, total);
         UiKit.Text(panel, "Body", new Vector2(0.07f, 0.74f), new Vector2(0.93f, 0.875f), body,
-            UiTypography.Scale(tablet ? 22 : 20), new Color(0.82f, 0.86f, 0.94f, 1f));
+            UiTypography.Scale(tablet ? 22 : 20), Bauhaus.Ink);
 
         // Plans ------------------------------------------------------------------
         var rows = new System.Collections.Generic.List<PlanRow>();
         float top = 0.725f;
         float h = ownsFull ? 0.135f : 0.115f;
         float gap = 0.012f;
-        rows.Add(AddPlan(panel, LevelAccessPolicy.PlusYearlyProductId, top, h, UiKit.PlusViolet, tablet, true));
+        rows.Add(AddPlan(panel, LevelAccessPolicy.PlusYearlyProductId, top, h, Bauhaus.Blue, tablet, true));
         top -= h + gap;
-        rows.Add(AddPlan(panel, LevelAccessPolicy.PlusMonthlyProductId, top, h, new Color(0.3f, 0.27f, 0.55f, 0.98f), tablet, false));
+        rows.Add(AddPlan(panel, LevelAccessPolicy.PlusMonthlyProductId, top, h, Bauhaus.Card, tablet, false));
         top -= h + gap;
         if (!ownsFull)
         {
-            rows.Add(AddPlan(panel, LevelAccessPolicy.FullGameProductId, top, h, RuntimeUiPolish.AccentCoral, tablet, false));
+            rows.Add(AddPlan(panel, LevelAccessPolicy.FullGameProductId, top, h, Bauhaus.Red, tablet, false));
             top -= h + gap;
         }
         _plans = rows.ToArray();
@@ -130,16 +123,16 @@ public static class PaywallOverlay
         // Restore + Not now -------------------------------------------------------
         float by1 = top - 0.075f;
         var restoreBtn = UiKit.Button(panel, "RestoreButton", new Vector2(0.07f, by1), new Vector2(0.49f, top - 0.005f),
-            LocalizationManager.Get("paywall.restore", "Restore purchases"), RuntimeUiPolish.ButtonNeutral, OnRestore, tablet ? 22 : 20);
+            LocalizationManager.Get("paywall.restore", "Restore purchases"), Bauhaus.Tone.Paper, OnRestore, tablet ? 22 : 20);
         _restoreBtn = restoreBtn;
         var laterBtn = UiKit.Button(panel, "NotNowButton", new Vector2(0.51f, by1), new Vector2(0.93f, top - 0.005f),
-            LocalizationManager.Get("paywall.not_now", "Not now"), new Color(0.15f, 0.17f, 0.24f, 0.96f),
+            LocalizationManager.Get("paywall.not_now", "Not now"), Bauhaus.Tone.Ink,
             () => { if (!_busy) Close(); }, tablet ? 22 : 20);
         OverlayCancelHandler.Attach(_root, laterBtn, _plans.Length > 0 ? _plans[0].Button : laterBtn);
 
         // Status + legal ----------------------------------------------------------
         _statusTmp = UiKit.Text(panel, "Status", new Vector2(0.06f, by1 - 0.055f), new Vector2(0.94f, by1 - 0.005f), "",
-            UiTypography.Scale(tablet ? 19 : 17), new Color(0.75f, 0.8f, 0.92f, 0.9f), FontStyles.Italic);
+            UiTypography.Scale(tablet ? 19 : 17), Bauhaus.InkSoft, FontStyles.Normal);
 
         bool apple = Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.OSXPlayer
                      || Application.platform == RuntimePlatform.VisionOS || Application.platform == RuntimePlatform.tvOS
@@ -149,14 +142,14 @@ public static class PaywallOverlay
             "Plus is an auto-renewing subscription. Payment is charged to your {0} at confirmation. It renews automatically at the same price for the same period unless cancelled at least 24 hours before the end of the current period; manage or cancel any time in your account settings. The Full Game is a one-time purchase."),
             account);
         UiKit.Text(panel, "Legal", new Vector2(0.06f, 0.075f), new Vector2(0.94f, by1 - 0.06f), legal,
-            UiTypography.Scale(tablet ? 15 : 13), new Color(0.62f, 0.67f, 0.78f, 0.95f));
+            UiTypography.Scale(tablet ? 18 : 17), Bauhaus.InkSoft);
 
         UiKit.Button(panel, "TermsLink", new Vector2(0.07f, 0.018f), new Vector2(0.49f, 0.068f),
-            LocalizationManager.Get("paywall.terms", "Terms of Use (EULA)"), new Color(0.12f, 0.13f, 0.19f, 0.9f),
-            () => UiKit.OpenUrl(apple ? AppleEulaUrl : GooglePlayTermsUrl), tablet ? 17 : 15, new Color(0.7f, 0.82f, 1f, 1f));
+            LocalizationManager.Get("paywall.terms", "Terms of Use (EULA)"), Bauhaus.Tone.Paper,
+            () => UiKit.OpenUrl(apple ? AppleEulaUrl : GooglePlayTermsUrl), tablet ? 19 : 18);
         UiKit.Button(panel, "PrivacyLink", new Vector2(0.51f, 0.018f), new Vector2(0.93f, 0.068f),
-            LocalizationManager.Get("paywall.privacy", "Privacy Policy"), new Color(0.12f, 0.13f, 0.19f, 0.9f),
-            () => UiKit.OpenUrl(PrivacyPolicyUrl), tablet ? 17 : 15, new Color(0.7f, 0.82f, 1f, 1f));
+            LocalizationManager.Get("paywall.privacy", "Privacy Policy"), Bauhaus.Tone.Paper,
+            () => UiKit.OpenUrl(PrivacyPolicyUrl), tablet ? 19 : 18);
 
         Entitlements.Changed += Refresh;
         Entitlements.PurchaseFinished += OnPurchaseFinished;
@@ -167,15 +160,16 @@ public static class PaywallOverlay
     static PlanRow AddPlan(RectTransform panel, string productId, float top, float h, Color bg, bool tablet, bool bestValue)
     {
         var row = new PlanRow { ProductId = productId };
-        var btn = UiKit.Button(panel, "Plan_" + productId, new Vector2(0.07f, top - h), new Vector2(0.93f, top), "", bg,
-            () => OnBuy(productId), tablet ? 26 : 24, Color.white);
+        var tone = Bauhaus.ToneFor(bg);
+        var btn = UiKit.Button(panel, "Plan_" + productId, new Vector2(0.07f, top - h), new Vector2(0.93f, top), "", tone,
+            () => OnBuy(productId), tablet ? 26 : 24);
         // Replace the default centered label with a title + detail pair.
         Object.Destroy(btn.transform.Find("Text").gameObject);
         row.Button = btn;
         row.Title = UiKit.Text(btn.transform, "PlanTitle", new Vector2(0.04f, 0.5f), new Vector2(0.96f, 0.95f), "",
-            UiTypography.Scale(tablet ? 26 : 24), Color.white, FontStyles.Bold);
+            UiTypography.Scale(tablet ? 26 : 24), Bauhaus.OnFill(tone), FontStyles.Bold);
         row.Detail = UiKit.Text(btn.transform, "PlanDetail", new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.5f), "",
-            UiTypography.Scale(tablet ? 18 : 16), new Color(1f, 1f, 1f, 0.86f));
+            UiTypography.Scale(tablet ? 19 : 18), Bauhaus.OnFill(tone));
         if (bestValue)
         {
             var tag = UiKit.Rect("BestValue", btn.transform, new Vector2(1f, 1f), new Vector2(1f, 1f));
@@ -183,11 +177,10 @@ public static class PaywallOverlay
             tag.sizeDelta = new Vector2(tablet ? 190f : 170f, 34f);
             tag.anchoredPosition = new Vector2(-14f, 0f);
             var timg = tag.gameObject.AddComponent<Image>();
-            RuntimeUiPolish.UseRoundedSliced(timg);
-            timg.color = UiKit.Gold;
+            Bauhaus.Panel(timg, Bauhaus.Yellow, 2f);
             timg.raycastTarget = false;
             UiKit.Text(tag, "T", new Vector2(0.04f, 0.05f), new Vector2(0.96f, 0.95f),
-                LocalizationManager.Get("paywall.best_value", "Best value"), UiTypography.Scale(16), new Color(0.2f, 0.14f, 0.02f, 1f), FontStyles.Bold);
+                LocalizationManager.Get("paywall.best_value", "Best value"), UiTypography.Scale(16), Bauhaus.Ink, FontStyles.Bold);
         }
         return row;
     }

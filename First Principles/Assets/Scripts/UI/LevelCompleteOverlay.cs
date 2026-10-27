@@ -36,21 +36,14 @@ public static class LevelCompleteOverlay
             landscape ? new Vector2(0.24f, 0.07f) : new Vector2(0.05f, 0.16f),
             landscape ? new Vector2(0.76f, 0.93f) : new Vector2(0.95f, 0.84f));
 
-        // Accent bar.
-        var accent = UiKit.Rect("Accent", panel, new Vector2(0f, 1f), new Vector2(1f, 1f));
-        accent.pivot = new Vector2(0.5f, 1f);
-        accent.sizeDelta = new Vector2(-48f, 8f);
-        accent.anchoredPosition = new Vector2(0f, -20f);
-        var accentImg = accent.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(accentImg);
-        accentImg.color = UiKit.Gold;
-        accentImg.raycastTarget = false;
+        // Yellow header block (Bauhaus band) across the top of the card.
+        UiKit.Band(panel, Bauhaus.Yellow, 22f);
 
         string title = o.FirstClear
             ? LocalizationManager.Get("complete.title_first", "Level cleared!")
             : LocalizationManager.Get("complete.title", "Cleared again!");
         UiKit.Text(panel, "Title", new Vector2(0.06f, 0.83f), new Vector2(0.94f, 0.94f), title,
-            UiTypography.Scale(tablet ? 46 : 42), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
+            UiTypography.Scale(tablet ? 46 : 42), Bauhaus.Ink, FontStyles.Bold);
         UiKit.Text(panel, "Level", new Vector2(0.06f, 0.76f), new Vector2(0.94f, 0.83f),
             GameLevelCatalog.GetLocalizedDisplayName(r.LevelIndex),
             UiTypography.Scale(tablet ? 24 : 22), UiKit.Muted);
@@ -62,14 +55,14 @@ public static class LevelCompleteOverlay
             LocalizationManager.Get("complete.stats", "<b>{0}</b> points   |   <b>{1}</b> falls   |   <b>{2}</b>"),
             r.Score, r.Falls, FormatTime(r.Seconds));
         UiKit.Text(panel, "Stats", new Vector2(0.06f, 0.47f), new Vector2(0.94f, 0.55f), stats,
-            UiTypography.Scale(tablet ? 26 : 23), RuntimeUiPolish.TitleIvory);
+            UiTypography.Scale(tablet ? 26 : 23), Bauhaus.Ink);
 
         string rules = string.Format(
             LocalizationManager.Get("complete.rules",
                 "1 star: reach the exit   |   2: at most {0} fall   |   3: no falls and {1}+ points"),
             ProgressRules.TwoStarMaxFalls, ProgressRules.ThreeStarMinScore);
         UiKit.Text(panel, "Rules", new Vector2(0.06f, 0.41f), new Vector2(0.94f, 0.47f), rules,
-            UiTypography.Scale(tablet ? 18 : 16), UiKit.Muted, FontStyles.Italic);
+            UiTypography.Scale(tablet ? 20 : 19), UiKit.Muted, FontStyles.Normal);
 
         // Badge line (new best / daily / streak).
         string badge = "";
@@ -101,7 +94,7 @@ public static class LevelCompleteOverlay
         else if (o.NewBestScore)
             badge = LocalizationManager.Get("complete.best", "New best score!");
         var badgeTmp = UiKit.Text(panel, "Badge", new Vector2(0.06f, 0.33f), new Vector2(0.94f, 0.41f), badge,
-            UiTypography.Scale(tablet ? 26 : 23), goldBadge ? UiKit.Gold : UiKit.Mint, FontStyles.Bold);
+            UiTypography.Scale(tablet ? 26 : 23), goldBadge ? Bauhaus.Red : Bauhaus.Blue, FontStyles.Bold);
 
         // Buttons.
         bool nextLocked = !Entitlements.IsLevelUnlocked(NextIndex(r.LevelIndex));
@@ -109,12 +102,12 @@ public static class LevelCompleteOverlay
             ? LocalizationManager.Get("complete.next_locked", "Unlock more levels")
             : LocalizationManager.Get("complete.next", "Next level");
         var next = UiKit.Button(panel, "Next", new Vector2(0.08f, 0.17f), new Vector2(0.92f, 0.3f), nextLabel,
-            RuntimeUiPolish.AccentCoral, () => { Close(); onNext?.Invoke(); }, tablet ? 32 : 30, Color.white);
+            Bauhaus.Tone.Red, () => { Close(); onNext?.Invoke(); }, tablet ? 32 : 30);
         var replay = UiKit.Button(panel, "Replay", new Vector2(0.08f, 0.05f), new Vector2(0.49f, 0.15f),
-            LocalizationManager.Get("complete.replay", "Replay"), RuntimeUiPolish.ButtonNeutral,
+            LocalizationManager.Get("complete.replay", "Replay"), Bauhaus.Tone.Paper,
             () => { Close(); onReplay?.Invoke(); }, tablet ? 25 : 23);
         var levels = UiKit.Button(panel, "Levels", new Vector2(0.51f, 0.05f), new Vector2(0.92f, 0.15f),
-            LocalizationManager.Get("complete.levels", "Levels"), new Color(0.15f, 0.17f, 0.24f, 0.96f),
+            LocalizationManager.Get("complete.levels", "Levels"), Bauhaus.Tone.Ink,
             () => { Close(); onLevels?.Invoke(); }, tablet ? 25 : 23);
         OverlayCancelHandler.Attach(_root, levels, next);
 
@@ -153,11 +146,10 @@ public static class LevelCompleteOverlay
             yield return new WaitForSecondsRealtime(0.28f);
             if (stars[i] == null)
                 yield break;
-            stars[i].sprite = StarGlyph.Filled;
-            stars[i].color = UiKit.Gold;
+            StarGlyph.SetStar(stars[i], true);
             FeelDirector.Play(i == 0 ? SfxId.Star1 : i == 1 ? SfxId.Star2 : SfxId.Star3, 0.85f);
             FeelDirector.Instance.StartCoroutine(FeelDirector.PopScale(stars[i].transform, 0.5f));
-            FeelDirector.Instance.Burst(stars[i].transform.position, UiKit.Gold, 6 + i * 3, 360f);
+            FeelDirector.Instance.Burst(stars[i].transform.position, Bauhaus.Ink, 6 + i * 3, 360f);
         }
 
         if (badge != null && !string.IsNullOrEmpty(badge.text))

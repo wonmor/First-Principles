@@ -32,7 +32,7 @@ public static class MenuPlayerGlyphPickerOverlay
         rootRt.offsetMax = Vector2.zero;
 
         var dim = root.AddComponent<Image>();
-        dim.color = new Color(0.02f, 0.03f, 0.08f, 0.94f);
+        dim.color = Bauhaus.Scrim;
         dim.raycastTarget = true;
 
         void Close()
@@ -52,8 +52,7 @@ public static class MenuPlayerGlyphPickerOverlay
         ApplySafeArea(panelRt, tablet ? 12f : 8f);
 
         var panelBg = panel.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(panelBg);
-        panelBg.color = RuntimeUiPolish.PanelMid;
+        Bauhaus.Panel(panelBg); // card + thick black rule
         RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(3f, -5f), 0.34f);
 
         var titleGo = new GameObject("Title");
@@ -82,7 +81,7 @@ public static class MenuPlayerGlyphPickerOverlay
         var hintTmp = hintGo.AddComponent<TextMeshProUGUI>();
         hintTmp.fontSize = UiTypography.Scale(tablet ? 22 : 18);
         hintTmp.alignment = TextAlignmentOptions.Center;
-        hintTmp.color = new Color(0.75f, 0.78f, 0.86f, 0.95f);
+        hintTmp.color = Bauhaus.InkSoft;
         hintTmp.richText = true;
         CopyFont(hintTmp);
         hintTmp.text = LocalizationManager.Get("menu.player_icon_hint", "Tap a symbol — it’s your avatar in levels.");
@@ -153,29 +152,21 @@ public static class MenuPlayerGlyphPickerOverlay
         {
             int idx = i;
             string g = PlayerGlyphSettings.Glyphs[i];
-            Color cell = PlayerGlyphSettings.GetAccentColorForIndex(i);
-            if (i == selected)
-                cell = Color.Lerp(cell, Color.white, 0.2f);
+            // Bauhaus grid of paper keys; the current glyph is the solid ink key.
+            bool isSel = i == selected;
 
             var cellGo = new GameObject($"GlyphChoice_{i}");
             var cellRt = cellGo.AddComponent<RectTransform>();
             cellRt.SetParent(contentRt, false);
 
             var cellImg = cellGo.AddComponent<Image>();
-            RuntimeUiPolish.UseRoundedSliced(cellImg);
-            cellImg.color = cell;
-
             var btn = cellGo.AddComponent<Button>();
             btn.targetGraphic = cellImg;
-            RuntimeUiPolish.ApplyButtonTransitions(btn, cell,
-                Color.Lerp(cell, Color.white, 0.22f),
-                Color.Lerp(cell, Color.black, 0.2f));
             btn.onClick.AddListener(() =>
             {
                 PlayerGlyphSettings.SetSelectedIndex(idx);
                 Close();
             });
-            RuntimeUiPolish.ApplyDropShadow(cellRt, new Vector2(2f, -3f), 0.26f);
 
             var txtGo = new GameObject("Text");
             var txtRt = txtGo.AddComponent<RectTransform>();
@@ -189,16 +180,13 @@ public static class MenuPlayerGlyphPickerOverlay
             tmp.fontSize = UiTypography.Scale(tablet ? 52 : 44);
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = new Color(1f, 0.99f, 0.97f, 1f);
+            tmp.color = isSel ? Bauhaus.Card : Bauhaus.Ink;
             tmp.enableAutoSizing = true;
             tmp.fontSizeMin = 22;
             tmp.fontSizeMax = 128;
             tmp.richText = false;
-            tmp.outlineWidth = i == selected ? 0.38f : 0.28f;
-            tmp.outlineColor = i == selected
-                ? new Color(1f, 1f, 1f, 0.82f)
-                : new Color(0f, 0f, 0f, 0.68f);
             CopyFont(tmp);
+            Bauhaus.Button(btn, isSel ? Bauhaus.Tone.Ink : Bauhaus.Tone.Paper);
         }
 
         var closerGo = new GameObject("DoneButton");
@@ -230,7 +218,7 @@ public static class MenuPlayerGlyphPickerOverlay
         var closerTmp = closerTxtGo.AddComponent<TextMeshProUGUI>();
         closerTmp.fontSize = UiTypography.Scale(tablet ? 24 : 20);
         closerTmp.alignment = TextAlignmentOptions.Center;
-        closerTmp.color = Color.white;
+        closerTmp.color = Bauhaus.Ink;
         CopyFont(closerTmp);
         closerTmp.text = LocalizationManager.Get("menu.player_icon_done", "Done");
 
@@ -280,7 +268,7 @@ public static class MenuPlayerGlyphPickerOverlay
 
     private static void ApplySafeArea(RectTransform panelRt, float outerMargin)
     {
-        Rect sa = Screen.safeArea;
+        Rect sa = DeviceLayout.SafeArea;
         float w = Mathf.Max(1f, Screen.width);
         float h = Mathf.Max(1f, Screen.height);
         float m = outerMargin;

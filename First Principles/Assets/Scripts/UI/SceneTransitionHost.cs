@@ -67,7 +67,7 @@ public sealed class SceneTransitionHost : MonoBehaviour
         dimRt.offsetMin = Vector2.zero;
         dimRt.offsetMax = Vector2.zero;
         var dim = dimGo.GetComponent<Image>();
-        dim.color = new Color(0.05f, 0.06f, 0.09f, 0.94f);
+        dim.color = Bauhaus.Paper; // loading page: plain paper
         dim.raycastTarget = true;
 
         var labelGo = new GameObject("LoadingText", typeof(RectTransform));
@@ -81,12 +81,12 @@ public sealed class SceneTransitionHost : MonoBehaviour
         tmp.text = LocalizationManager.Get("ui.loading", "Loading…");
         tmp.fontSize = UiTypography.Scale(40);
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(0.94f, 0.96f, 1f, 0.96f);
+        tmp.color = Bauhaus.Ink;
+        tmp.fontStyle = FontStyles.Bold;
         tmp.textWrappingMode = TextWrappingModes.NoWrap;
         tmp.richText = true;
         tmp.raycastTarget = false;
-        if (TMP_Settings.defaultFontAsset != null)
-            tmp.font = TMP_Settings.defaultFontAsset;
+        UiTypography.ApplyDefaultFontAsset(tmp);
         LocalizationManager.ApplyTextDirection(tmp);
     }
 
