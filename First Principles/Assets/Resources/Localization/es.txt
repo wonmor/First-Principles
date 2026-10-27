@@ -10,24 +10,24 @@ ui.close=Cerrar
 ui.math_concepts=Conceptos matemáticos
 ui.jump=Saltar
 ui.move=Mover
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(teclado: flechas / Espacio)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(teclado: flechas / Espacio)</color></size>
 hud.stage=FASE
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) para x>0 | min(x,3)...
 graph.status_enter=Intro / tocar fuera para graficar
-graph.status_graphed=<color=#8fd9b3>Graficado</color>
+graph.status_graphed=<color=#1F4FA0>Graficado</color>
 graph.line1=<b>Modo calculadora gráfica</b>
-graph.line2=<size=88%><color=#c4d0e8>Escribe <b>f(u)</b> abajo (la variable <b>x</b> en el cuadro = u interior). Luego:</color></size>
+graph.line2=<size=88%><color=#57534A>Escribe <b>f(u)</b> abajo (la variable <b>x</b> en el cuadro = u interior). Luego:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} | doble toque <b>+</b> | mantén <b>−</b> | <b>Escala</b> acercar / mantén alejar | <b>pellizco</b> con dos dedos</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x en [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x en [{4},{5}]</color></size>
 graph.param_a=A (escala vertical)
 graph.param_k=k (escala horizontal)
 graph.param_c=C (desplazamiento vertical)
 graph.param_d=D (desplazamiento horizontal)
 graph.calculator_intro=<b>Modo calculadora gráfica</b>\n<size=88%>Escribe casi cualquier <b>f(u)</b> (variable <b>x</b> en tu fórmula); <b>Trans</b> ajusta A, k, C, D; <b>Escala</b> y <b>pellizco</b> hacen zoom en la ventana.</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × Rayan Kaissi (GameGenesis)</size>
-menu.support_contact=<size=32><color=#94a3b8>Soporte:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>Soporte:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=Introducción: primeros principios
 level.1=Pendiente de la parábola
 level.2=Ondas del seno
@@ -105,3 +105,6 @@ paywall.status.restore_failed=No se pudo restaurar ahora. Inténtalo de nuevo.
 paywall.status.deferred=La compra está pendiente de aprobación. Los niveles se desbloquearán automáticamente.
 paywall.status.already_owned=Ya lo tienes — toca Restaurar compras.
 paywall.status.failed=La compra no se completó. No se te ha cobrado.
+menu.play=Jugar
+ui.back=Atrás
+menu.tagline=Un juego de plataformas de cálculo

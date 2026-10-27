@@ -10,24 +10,24 @@ ui.close=关闭
 ui.math_concepts=数学概念
 ui.jump=跳跃
 ui.move=移动
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（键盘：方向键 / 空格）</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>（键盘：方向键 / 空格）</color></size>
 hud.stage=阶段
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x)（x>0）| min(x,3)...
 graph.status_enter=回车 / 点击外部绘制图象
-graph.status_graphed=<color=#8fd9b3>已绘制</color>
+graph.status_graphed=<color=#1F4FA0>已绘制</color>
 graph.line1=<b>图形计算器模式</b>
-graph.line2=<size=88%><color=#c4d0e8>在下方输入 <b>f(u)</b>（框内变量 <b>x</b> 为内层 u）。然后：</color></size>
+graph.line2=<size=88%><color=#57534A>在下方输入 <b>f(u)</b>（框内变量 <b>x</b> 为内层 u）。然后：</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} | 双击 <b>+</b> | 长按 <b>−</b> | <b>Scale</b> 点按放大 / 长按缩小 | 双指 <b>捏合</b></size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x 在 [{4},{5}] 内</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x 在 [{4},{5}] 内</color></size>
 graph.param_a=A（纵向缩放）
 graph.param_k=k（横向缩放）
 graph.param_c=C（纵向平移）
 graph.param_d=D（横向平移）
 graph.calculator_intro=<b>图形计算器模式</b>\n<size=88%>可输入几乎任意 <b>f(u)</b>（式中变量 <b>x</b>）；<b>Trans</b> 调整 A、k、C、D；<b>Scale</b> 与 <b>捏合</b> 缩放窗口。</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong（Orch Aerospace）× Rayan Kaissi（GameGenesis）</size>
-menu.support_contact=<size=32><color=#94a3b8>支持：</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>支持：</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=第一性原理入门
 level.1=抛物线斜率
 level.2=正弦波动
@@ -105,3 +105,6 @@ paywall.status.restore_failed=暂时无法恢复，请重试。
 paywall.status.deferred=购买正在等待批准。批准后关卡将自动解锁。
 paywall.status.already_owned=你已购买此项目——请点按“恢复购买”。
 paywall.status.failed=购买未完成，你没有被扣款。
+menu.play=开始
+ui.back=返回
+menu.tagline=微积分平台跳跃游戏

@@ -1,20 +1,20 @@
 @@SECTION=intro
 <b><size=120%>Math concepts — in-game reader</size></b>
 <size=90%>The game <b>First Principles</b> takes its name from public remarks by <b>Elon Musk</b> on a <b>first-principles approach</b> to <b>business</b> and to <b>solving problems in life and work</b>—then teaches <b>calculus-first</b> ideas on the graph as a matching metaphor.</size>
-<size=90%>Use <b>Math concepts</b> while playing, or <b>Math tips & snippets</b> on Level select — same scrollable notes. Tap the dark backdrop or <b>Close</b> to dismiss.</size>
+<size=90%>Use <b>Math concepts</b> while playing, or <b>Math tips & snippets</b> on Level select — same scrollable notes. Tap outside the sheet or <b>Close</b> to dismiss.</size>
 
 @@SECTION=how_graph
 <b><size=115%>How this game teaches calculus (read the graph while you play)</size></b>
 <size=92%>
-• <b>Main curve</b> — the thick path on the Cartesian grid is \(y = f(x)\) for this stage. Your character tries to stand on platforms that follow that shape. The <b>Equation</b> label (when visible) names the rule being plotted.
+– <b>Main curve</b> — the thick path on the Cartesian grid is \(y = f(x)\) for this stage. Your character tries to stand on platforms that follow that shape. The <b>Equation</b> label (when visible) names the rule being plotted.
 
-• <b>Derivative curve \(f'(x)\)</b> — drawn as a second graph; values come from a <i>numerical</i> derivative (sampled slopes). On many levels, <b>where \(f'\) is large enough you get solid ground</b>; where it falls short you can fall through — the platformer is tied to slope logic.
+– <b>Derivative curve \(f'(x)\)</b> — drawn as a second graph; values come from a <i>numerical</i> derivative (sampled slopes). On many levels, <b>where \(f'\) is large enough you get solid ground</b>; where it falls short you can fall through — the platformer is tied to slope logic.
 
-• <b>Stages & “pops”</b> — the <b>Stage</b> HUD counts story beats. As you move right, the derivative visualization can <i>pop</i> or recolor at set \(x\)-values (like curtain lifts between ideas in a lesson).
+– <b>Stages & “pops”</b> — the <b>Stage</b> HUD counts story beats. As you move right, the derivative visualization can <i>pop</i> or recolor at set \(x\)-values (like curtain lifts between ideas in a lesson).
 
-• <b>Riemann sums / area</b> — some levels shade rectangles or build <i>stair</i> platforms from left-, right-, or midpoint-rule samples. That pictures \(\displaystyle \int_a^b f(x)\,dx\) as the limit of \(\sum f(x^\ast)\,\Delta x\).
+– <b>Riemann sums / area</b> — some levels shade rectangles or build <i>stair</i> platforms from left-, right-, or midpoint-rule samples. That pictures \(\displaystyle \int_a^b f(x)\,dx\) as the limit of \(\sum f(x^\ast)\,\Delta x\).
 
-• <b>Story text</b> — the banner at the top ties each level to the math (series, polar, physics metaphors, etc.). Pause and read; it fades so the run stays readable. The <b>First Principles Primer</b> also nudges <b>first-principles business</b> thinking (reason from fundamentals vs analogy).
+– <b>Story text</b> — the banner at the top ties each level to the math (series, polar, physics metaphors, etc.). Pause and read; it fades so the run stays readable. The <b>First Principles Primer</b> also nudges <b>first-principles business</b> thinking (reason from fundamentals vs analogy).
 
 Everything below is a <b>topic glossary</b> you can skim between deaths or after finishing a graph — plus a <b>First principles thinking (business)</b> section before exam prep.
 </size>
@@ -124,10 +124,10 @@ A circle is usually written implicitly. Solving for \(y\) gives two branches (\(
 <size=92%>Startup culture often cites <b>Elon Musk</b> for reviving <b>first principles</b> at places like <b>Tesla / SpaceX</b>: stop trusting “the market always prices it this way,” and instead <b>unpack assumptions</b> until you hit bedrock facts (materials, energy, physics, true unit costs), then <b>reason upward</b> into a new design. The idea is older than any one founder — but the <i>habit</i> matches this game’s visuals.</size>
 
 <b><size=118%>Map the metaphor</size></b>
-• <b>Your mental “business curve”</b> is like <b>f(x)</b> — the story you tell about how output moves with a lever (price, latency, quality, throughput).
-• <b>Where it breaks or soars</b> is like <b>f'(x)</b> — <i>sensitivity</i>. Same as here: derivative magnitude decides whether the “floor” (your plan) actually holds.
-• <b>Stages & pops</b> — slice the bet into acts; each reveal is a new hypothesis. <b>Riemann / area levels</b> — many small choices sum; refine the grid before you scale spend.
-• <b>Multivariable slices</b> — fix hidden variables on purpose; one clear 1D walk beats a fuzzy 4D slide deck.
+– <b>Your mental “business curve”</b> is like <b>f(x)</b> — the story you tell about how output moves with a lever (price, latency, quality, throughput).
+– <b>Where it breaks or soars</b> is like <b>f'(x)</b> — <i>sensitivity</i>. Same as here: derivative magnitude decides whether the “floor” (your plan) actually holds.
+– <b>Stages & pops</b> — slice the bet into acts; each reveal is a new hypothesis. <b>Riemann / area levels</b> — many small choices sum; refine the grid before you scale spend.
+– <b>Multivariable slices</b> — fix hidden variables on purpose; one clear 1D walk beats a fuzzy 4D slide deck.
 
 <b><size=92%>This is <i>not</i> legal, tax, or investing advice — a thinking drill you can pair with real advisors and data. Full write-up:</size></b> <b>docs/first-principles-business.md</b> on GitHub Pages.
 
@@ -155,4 +155,4 @@ BC stacks <b>series & Taylor</b>, <b>parametric / polar / vector-valued</b> moti
 <b><size=110%>Where to read more</size></b>
 <b>docs/math-concepts.md</b> (index), <b>docs/first-principles-business.md</b> (Musk-popularized builder lens ↔ game), <b>docs/competition-math.md</b> &amp; <b>docs/amc-10-12.md</b> (contest / MAA map), <b>docs/engineering-math.md</b> (applied circuits/oscillations), and the exam-prep files above on GitHub Pages.
 
-— © 2022-2026 · ORCH AEROSPACE × GAME GENESIS · First Principles
+— © 2022-2026 × ORCH AEROSPACE × GAME GENESIS × First Principles

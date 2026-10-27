@@ -1,7 +1,7 @@
 # 한국어
 menu.tutorial_button=플레이 방법
 menu.tutorial_title=플레이 방법
-menu.tutorial_body=<b>목표</b>\n그래프를 따라 이동하고 초록 플랫폼을 밟으며 빨간 지대는 피해 오른쪽 밝은 출구까지 가세요.\n\n<b>조작</b>\n– <b>이동</b> — 방향키/WASD 또는 화면 버튼.\n– <b>점프</b> — 스페이스(또는 모바일 점프). 단단한 플랫폼에서 뜁니다.\n\n<b>두 곡선</b>\n– <color=#c4b5fd>주 곡선</color> — 함수 그래프 위를 걷습니다.\n– <color=#fdba74>도함수 f′</color> — 기울기 정보, 다른 색 선으로 그려집니다.\n\n<b>도함수 위 에어 점프</b>\n<b>공중에 있는 동안</b> 캐릭터가 <b>도함수 곡선</b>과 겹치면 <b>점프를 한 번 더</b> 눌러 추가로 뜰 수 있습니다.\n\n<size=94%><color=#a8b2d1>도함수에 닿으면 선이 밝아집니다. 곡선에서 벗어나거나 땅에 닿기 전까지 <b>한 번</b>만 보너스 점프가 있습니다. 휴대폰에서는 f′에 닿을 때 짧은 진동이, PC에서는 진동이 없을 때만 효과음이 날 수 있습니다.</color></size>\n\n<b>레벨 선택</b>\n<size=94%>이 화면에서 스테이지는 주제별로 묶여 있습니다(기초, 공학, AP 미적분, 항공우주 …). 화면 하단의 <b>플레이 방법</b>을 누르면 이 안내를 다시 열 수 있습니다. 주제를 고른 뒤 스테이지를 고르세요.</size>
+menu.tutorial_body=<b>목표</b>\n그래프를 따라 이동하고 파란 플랫폼을 밟으며 빨간 지대는 피해 오른쪽 노란 출구까지 가세요.\n\n<b>조작</b>\n– <b>이동</b> — 방향키/WASD 또는 화면 버튼.\n– <b>점프</b> — 스페이스(또는 모바일 점프). 단단한 플랫폼에서 뜁니다.\n\n<b>두 곡선</b>\n– <color=#1F4FA0>주 곡선</color> — 함수 그래프 위를 걷습니다.\n– <color=#D7261E>도함수 f′</color> — 기울기 정보, 다른 색 선으로 그려집니다.\n\n<b>도함수 위 에어 점프</b>\n<b>공중에 있는 동안</b> 캐릭터가 <b>도함수 곡선</b>과 겹치면 <b>점프를 한 번 더</b> 눌러 추가로 뜰 수 있습니다.\n\n<size=94%><color=#57534A>도함수에 닿으면 선이 밝아집니다. 곡선에서 벗어나거나 땅에 닿기 전까지 <b>한 번</b>만 보너스 점프가 있습니다. 휴대폰에서는 f′에 닿을 때 짧은 진동이, PC에서는 진동이 없을 때만 효과음이 날 수 있습니다.</color></size>\n\n<b>레벨 선택</b>\n<size=94%>이 화면에서 스테이지는 주제별로 묶여 있습니다(기초, 공학, AP 미적분, 항공우주 …). 화면 하단의 <b>플레이 방법</b>을 누르면 이 안내를 다시 열 수 있습니다. 주제를 고른 뒤 스테이지를 고르세요.</size>
 menu.player_icon_title=플레이어 아이콘
 menu.player_icon_set=아이콘 바꾸기
 menu.player_icon_hint=기호를 누르면 스테이지에서 그 모양으로 보입니다.
@@ -28,25 +28,25 @@ ui.close=닫기
 ui.math_concepts=수학 개념
 ui.jump=점프
 ui.move=이동
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(키보드: 방향키 / 스페이스)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(키보드: 방향키 / 스페이스)</color></size>
 hud.stage=스테이지
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) (x>0) | min(x,3)...
 graph.status_enter=Enter / 바깥 탭으로 그래프
-graph.status_graphed=<color=#8fd9b3>그래프 완료</color>
+graph.status_graphed=<color=#1F4FA0>그래프 완료</color>
 graph.line1=<b>그래프 계산기 모드</b>
-graph.line2=<size=88%><color=#c4d0e8>아래에 <b>f(u)</b> 입력(상자 안 변수 <b>x</b> = 내부 u). 그다음:</color></size>
+graph.line2=<size=88%><color=#57534A>아래에 <b>f(u)</b> 입력(상자 안 변수 <b>x</b> = 내부 u). 그다음:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} | 더블탭 <b>+</b> | 길게 <b>−</b> | <b>Scale</b> 탭 확대 / 길게 축소 | 두 손가락 <b>핀치</b></size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
 graph.param_a=A (세로 스케일)
 graph.param_k=k (가로 스케일)
 graph.param_c=C (세로 이동)
 graph.param_d=D (가로 이동)
 graph.calculator_intro=<b>그래프 계산기 모드</b>\n<size=88%>거의 모든 <b>f(u)</b> 입력(식의 변수 <b>x</b>); <b>Trans</b>로 A,k,C,D 조절; <b>Scale</b>/<b>핀치</b>로 창 확대.</size>
-aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>항력 극곡선 복습</color></b> (모든 <b>항공</b> 스테이지)\n<size=92%><b>패러사이틱(형상/제로리프트) 항력</b> — 마찰/형상/간섭 항력을 극곡선 모형에서 <b>C<sub>D0</sub></b>로 묶은 부분(단순 모형에서는 양력에 따라 늘지 않는 항).\n<b>유도(induced) 항력</b> — 양력을 낼 때 생기는 비용: 날개끝 와류로 <b>K C<sub>L</sub>²</b> 꼴이 커짐(C<sub>L</sub>가 클수록/급선회일수록 유도항력↑).\n<b>전체 항력 극곡선</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: C<sub>L</sub>에 대한 아래로 볼록한 포물선; 최소 항력 C<sub>L</sub>은 실제 임무에서 ‘너무 느림/α 큼’과 ‘너무 빠름’ 사이 지점.</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+aerospace.story_drag_polar_preamble=<b><color=#1F4FA0>항력 극곡선 복습</color></b> (모든 <b>항공</b> 스테이지)\n<size=92%><b>패러사이틱(형상/제로리프트) 항력</b> — 마찰/형상/간섭 항력을 극곡선 모형에서 <b>C<sub>D0</sub></b>로 묶은 부분(단순 모형에서는 양력에 따라 늘지 않는 항).\n<b>유도(induced) 항력</b> — 양력을 낼 때 생기는 비용: 날개끝 와류로 <b>K C<sub>L</sub>²</b> 꼴이 커짐(C<sub>L</sub>가 클수록/급선회일수록 유도항력↑).\n<b>전체 항력 극곡선</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: C<sub>L</sub>에 대한 아래로 볼록한 포물선; 최소 항력 C<sub>L</sub>은 실제 임무에서 ‘너무 느림/α 큼’과 ‘너무 빠름’ 사이 지점.</size>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>존 성 (오치 에어로스페이스) × 라얀 카이시 (GameGenesis)</size>
-menu.support_contact=<size=32><color=#94a3b8>지원:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>지원:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=첫 원리 입문
 level.1=포물선의 기울기
 level.2=사인 물결
@@ -124,3 +124,6 @@ paywall.status.restore_failed=지금은 복원할 수 없어요. 다시 시도�
 paywall.status.deferred=구매 승인을 기다리고 있어요. 승인되면 레벨이 자동으로 열려요.
 paywall.status.already_owned=이미 구매하셨어요 — 구매 복원을 눌러 주세요.
 paywall.status.failed=구매가 완료되지 않았어요. 요금은 청구되지 않았어요.
+menu.play=플레이
+ui.back=뒤로
+menu.tagline=미적분 플랫포머

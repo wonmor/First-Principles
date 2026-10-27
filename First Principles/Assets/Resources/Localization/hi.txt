@@ -11,25 +11,25 @@ ui.close=बंद करें
 ui.math_concepts=गणित अवधारणाएँ
 ui.jump=कूद
 ui.move=चलें
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(कीबोर्ड: तीर / स्पेस)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(कीबोर्ड: तीर / स्पेस)</color></size>
 hud.stage=चरण
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) जब x>0 | min(x,3)...
 graph.status_enter=Enter / ग्राफ़ के लिए बाहर टैप करें
-graph.status_graphed=<color=#8fd9b3>ग्राफ़ तैयार</color>
+graph.status_graphed=<color=#1F4FA0>ग्राफ़ तैयार</color>
 graph.line1=<b>ग्राफ़िंग कैलकुलेटर मोड</b>
-graph.line2=<size=88%><color=#c4d0e8>नीचे <b>f(u)</b> लिखें (बॉक्स में चर <b>x</b> = आंतरिक u)। फिर:</color></size>
+graph.line2=<size=88%><color=#57534A>नीचे <b>f(u)</b> लिखें (बॉक्स में चर <b>x</b> = आंतरिक u)। फिर:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} | <b>+</b> पर डबल-टैप | <b>−</b> दबाकर रखें | <b>Scale</b> ज़ूम इन / आउट दबाकर रखें | दो उंगलियों से <b>पिंच</b></size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
 graph.param_a=A (लंबवत स्केल)
 graph.param_k=k (क्षैतिज स्केल)
 graph.param_c=C (लंबवत खिसकाव)
 graph.param_d=D (क्षैतिज खिसकाव)
 graph.calculator_intro=<b>ग्राफ़िंग कैलकुलेटर मोड</b>\n<size=88%>लगभग कोई भी <b>f(u)</b> फ़ील्ड में लिखें (सूत्र में चर <b>x</b>); <b>Trans</b> से A, k, C, D; <b>Scale</b> व <b>पिंच</b> से खिड़की ज़ूम।</size>
-aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>ड्रैग पोलर संक्षिप्त</color></b> (हर <b>एयरोस्पेस</b> चरण)\n<size=92%><b>पैरासिटिक (शून्य-लिफ़्ट) ड्रैग</b> — घर्षण, रूप ड्रैग, हस्तक्षेप को पैराबोलिक मॉडल में <b>C<sub>D0</sub></b> में समेटा जाता है (लिफ़्ट के साथ बढ़ने वाला हिस्सा नहीं)।\n<b>प्रेरित (इंड्यूस्ड) ड्रैग</b> — लिफ़्ट बनाने का खर्च: पिछले वॉर्टेक्स ~ <b>K C<sub>L</sub>²</b> (ऊँचा C<sub>L</sub> / तेज़ मोड़ → ज़्यादा इंड्यूस्ड)।\n<b>कुल ड्रैग पोलर</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: C<sub>L</sub> में ऊपर खुलने वाला पैराबोला; न्यूनतम-ड्रैग C<sub>L</sub> वास्तविक मिशनों में “बहुत धीमा / ऊँचा α” और “बहुत तेज़” के बीच।</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+aerospace.story_drag_polar_preamble=<b><color=#1F4FA0>ड्रैग पोलर संक्षिप्त</color></b> (हर <b>एयरोस्पेस</b> चरण)\n<size=92%><b>पैरासिटिक (शून्य-लिफ़्ट) ड्रैग</b> — घर्षण, रूप ड्रैग, हस्तक्षेप को पैराबोलिक मॉडल में <b>C<sub>D0</sub></b> में समेटा जाता है (लिफ़्ट के साथ बढ़ने वाला हिस्सा नहीं)।\n<b>प्रेरित (इंड्यूस्ड) ड्रैग</b> — लिफ़्ट बनाने का खर्च: पिछले वॉर्टेक्स ~ <b>K C<sub>L</sub>²</b> (ऊँचा C<sub>L</sub> / तेज़ मोड़ → ज़्यादा इंड्यूस्ड)।\n<b>कुल ड्रैग पोलर</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: C<sub>L</sub> में ऊपर खुलने वाला पैराबोला; न्यूनतम-ड्रैग C<sub>L</sub> वास्तविक मिशनों में “बहुत धीमा / ऊँचा α” और “बहुत तेज़” के बीच।</size>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>जॉन सेओंग (ऑर्च एयरोस्पेस) × रयान कैसी (GameGenesis)</size>
-menu.support_contact=<size=32><color=#94a3b8>सहायता:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>सहायता:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=प्रथम सिद्धांत: प्रस्तावना
 level.1=पराबोला की ढाल
 level.2=ज्या की लहरें
@@ -107,3 +107,6 @@ paywall.status.restore_failed=अभी बहाल नहीं हो सक�
 paywall.status.deferred=खरीद स्वीकृति की प्रतीक्षा में है। स्वीकृत होते ही लेवल अपने-आप खुल जाएँगे।
 paywall.status.already_owned=यह आपके पास पहले से है — खरीदारी बहाल करें पर टैप करें।
 paywall.status.failed=खरीद पूरी नहीं हुई। आपसे कोई शुल्क नहीं लिया गया।
+menu.play=खेलें
+ui.back=वापस
+menu.tagline=कैलकुलस प्लेटफ़ॉर्मर

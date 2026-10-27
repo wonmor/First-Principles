@@ -23,32 +23,32 @@ ui.close=Chiudi
 ui.math_concepts=Concetti di matematica
 ui.jump=Salta
 ui.move=Muoviti
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(tastiera: frecce / Spazio)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(tastiera: frecce / Spazio)</color></size>
 hud.stage=STADIO
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) per x>0 | min(x,3)...
 graph.status_enter=Invio / tocca fuori per tracciare
-graph.status_graphed=<color=#8fd9b3>Tracciato</color>
+graph.status_graphed=<color=#1F4FA0>Tracciato</color>
 graph.line1=<b>Modalità calcolatrice grafica</b>
-graph.line2=<size=88%><color=#c4d0e8>Digita <b>f(u)</b> sotto (la variabile <b>x</b> nella casella = u interno). Poi:</color></size>
+graph.line2=<size=88%><color=#57534A>Digita <b>f(u)</b> sotto (la variabile <b>x</b> nella casella = u interno). Poi:</color></size>
 graph.line3=<size=92%><b>Trasf</b> → {0} | doppio tocco <b>+</b> | tieni premuto <b>−</b> | <b>Scala</b> zoom avanti / tieni zoom indietro | <b>pizzica</b> a due dita</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x in [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x in [{4},{5}]</color></size>
 graph.param_a=A (scala verticale)
 graph.param_k=k (scala orizzontale)
 graph.param_c=C (traslazione verticale)
 graph.param_d=D (traslazione orizzontale)
 graph.calculator_intro=<b>Modalità calcolatrice grafica</b>\n<size=88%>Digita quasi ogni <b>f(u)</b> nel campo (variabile <b>x</b> nella formula); <b>Trasf</b> regola A, k, C, D; <b>Scala</b> e <b>pizzica</b> zoomano la finestra.</size>
-aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>Ricordo sulla polare di resistenza</color></b> (ogni livello <b>Aerospaziale</b>)\n<size=92%><b>Resistenza parasita (a portanza zero)</b> — attrito di superficie, resistenza di forma e interferenza raggruppati come <b>C<sub>D0</sub></b> nel modello parabolico (in prima approssimazione <i>non</i> la parte che cresce con la portanza).\n<b>Resistenza indotta</b> — il costo di generare portanza: i vortici di estremità aggiungono ~ <b>K C<sub>L</sub>²</b> (C<sub>L</sub> più alta / virate più strette → più indotta).\n<b>Polare complessiva</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: una parabola verso l’alto in C<sub>L</sub>; il <b>C<sub>L</sub></b> a resistenza minima sta tra “troppo lento / α alta” e “troppo veloce / α bassa” per missioni reali.</size>
+aerospace.story_drag_polar_preamble=<b><color=#1F4FA0>Ricordo sulla polare di resistenza</color></b> (ogni livello <b>Aerospaziale</b>)\n<size=92%><b>Resistenza parasita (a portanza zero)</b> — attrito di superficie, resistenza di forma e interferenza raggruppati come <b>C<sub>D0</sub></b> nel modello parabolico (in prima approssimazione <i>non</i> la parte che cresce con la portanza).\n<b>Resistenza indotta</b> — il costo di generare portanza: i vortici di estremità aggiungono ~ <b>K C<sub>L</sub>²</b> (C<sub>L</sub> più alta / virate più strette → più indotta).\n<b>Polare complessiva</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: una parabola verso l’alto in C<sub>L</sub>; il <b>C<sub>L</sub></b> a resistenza minima sta tra “troppo lento / α alta” e “troppo veloce / α bassa” per missioni reali.</size>
 menu.tutorial_button=Come si gioca
 menu.tutorial_title=Come si gioca
-menu.tutorial_body=<b>Obiettivo</b>\nMuoviti lungo il grafico, usa le piattaforme (verdi), evita i pericoli rossi e raggiungi l’uscita luminosa a destra.\n\n<b>Comandi</b>\n– <b>Muoviti</b> — frecce / WASD, o pulsanti sullo schermo.\n– <b>Salta</b> — Spazio (o salto su mobile). Salti dalle piattaforme solide.\n\n<b>Le due curve</b>\n– <color=#c4b5fd>Curva principale</color> — la funzione su cui cammini.\n– <color=#fdba74>Derivata f′</color> — informazione sulla pendenza; disegnata come seconda linea.\n\n<b>Salto in aria sulla derivata</b>\nMentre sei <b>in aria</b>, se il personaggio si sovrappone alla <b>curva della derivata</b>, premi di nuovo <b>Salta</b> per un salto extra.\n\n<size=94%><color=#a8b2d1>La linea della derivata si illumina quando la tocchi. Hai <b>un</b> salto bonus ogni volta che la sfiori finché non lasci la curva o non atterri. Sul telefono potresti sentire una breve vibrazione quando tocchi f′; su PC suona un effetto se la vibrazione non è disponibile.</color></size>\n\n<b>Seleziona livello</b>\n<size=94%>In questa schermata i livelli sono raggruppati (Base, Ingegneria, AP Calculus, Aerospaziale …). Tocca <b>Come si gioca</b> in basso per riaprire questo aiuto. Scegli un gruppo, poi un livello.</size>
+menu.tutorial_body=<b>Obiettivo</b>\nMuoviti lungo il grafico, usa le piattaforme (blu), evita i pericoli rossi e raggiungi l’uscita gialla a destra.\n\n<b>Comandi</b>\n– <b>Muoviti</b> — frecce / WASD, o pulsanti sullo schermo.\n– <b>Salta</b> — Spazio (o salto su mobile). Salti dalle piattaforme solide.\n\n<b>Le due curve</b>\n– <color=#1F4FA0>Curva principale</color> — la funzione su cui cammini.\n– <color=#D7261E>Derivata f′</color> — informazione sulla pendenza; disegnata come seconda linea.\n\n<b>Salto in aria sulla derivata</b>\nMentre sei <b>in aria</b>, se il personaggio si sovrappone alla <b>curva della derivata</b>, premi di nuovo <b>Salta</b> per un salto extra.\n\n<size=94%><color=#57534A>La linea della derivata si illumina quando la tocchi. Hai <b>un</b> salto bonus ogni volta che la sfiori finché non lasci la curva o non atterri. Sul telefono potresti sentire una breve vibrazione quando tocchi f′; su PC suona un effetto se la vibrazione non è disponibile.</color></size>\n\n<b>Seleziona livello</b>\n<size=94%>In questa schermata i livelli sono raggruppati (Base, Ingegneria, AP Calculus, Aerospaziale …). Tocca <b>Come si gioca</b> in basso per riaprire questo aiuto. Scegli un gruppo, poi un livello.</size>
 menu.player_icon_title=Icona giocatore
 menu.player_icon_set=Imposta icona giocatore
 menu.player_icon_hint=Tocca un simbolo — è il tuo avatar nei livelli.
 menu.player_icon_done=Fatto
-menu.version_line=<b>First Principles</b> <color=#555555>(versione 1.0)</color>
+menu.version_line=<b>First Principles</b> <color=#57534A>(versione 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
-menu.support_contact=<size=32><color=#94a3b8>Supporto:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>Supporto:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=First Principles — introduzione
 level.1=Pendenza della parabola
 level.2=Onde del seno
@@ -126,3 +126,6 @@ paywall.status.restore_failed=Impossibile ripristinare ora. Riprova.
 paywall.status.deferred=L'acquisto è in attesa di approvazione. I livelli si sbloccheranno automaticamente.
 paywall.status.already_owned=Lo possiedi già — tocca Ripristina acquisti.
 paywall.status.failed=L'acquisto non è andato a buon fine. Non ti è stato addebitato nulla.
+menu.play=Gioca
+ui.back=Indietro
+menu.tagline=Un platform sul calcolo

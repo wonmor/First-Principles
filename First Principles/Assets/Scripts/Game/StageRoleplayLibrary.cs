@@ -92,7 +92,7 @@ public static class StageRoleplayLibrary
         // 39
         "<b>Hypersonic scribe.</b> Newtonian sin²α scratches impact lore on blunt faces—models, not scripture. Use it to speak, not to land contracts.",
         // 40
-        "<b>Wake listener.</b> Strouhal hums a shedding song—bluff bodies gossip at f~St·U/D. Feel the sine fingerprint of organized wake jazz.",
+        "<b>Wake listener.</b> Strouhal hums a shedding song—bluff bodies gossip at f~St×U/D. Feel the sine fingerprint of organized wake jazz.",
         // 41
         "<b>Shield monk.</b> Re-entry trades dynamic pressure against velocity cubed in campfire tales. The envelope relaxes: breathe as ρ and V forgive you.",
         // 42

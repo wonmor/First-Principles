@@ -4,15 +4,15 @@
 
 <b><size=115%>Come questo gioco insegna il calcolo (leggi il grafico mentre giochi)</size></b>
 <size=92%>
-• <b>Curva principale</b> — il percorso spesso sulla griglia cartesiana è \(y = f(x)\) per questo livello. Il personaggio cerca di stare su piattaforme che seguono quella forma. L’etichetta <b>Equazione</b> (se visibile) nomina la regola tracciata.
+– <b>Curva principale</b> — il percorso spesso sulla griglia cartesiana è \(y = f(x)\) per questo livello. Il personaggio cerca di stare su piattaforme che seguono quella forma. L’etichetta <b>Equazione</b> (se visibile) nomina la regola tracciata.
 
-• <b>Curva derivata \(f'(x)\)</b> — disegnata come secondo grafico; i valori provengono da una derivata <i>numerica</i> (pendenze campeggiate). In molti livelli, <b>dove \(f'\) è abbastanza grande hai terreno solido</b>; dove manca puoi cadere — il platformer è legato alla logica della pendenza.
+– <b>Curva derivata \(f'(x)\)</b> — disegnata come secondo grafico; i valori provengono da una derivata <i>numerica</i> (pendenze campeggiate). In molti livelli, <b>dove \(f'\) è abbastanza grande hai terreno solido</b>; dove manca puoi cadere — il platformer è legato alla logica della pendenza.
 
-• <b>Stadi e “pop”</b> — l’HUD <b>Stadio</b> conta i colpi narrativi. Muovendoti a destra, la derivata può fare un <i>pop</i> o ricolorarsi a certi \(x\) (come sipari tra le idee di una lezione).
+– <b>Stadi e “pop”</b> — l’HUD <b>Stadio</b> conta i colpi narrativi. Muovendoti a destra, la derivata può fare un <i>pop</i> o ricolorarsi a certi \(x\) (come sipari tra le idee di una lezione).
 
-• <b>Somme di Riemann / area</b> — alcuni livelli ombreggiano rettangoli o costruiscono piattaforme a <i>scala</i> con campioni sinistra‑, destra‑ o punto medio. Questo rappresenta \(\displaystyle \int_a^b f(x)\,dx\) come limite di \(\sum f(x^\ast)\,\Delta x\).
+– <b>Somme di Riemann / area</b> — alcuni livelli ombreggiano rettangoli o costruiscono piattaforme a <i>scala</i> con campioni sinistra‑, destra‑ o punto medio. Questo rappresenta \(\displaystyle \int_a^b f(x)\,dx\) come limite di \(\sum f(x^\ast)\,\Delta x\).
 
-• <b>Testo narrativo</b> — il banner in alto lega ogni livello alla matematica (serie, polari, metafore fisiche, ecc.). Fermati e leggi; poi sfuma così la corsa resta leggibile. Il <b>Primer First Principles</b> spinge anche il pensiero <b>business ai primi principi</b> (ragionare dai fondamenti vs analogia).
+– <b>Testo narrativo</b> — il banner in alto lega ogni livello alla matematica (serie, polari, metafore fisiche, ecc.). Fermati e leggi; poi sfuma così la corsa resta leggibile. Il <b>Primer First Principles</b> spinge anche il pensiero <b>business ai primi principi</b> (ragionare dai fondamenti vs analogia).
 
 Sotto trovi un <b>glossario tematico</b> da scorrere tra una morte e l’altra o dopo un grafico — più una sezione <b>Primi principi (business)</b> prima della preparazione d’esame.
 </size>
@@ -105,10 +105,10 @@ Le modalità <b>fugoide / breve periodo</b> usano sinusoidi smorzate dalla dinam
 <size=92%>La cultura startup cita spesso <b>Elon Musk</b> per aver riportato i <b>primi principi</b> in posti come <b>Tesla / SpaceX</b>: smetti di credere che “il mercato prezza sempre così,” e invece <b>disimballi le assunzioni</b> fino a fatti di base (materiali, energia, fisica, costi unitari veri), poi <b>ragioni verso l’alto</b> in un nuovo design. L’idea è più antica di un solo founder — ma l’<i>abitudine</i> combacia con le immagini di questo gioco.</size>
 
 <b><size=118%>Mappa la metafora</size></b>
-• <b>La tua “curva business” mentale</b> è come <b>f(x)</b> — la storia su come l’output si muove con una leva (prezzo, latenza, qualità, throughput).
-• <b>Dove rompe o vola</b> è come <b>f'(x)</b> — <i>sensibilità</i>. Come qui: l’entità della derivata decide se il “pavimento” (il piano) regge davvero.
-• <b>Stadi e pop</b> — taglia la scommessa in atti; ogni rivelazione è una nuova ipotesi. <b>Livelli Riemann / area</b> — molte scelte piccole sommano; raffina la griglia prima di scalare la spesa.
-• <b>Sezioni multivariabile</b> — fissa di proposito le variabili nascoste; una camminata 1D chiara batte un deck 4D confuso.
+– <b>La tua “curva business” mentale</b> è come <b>f(x)</b> — la storia su come l’output si muove con una leva (prezzo, latenza, qualità, throughput).
+– <b>Dove rompe o vola</b> è come <b>f'(x)</b> — <i>sensibilità</i>. Come qui: l’entità della derivata decide se il “pavimento” (il piano) regge davvero.
+– <b>Stadi e pop</b> — taglia la scommessa in atti; ogni rivelazione è una nuova ipotesi. <b>Livelli Riemann / area</b> — molte scelte piccole sommano; raffina la griglia prima di scalare la spesa.
+– <b>Sezioni multivariabile</b> — fissa di proposito le variabili nascoste; una camminata 1D chiara batte un deck 4D confuso.
 
 <b><size=92%>Questo <i>non</i> è consulenza legale, fiscale o d’investimento — un esercizio di pensiero da abbinare a consulenti e dati reali. Approfondimento:</size></b> <b>docs/first-principles-business.md</b> su GitHub Pages.
 
@@ -135,4 +135,4 @@ Meccanica ed E&amp;M <b>calcolo‑first</b>: \(v = dr/dt\), \(a = dv/dt\), integ
 <b><size=110%>Dove leggere di più</size></b>
 <b>docs/math-concepts.md</b> (indice), <b>docs/first-principles-business.md</b> (lente builder popolarizzata da Musk ↔ gioco), <b>docs/competition-math.md</b> &amp; <b>docs/amc-10-12.md</b> (mappa concorsi / MAA), <b>docs/engineering-math.md</b> (circuiti/oscillazioni applicate) e i file d’esame sopra su GitHub Pages.
 
-— © 2022-2026 · ORCH AEROSPACE × GAME GENESIS · First Principles
+— © 2022-2026 × ORCH AEROSPACE × GAME GENESIS × First Principles

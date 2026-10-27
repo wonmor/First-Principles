@@ -111,7 +111,7 @@ public class LabelManager : MonoBehaviour
         // Plot window (zoom / pinch / scale).
         bool window = !Mathf.Approximately(p.xStart, _lastXStart)
                       || !Mathf.Approximately(p.xEnd, _lastXEnd);
-        // CustomExpression axis readout is u = k·(x−D); must refresh when Trans or mode changes.
+        // CustomExpression axis readout is u = k×(x−D); must refresh when Trans or mode changes.
         bool trans = !Mathf.Approximately(p.transK, _lastTransK)
                      || !Mathf.Approximately(p.transD, _lastTransD);
         bool mode = p.functionType != _lastFunctionTypeForXAxis;

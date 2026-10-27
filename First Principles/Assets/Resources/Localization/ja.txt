@@ -10,24 +10,24 @@ ui.close=閉じる
 ui.math_concepts=数学コンセプト
 ui.jump=ジャンプ
 ui.move=移動
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>（キーボード：矢印／スペース）</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>（キーボード：矢印／スペース）</color></size>
 hud.stage=ステージ
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) （x>0）| min(x,3)...
 graph.status_enter=Enter／外側タップでグラフ描画
-graph.status_graphed=<color=#8fd9b3>描画済み</color>
+graph.status_graphed=<color=#1F4FA0>描画済み</color>
 graph.line1=<b>グラフ電卓モード</b>
-graph.line2=<size=88%><color=#c4d0e8>下に<b>f(u)</b>を入力（欄内の変数<b>x</b>は内側の u）。次に：</color></size>
+graph.line2=<size=88%><color=#57534A>下に<b>f(u)</b>を入力（欄内の変数<b>x</b>は内側の u）。次に：</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} | ダブルタップ <b>+</b> | 長押し <b>−</b> | <b>Scale</b> はタップで拡大／長押しで縮小 | 2本指<b>ピンチ</b></size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x は [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x は [{4},{5}]</color></size>
 graph.param_a=A（縦スケール）
 graph.param_k=k（横スケール）
 graph.param_c=C（縦シフト）
 graph.param_d=D（横シフト）
 graph.calculator_intro=<b>グラフ電卓モード</b>\n<size=88%>ほぼ任意の<b>f(u)</b>を入力（式の変数<b>x</b>）；<b>Trans</b>で A,k,C,D を調整；<b>Scale</b>と<b>ピンチ</b>でウィンドウをズーム。</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>ジョン・ソン（オーチ・エアロスペース）× ラヤン・カイシ（GameGenesis）</size>
-menu.support_contact=<size=32><color=#94a3b8>サポート：</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>サポート：</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=ファーストプリンシプル入門
 level.1=放物線の傾き
 level.2=サイン波
@@ -105,3 +105,6 @@ paywall.status.restore_failed=現在復元できません。もう一度お試�
 paywall.status.deferred=購入は承認待ちです。承認されると自動的にレベルが解放されます。
 paywall.status.already_owned=すでに購入済みです — 「購入を復元」をタップしてください。
 paywall.status.failed=購入は完了しませんでした。請求は発生していません。
+menu.play=プレイ
+ui.back=戻る
+menu.tagline=微積分プラットフォーマー

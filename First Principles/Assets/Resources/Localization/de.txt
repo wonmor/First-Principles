@@ -10,24 +10,24 @@ ui.close=Schließen
 ui.math_concepts=Mathe-Konzepte
 ui.jump=Sprung
 ui.move=Bewegen
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(Tastatur: Pfeile / Leertaste)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(Tastatur: Pfeile / Leertaste)</color></size>
 hud.stage=PHASE
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) für x>0 | min(x,3)...
 graph.status_enter=Eingabe / außerhalb tippen zum Zeichnen
-graph.status_graphed=<color=#8fd9b3>Gezeichnet</color>
+graph.status_graphed=<color=#1F4FA0>Gezeichnet</color>
 graph.line1=<b>Grafikrechner-Modus</b>
-graph.line2=<size=88%><color=#c4d0e8>Geben Sie unten <b>f(u)</b> ein (Variable <b>x</b> im Feld = inneres u). Dann:</color></size>
+graph.line2=<size=88%><color=#57534A>Geben Sie unten <b>f(u)</b> ein (Variable <b>x</b> im Feld = inneres u). Dann:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} | Doppeltipp <b>+</b> | halten <b>−</b> | <b>Maßstab</b> hereinzoomen / halten herauszoomen | Zweifinger-<b>Pinch</b></size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x in [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x in [{4},{5}]</color></size>
 graph.param_a=A (vertikaler Maßstab)
 graph.param_k=k (horizontaler Maßstab)
 graph.param_c=C (vertikale Verschiebung)
 graph.param_d=D (horizontale Verschiebung)
 graph.calculator_intro=<b>Grafikrechner-Modus</b>\n<size=88%>Geben Sie fast beliebiges <b>f(u)</b> ein (Variable <b>x</b> in Ihrer Formel); <b>Trans</b> stellt A, k, C, D ein; <b>Maßstab</b> und <b>Pinch</b> zoomen das Fenster.</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
-menu.support_contact=<size=32><color=#94a3b8>Support:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>Support:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=Einstieg: Erste Prinzipien
 level.1=Steigung der Parabel
 level.2=Sinuswellen
@@ -105,3 +105,6 @@ paywall.status.restore_failed=Wiederherstellen gerade nicht möglich. Bitte erne
 paywall.status.deferred=Der Kauf wartet auf Genehmigung. Die Level werden danach automatisch freigeschaltet.
 paywall.status.already_owned=Du besitzt das bereits — tippe auf „Käufe wiederherstellen“.
 paywall.status.failed=Der Kauf wurde nicht abgeschlossen. Dir wurde nichts berechnet.
+menu.play=Spielen
+ui.back=Zurück
+menu.tagline=Ein Analysis-Plattformer

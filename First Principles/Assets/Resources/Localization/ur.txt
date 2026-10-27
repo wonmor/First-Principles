@@ -11,25 +11,25 @@ ui.close=بند کریں
 ui.math_concepts=ریاضی کے تصورات
 ui.jump=چھلانگ
 ui.move=حرکت
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(کی بورڈ: تیر / اسپیس)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(کی بورڈ: تیر / اسپیس)</color></size>
 hud.stage=اسٹیج
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) جب x>0 | min(x,3)...
 graph.status_enter=Enter / گراف کے لیے باہر تھپتھپائیں
-graph.status_graphed=<color=#8fd9b3>گراف مکمل</color>
+graph.status_graphed=<color=#1F4FA0>گراف مکمل</color>
 graph.line1=<b>گرافنگ کیلکولیٹر موڈ</b>
-graph.line2=<size=88%><color=#c4d0e8><b>f(u)</b> نیچے لکھیں (باکس میں متغیر <b>x</b> = اندرونی u)۔ پھر:</color></size>
+graph.line2=<size=88%><color=#57534A><b>f(u)</b> نیچے لکھیں (باکس میں متغیر <b>x</b> = اندرونی u)۔ پھر:</color></size>
 graph.line3=<size=92%><b>Trans</b> → {0} | <b>+</b> پر ڈبل-تھپتھی | <b>−</b> دبائے رکھیں | <b>Scale</b> زوم اندر / باہر دبائے رکھیں | دو انگلیوں سے <b>پنچ</b></size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x ∈ [{4},{5}]</color></size>
 graph.param_a=A (عمودی پیمانہ)
 graph.param_k=k (افقی پیمانہ)
 graph.param_c=C (عمودی بِدائل)
 graph.param_d=D (افقی بِدائل)
 graph.calculator_intro=<b>گرافنگ کیلکولیٹر موڈ</b>\n<size=88%>تقریباً کوئی بھی <b>f(u)</b> خانے میں لکھیں (فارمولے میں <b>x</b>)؛ <b>Trans</b> سے A, k, C, D؛ <b>Scale</b> و <b>پنچ</b> سے کھڑکی زوم۔</size>
-aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>ڈریگ پولر یاد دہانی</color></b> (ہر <b>ایرواسپیس</b> اسٹیج)\n<size=92%><b>پیراسیٹک (صفر-لفٹ) ڈریگ</b> — رگڑ، شکل، مداخلت کو ماڈل میں <b>C<sub>D0</sub></b> میں سمیٹا جاتا ہے (لفٹ کے ساتھ نہيں بڑھنے والا حصہ)۔\n<b>انڈیوسڈ ڈریگ</b> — لفٹ بنانے کی قیمت: ~ <b>K C<sub>L</sub>²</b>۔\n<b>کل ڈریگ پولر</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>۔</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+aerospace.story_drag_polar_preamble=<b><color=#1F4FA0>ڈریگ پولر یاد دہانی</color></b> (ہر <b>ایرواسپیس</b> اسٹیج)\n<size=92%><b>پیراسیٹک (صفر-لفٹ) ڈریگ</b> — رگڑ، شکل، مداخلت کو ماڈل میں <b>C<sub>D0</sub></b> میں سمیٹا جاتا ہے (لفٹ کے ساتھ نہيں بڑھنے والا حصہ)۔\n<b>انڈیوسڈ ڈریگ</b> — لفٹ بنانے کی قیمت: ~ <b>K C<sub>L</sub>²</b>۔\n<b>کل ڈریگ پولر</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>۔</size>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × Rayan Kaissi (GameGenesis)</size>
-menu.support_contact=<size=32><color=#94a3b8>معاونت:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>معاونت:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=ابتدائی اصول: تعارف
 level.1=پارابولا کی ڈھلوان
 level.2=جیا کی لہریں
@@ -107,3 +107,6 @@ paywall.status.restore_failed=ابھی بحال نہیں ہو سکا۔ براہ 
 paywall.status.deferred=خریداری منظوری کی منتظر ہے۔ منظوری کے بعد لیولز خود بخود کھل جائیں گے۔
 paywall.status.already_owned=یہ پہلے سے آپ کے پاس ہے — خریداریاں بحال کریں پر ٹیپ کریں۔
 paywall.status.failed=خریداری مکمل نہیں ہوئی۔ آپ سے کوئی رقم نہیں لی گئی۔
+menu.play=کھیلیں
+ui.back=واپس
+menu.tagline=کیلکولس پلیٹ فارمر

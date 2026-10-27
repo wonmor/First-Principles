@@ -18,7 +18,7 @@ public static class GraphingCalculatorAntiderivativeHint
         if (Regex.IsMatch(s, @"^-?(\d+\.?\d*|\.\d+)$"))
         {
             if (float.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float c))
-                return $"{FormatNum(c)}·u + C";
+                return $"{FormatNum(c)}×u + C";
         }
 
         // u, x as variable

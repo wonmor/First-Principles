@@ -10,24 +10,24 @@ ui.close=إغلاق
 ui.math_concepts=المفاهيم الرياضية
 ui.jump=قفز
 ui.move=تحرك
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(لوحة المفاتيح: الأسهم / المسافة)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(لوحة المفاتيح: الأسهم / المسافة)</color></size>
 hud.stage=المرحلة
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) عندما x>0 | min(x,3)...
 graph.status_enter=Enter / اضغط خارج الحقل للرسم
-graph.status_graphed=<color=#8fd9b3>تم الرسم</color>
+graph.status_graphed=<color=#1F4FA0>تم الرسم</color>
 graph.line1=<b>وضع آلة الرسوم البيانية</b>
-graph.line2=<size=88%><color=#c4d0e8>اكتب <b>f(u)</b> أدناه (المتغير <b>x</b> في المربع = u الداخلي). ثم:</color></size>
+graph.line2=<size=88%><color=#57534A>اكتب <b>f(u)</b> أدناه (المتغير <b>x</b> في المربع = u الداخلي). ثم:</color></size>
 graph.line3=<size=92%><b>Trans</b> ← {0} | نقرتان <b>+</b> | اضغط مطولًا <b>−</b> | <b>Scale</b> تكبير باللمس / اضغط مطولًا للتصغير | <b>قرصة</b> بإصبعين</size>
-graph.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x في [{4},{5}]</color></size>
+graph.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x في [{4},{5}]</color></size>
 graph.param_a=A (مقياس عمودي)
 graph.param_k=k (مقياس أفقي)
 graph.param_c=C (إزاحة عمودية)
 graph.param_d=D (إزاحة أفقية)
 graph.calculator_intro=<b>وضع آلة الرسوم البيانية</b>\n<size=88%>اكتب تقريبًا أي <b>f(u)</b> (المتغير <b>x</b> في صيغتك)؛ <b>Trans</b> يضبط A و k و C و D؛ <b>Scale</b> و<b>القرصة</b> تكبّران النافذة.</size>
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>جون سونغ (أورك إيروسبيس) × رايان قيسي (GameGenesis)</size>
-menu.support_contact=<size=32><color=#94a3b8>الدعم:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>الدعم:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=مقدمة المبادئ الأولى
 level.1=ميل قطع مكافئ
 level.2=أمواج الجيب
@@ -105,3 +105,6 @@ paywall.status.restore_failed=تعذّرت الاستعادة الآن. يُرج
 paywall.status.deferred=عملية الشراء بانتظار الموافقة. ستُفتح المستويات تلقائيًا بعد الموافقة.
 paywall.status.already_owned=أنت تملك هذا بالفعل — اضغط على استعادة المشتريات.
 paywall.status.failed=لم تكتمل عملية الشراء. لم يتم خصم أي مبلغ.
+menu.play=العب
+ui.back=رجوع
+menu.tagline=لعبة منصات عن التفاضل والتكامل

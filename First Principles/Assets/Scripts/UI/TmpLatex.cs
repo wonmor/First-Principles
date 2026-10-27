@@ -226,7 +226,7 @@ public static class TmpLatex
         s = StripWrappers(s, @"\operatorname");
         s = RemoveLeftRight(s);
         s = ReplaceCommandsLongestFirst(s, GreekAndSymbols);
-        s = ReplaceSimpleCommands(s, @"\cdot", "·");
+        s = ReplaceSimpleCommands(s, @"\cdot", "×");
         s = ReplaceSimpleCommands(s, @"\times", "\u00D7");
         s = ReplaceSimpleCommands(s, @"\pm", "\u00B1");
         s = ReplaceSimpleCommands(s, @"\mp", "\u2213");

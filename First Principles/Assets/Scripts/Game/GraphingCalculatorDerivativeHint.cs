@@ -30,7 +30,7 @@ public static class GraphingCalculatorDerivativeHint
                 return "1";
             if (n == 2)
                 return "2u";
-            return d == 1 ? $"{n}·u" : $"{n}·u^{d}";
+            return d == 1 ? $"{n}×u" : $"{n}×u^{d}";
         }
 
         if (s == "sin(x)" || s == "sin(u)")
@@ -46,10 +46,10 @@ public static class GraphingCalculatorDerivativeHint
         if (s == "ln(x)" || s == "ln(u)")
             return "1/u";
         if (s == "log(x)" || s == "log(u)")
-            return "1/(u·ln 10)";
+            return "1/(u×ln 10)";
 
         if (s == "sqrt(x)" || s == "sqrt(u)")
-            return "1/(2·√u)";
+            return "1/(2×√u)";
 
         if (s == "1/x" || s == "1/u" || s == "x^-1" || s == "u^-1")
             return "-1/u²";

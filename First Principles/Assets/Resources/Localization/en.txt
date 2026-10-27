@@ -27,7 +27,7 @@ ui.coming_soon_tap=Tap anywhere to close
 ui.math_concepts=Math concepts
 ui.jump=Jump
 ui.move=Move
-ui.keyboard_hint_mobile=<size=90%><color=#5c6577>(keyboard: arrows / Space)</color></size>
+ui.keyboard_hint_mobile=<size=90%><color=#57534A>(keyboard: arrows / Space)</color></size>
 hud.stage=STAGE
 hud.points=PTS
 graph.calc_deriv=Deriv
@@ -37,34 +37,34 @@ graph.calc_integral_fallback=∫ f(u) du + C — add a simple pattern (e.g. x^2,
 graph.label_fu=f(u) =
 graph.placeholder=x^2 + sin(x)*ln(x) for x>0 | min(x,3)...
 graph.status_enter=Enter / tap away to graph
-graph.status_graphed=<color=#8fd9b3>Graphed</color>
+graph.status_graphed=<color=#1F4FA0>Graphed</color>
 graph.line1=<b>Graphing calculator mode</b>
-graph.line2=<size=96%><color=#c4d0e8>Type <b>f(u)</b> below (variable <b>x</b> in the box = inner u). Then:</color></size>
+graph.line2=<size=96%><color=#57534A>Type <b>f(u)</b> below (variable <b>x</b> in the box = inner u). Then:</color></size>
 graph.line3=<size=96%><b>Deriv</b> adds f′ once (numeric) | <b>∫ area</b> Riemann strips once + primitive guess | <b>Trans</b> → {0} | double-tap <b>+</b> | hold <b>−</b> | <b>Scale</b> / <b>pinch</b></size>
-graph.line4=<size=96%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   x in [{4},{5}]</color></size>
+graph.line4=<size=96%><color=#57534A>A={0}  k={1}  C={2}  D={3}   x in [{4},{5}]</color></size>
 graph.param_a=A (vertical scale)
 graph.param_k=k (horizontal scale)
 graph.param_c=C (vertical shift)
 graph.param_d=D (horizontal shift)
-graph.polar.line2=<size=88%><color=#c4d0e8>Polar plot: horizontal axis is <b>θ</b>, vertical is <b>r(θ)</b>. <b>Trans</b> adjusts A, k, C, D in the polar equation.</color></size>
+graph.polar.line2=<size=88%><color=#57534A>Polar plot: horizontal axis is <b>θ</b>, vertical is <b>r(θ)</b>. <b>Trans</b> adjusts A, k, C, D in the polar equation.</color></size>
 graph.polar.param_a=A (r scale)
 graph.polar.param_k=k (θ scale)
 graph.polar.param_c=C (r shift)
 graph.polar.param_d=D (θ phase / axis shift)
-graph.polar.line4=<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}   θ∈[{4},{5}]</color></size>
+graph.polar.line4=<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}   θ∈[{4},{5}]</color></size>
 graph.calculator_intro=<b>Graphing calculator mode</b>\n<size=88%>Type almost any <b>f(u)</b> in the field (variable <b>x</b> in your formula); <b>Trans</b> adjusts A, k, C, D; <b>Scale</b> | <b>pinch</b> zoom the window.</size>
 # Prepended to story text for every Aerospace stage (indices 35–41).
-aerospace.story_drag_polar_preamble=<b><color=#c4b5fd>Drag polar refresher</color></b> (every <b>Aerospace</b> stage)\n<size=92%><b>Parasitic (zero-lift) drag</b> — skin friction, form drag, interference lumped as <b>C<sub>D0</sub></b> in the parabolic model (roughly <i>not</i> the part that grows with lift).\n<b>Induced drag</b> — the cost of making lift: trailing vortices add ~ <b>K C<sub>L</sub>²</b> (higher C<sub>L</sub> / tighter turns → more induced).\n<b>Overall drag polar</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: an upward-opening parabola in C<sub>L</sub>; min-drag <b>C<sub>L</sub></b> sits between “too slow / high α” and “too fast / low α” for real missions.</size>
+aerospace.story_drag_polar_preamble=<b><color=#1F4FA0>Drag polar refresher</color></b> (every <b>Aerospace</b> stage)\n<size=92%><b>Parasitic (zero-lift) drag</b> — skin friction, form drag, interference lumped as <b>C<sub>D0</sub></b> in the parabolic model (roughly <i>not</i> the part that grows with lift).\n<b>Induced drag</b> — the cost of making lift: trailing vortices add ~ <b>K C<sub>L</sub>²</b> (higher C<sub>L</sub> / tighter turns → more induced).\n<b>Overall drag polar</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: an upward-opening parabola in C<sub>L</sub>; min-drag <b>C<sub>L</sub></b> sits between “too slow / high α” and “too fast / low α” for real missions.</size>
 menu.tutorial_button=How to play
 menu.tutorial_title=How to play
-menu.tutorial_body=<b>Goal</b>\nMove along the graph, use platforms (green), avoid red hazards, and reach the bright exit on the right.\n\n<b>Controls</b>\n– <b>Move</b> — arrows / WASD, or on a phone hold the <b>left</b> / <b>right half</b> of the screen.\n– <b>Jump</b> — Space, or on a phone <b>tap with a second finger</b> while holding left/right. You jump from solid platforms.\n\n<b>The two curves</b>\n– <color=#c4b5fd>Main curve</color> — the function you walk on.\n– <color=#fdba74>Derivative f′</color> — slope information; it’s drawn as a second line.\n\n<b>Air jump on the derivative</b>\nWhile you are <b>in the air</b>, if your character overlaps the <b>derivative curve</b>, press <b>Jump again</b> for an extra hop.\n\n<size=94%><color=#a8b2d1>The derivative line brightens when you touch it. You get <b>one</b> bonus jump each time you brush it until you leave the curve or land. On phones you may feel a short vibration when you touch f′; on PC a sound plays when vibration isn’t available.</color></size>\n\n<b>Select level</b>\n<size=94%>On this screen, stages are grouped (Core, Engineering, AP Calculus, Aerospace …). Tap <b>How to play</b> at the bottom to reopen this help. Pick a group, then a level.</size>
+menu.tutorial_body=<b>Goal</b>\nMove along the graph, use the blue platforms, avoid red hazards, and reach the yellow exit on the right.\n\n<b>Controls</b>\n– <b>Move</b> — arrows / WASD, or on a phone hold the <b>left</b> / <b>right half</b> of the screen.\n– <b>Jump</b> — Space, or on a phone <b>tap with a second finger</b> while holding left/right. You jump from solid platforms.\n\n<b>The two curves</b>\n– <color=#1F4FA0>Main curve</color> — the function you walk on.\n– <color=#D7261E>Derivative f′</color> — slope information; it’s drawn as a second line.\n\n<b>Air jump on the derivative</b>\nWhile you are <b>in the air</b>, if your character overlaps the <b>derivative curve</b>, press <b>Jump again</b> for an extra hop.\n\n<size=94%><color=#57534A>The derivative line brightens when you touch it. You get <b>one</b> bonus jump each time you brush it until you leave the curve or land. On phones you may feel a short vibration when you touch f′; on PC a sound plays when vibration isn’t available.</color></size>\n\n<b>Select level</b>\n<size=94%>On this screen, stages are grouped (Core, Engineering, AP Calculus, Aerospace …). Tap <b>How to play</b> at the bottom to reopen this help. Pick a group, then a level.</size>
 menu.player_icon_title=Player icon
 menu.player_icon_set=Player icon
 menu.player_icon_hint=Tap a symbol — it’s your avatar in levels.
 menu.player_icon_done=Done
-menu.version_line=<b>First Principles</b> <color=#555555>(version 1.0)</color>
+menu.version_line=<b>First Principles</b> <color=#57534A>(version 1.0)</color>
 menu.credits_line=<size=34>John Seong (Orch Aerospace) × GameGenesis (Rayan Kaissi)</size>
-menu.support_contact=<size=32><color=#94a3b8>Support:</color> <color=#c4d0e8>contact@orchestrsim.com</color></size>
+menu.support_contact=<size=32><color=#57534A>Support:</color> <color=#57534A>contact@orchestrsim.com</color></size>
 level.0=First Principles Primer
 level.1=Slope of Parabola
 level.2=Waves of Sine
@@ -143,3 +143,6 @@ paywall.status.restore_failed=Couldn't restore right now. Please try again.
 paywall.status.deferred=Purchase is waiting for approval. Levels unlock automatically once it's approved.
 paywall.status.already_owned=You already own this — tap Restore purchases.
 paywall.status.failed=The purchase didn't go through. You haven't been charged.
+menu.play=Play
+ui.back=Back
+menu.tagline=A calculus platformer
