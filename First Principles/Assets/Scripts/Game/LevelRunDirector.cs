@@ -99,9 +99,7 @@ public class LevelRunDirector : MonoBehaviour
             _meterShown = potential;
             for (int i = 0; i < _meterStars.Length; i++)
             {
-                bool on = i < potential;
-                _meterStars[i].sprite = on ? StarGlyph.Filled : StarGlyph.Outline;
-                _meterStars[i].color = on ? UiKit.Gold : UiKit.GoldDim;
+                StarGlyph.SetStar(_meterStars[i], i < potential);
             }
             if (drop && potential < _meterStars.Length)
                 StartCoroutine(FeelDirector.PopScale(_meterStars[potential].transform, 0.35f, 1.25f));
@@ -129,7 +127,7 @@ public class LevelRunDirector : MonoBehaviour
         _meterStars = new Image[ProgressRules.MaxStars];
         float s = tablet ? 46f : 40f;
         for (int i = 0; i < _meterStars.Length; i++)
-            _meterStars[i] = StarGlyph.Add(_meterRt, "MeterStar" + i, StarGlyph.Filled, UiKit.Gold, new Vector2(s, s));
+            _meterStars[i] = StarGlyph.AddStar(_meterRt, "MeterStar" + i, true, new Vector2(s, s));
     }
 
     // ------------------------------------------------------------------ hints
@@ -138,26 +136,23 @@ public class LevelRunDirector : MonoBehaviour
     {
         bool tablet = DeviceLayout.IsTabletLike();
         float topPad = DeviceLayout.PreferOnScreenGameControls ? 12f : 20f;
-        float mathW = tablet ? 292f : 262f;
+        float mathW = tablet ? 330f : 300f; // matches LevelManager's Math concepts chip
         var rt = UiKit.Rect("HintButton", _safe, new Vector2(1f, 1f), new Vector2(1f, 1f));
         rt.pivot = new Vector2(1f, 1f);
         rt.sizeDelta = new Vector2(tablet ? 196f : 178f, tablet ? 60f : 56f);
         rt.anchoredPosition = new Vector2(-(18f + mathW + 12f), -topPad);
+        // Hint: yellow Bauhaus block, ink bulb glyph + label.
         var img = rt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        var bg = new Color(0.36f, 0.3f, 0.12f, 0.95f);
-        img.color = bg;
         _hintBtn = rt.gameObject.AddComponent<Button>();
         _hintBtn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(_hintBtn, bg, Color.Lerp(bg, Color.white, 0.18f), Color.Lerp(bg, Color.black, 0.22f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.3f);
-        var icon = StarGlyph.Add(rt, "Bulb", StarGlyph.Bulb, UiKit.Gold, new Vector2(40f, 40f));
+        var icon = StarGlyph.Add(rt, "Bulb", StarGlyph.Bulb, Bauhaus.Ink, new Vector2(40f, 40f));
         var irt = icon.rectTransform;
         irt.anchorMin = irt.anchorMax = new Vector2(0f, 0.5f);
         irt.pivot = new Vector2(0f, 0.5f);
         irt.anchoredPosition = new Vector2(10f, 0f);
         _hintLabel = UiKit.Text(rt, "Text", new Vector2(0.28f, 0.08f), new Vector2(0.96f, 0.92f), "",
-            UiTypography.Scale(tablet ? 26 : 24), new Color(1f, 0.95f, 0.8f, 1f), FontStyles.Bold);
+            UiTypography.Scale(tablet ? 26 : 24), Bauhaus.Ink, FontStyles.Bold);
+        Bauhaus.Button(_hintBtn, Bauhaus.Tone.Yellow);
         _hintBtn.onClick.AddListener(OnHintPressed);
         RefreshHintLabel();
 
@@ -168,14 +163,11 @@ public class LevelRunDirector : MonoBehaviour
         rr.sizeDelta = new Vector2(rs, rs);
         rr.anchoredPosition = new Vector2(rt.anchoredPosition.x - rt.sizeDelta.x - 12f, -topPad);
         var rimg = rr.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(rimg);
-        var rbg = new Color(0.16f, 0.19f, 0.27f, 0.95f);
-        rimg.color = rbg;
         var rbtn = rr.gameObject.AddComponent<Button>();
         rbtn.targetGraphic = rimg;
-        RuntimeUiPolish.ApplyButtonTransitions(rbtn, rbg, Color.Lerp(rbg, Color.white, 0.18f), Color.Lerp(rbg, Color.black, 0.22f));
-        var rglyph = StarGlyph.Add(rr, "Glyph", StarGlyph.Restart, RuntimeUiPolish.TitleIvory, new Vector2(rs * 0.66f, rs * 0.66f));
+        var rglyph = StarGlyph.Add(rr, "Glyph", StarGlyph.Restart, Bauhaus.Ink, new Vector2(rs * 0.62f, rs * 0.62f));
         rglyph.rectTransform.anchoredPosition = Vector2.zero;
+        Bauhaus.Button(rbtn, Bauhaus.Tone.Paper);
         rbtn.onClick.AddListener(() => { if (_lm != null) _lm.QuickRestart(); });
     }
 
@@ -232,7 +224,7 @@ public class LevelRunDirector : MonoBehaviour
             {
                 if (m == null) continue;
                 var g = m.GetComponentInChildren<Image>();
-                if (g != null) g.color = new Color(1f, 0.86f, 0.4f, pulse * fade);
+                if (g != null) g.color = Bauhaus.WithAlpha(Bauhaus.Red, pulse * fade);
             }
             yield return null;
         }
@@ -273,7 +265,7 @@ public class LevelRunDirector : MonoBehaviour
             var layout = go.AddComponent<GraphObstacleUILayout>();
             layout.gridRect = rect;
             layout.ApplyPixelLayout(uw, uh);
-            var img = StarGlyph.Add(rt, "Chevron", StarGlyph.Chevron, UiKit.Gold, Vector2.zero);
+            var img = StarGlyph.Add(rt, "Chevron", StarGlyph.Chevron, Bauhaus.Red, Vector2.zero);
             var irt = img.rectTransform;
             irt.anchorMin = Vector2.zero;
             irt.anchorMax = Vector2.one;
@@ -320,16 +312,23 @@ public class LevelRunDirector : MonoBehaviour
         float bottom = DeviceLayout.PreferOnScreenGameControls ? DeviceLayout.TouchControlBarHeight + 16f : 24f;
         rt.sizeDelta = new Vector2(0f, tablet ? 190f : 176f);
         rt.anchoredPosition = new Vector2(0f, bottom);
+        // Hint card: white sheet, black rule, yellow strip (the hint colour) on the left.
         var img = rt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.1f, 0.11f, 0.16f, 0.94f);
+        Bauhaus.Panel(img, Color.white, Bauhaus.ButtonRule);
         img.raycastTarget = false;
-        string body = RuleText(def) + "\n<color=#9fe8d8>" +
+        var strip = UiKit.Rect("Strip", rt, new Vector2(0f, 0f), new Vector2(0f, 1f));
+        strip.pivot = new Vector2(0f, 0.5f);
+        strip.sizeDelta = new Vector2(14f, 0f);
+        var simg = strip.gameObject.AddComponent<Image>();
+        simg.sprite = Bauhaus.Square;
+        simg.color = Bauhaus.Yellow;
+        simg.raycastTarget = false;
+        string body = RuleText(def) + "\n<color=#1F4FA0>" +
                       LocalizationManager.Get("hint.airjump",
                           "Touch the f′ curve in mid-air for a double jump (costs 5 points). Chevrons mark the take-off edges.") +
                       "</color>";
-        UiKit.Text(rt, "Body", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.92f), body,
-            UiTypography.Scale(tablet ? 22 : 20), RuntimeUiPolish.TitleIvory);
+        UiKit.Text(rt, "Body", new Vector2(0.05f, 0.08f), new Vector2(0.96f, 0.92f), body,
+            UiTypography.Scale(tablet ? 22 : 20), Bauhaus.Ink);
         _hintCard = rt.gameObject;
     }
 
@@ -357,17 +356,16 @@ public class LevelRunDirector : MonoBehaviour
             rt.sizeDelta = new Vector2(tablet ? 520f : 470f, 46f);
             rt.anchoredPosition = new Vector2(200f, -(topPad + (tablet ? 102f : 98f)));
             var img = rt.gameObject.AddComponent<Image>();
-            RuntimeUiPolish.UseRoundedSliced(img);
-            img.color = new Color(0.2f, 0.16f, 0.36f, 0.92f);
+            Bauhaus.Panel(img, Bauhaus.Yellow, 2f);
             img.raycastTarget = false;
             _dailyChip = UiKit.Text(rt, "Text", new Vector2(0.03f, 0.05f), new Vector2(0.97f, 0.95f), "",
-                UiTypography.Scale(20), new Color(0.88f, 0.84f, 1f, 1f), FontStyles.Bold);
+                UiTypography.Scale(20), Bauhaus.Ink, FontStyles.Bold);
         }
         if (challenge)
         {
             _challengeLevel = levelIndex;
             _dailyChip.text = ChallengeChipText(ch.Value);
-            _dailyChip.transform.parent.GetComponent<Image>().color = new Color(0.36f, 0.24f, 0.62f, 0.94f);
+            _dailyChip.transform.parent.GetComponent<Image>().color = Bauhaus.Card; // challenge runs: paper chip
         }
         else
         {
@@ -386,7 +384,7 @@ public class LevelRunDirector : MonoBehaviour
         {
             float t = _lm.LevelElapsed;
             string clock = LevelCompleteOverlay.FormatTime(t);
-            string color = t <= c.ParSeconds ? "#9fe8d8" : "#ff9a8a";
+            string color = t <= c.ParSeconds ? "#1F4FA0" : "#D7261E";
             return head + $"<color={color}>{clock}</color> / {c.ParSeconds}s";
         }
         return head + ChallengeSession.GoalText(c);
@@ -441,7 +439,7 @@ public class LevelRunDirector : MonoBehaviour
             {
                 Title = LocalizationManager.Get("tour.level.graph.title", "The level is the graph"),
                 Body = LocalizationManager.Get("tour.level.graph.body",
-                    "You walk on f(x). Ground only exists where the slope f′(x) is high enough, so jump the pits where it dips. Touch the glowing f′ curve in mid-air for a double jump. Grab ∂ tokens for points, bounce off springs for big leaps, and reach the blue exit on the right. Longer levels have a checkpoint flag."),
+                    "You walk on f(x). Ground only exists where the slope f′(x) is high enough, so jump the pits where it dips. Touch the red f′ curve in mid-air for a double jump. Grab ∂ tokens for points, bounce off springs for big leaps, and reach the yellow exit on the right. Longer levels have a checkpoint flag."),
                 Target = () => _lm != null ? _lm.CartesianPlane : null,
             },
             new CoachStep
@@ -495,12 +493,12 @@ public class LevelRunDirector : MonoBehaviour
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.sizeDelta = new Vector2(0f, tablet ? 120f : 108f);
         rt.anchoredPosition = new Vector2(0f, tablet ? 150f : 130f);
+        // First-run coach mark: ink block, paper type.
         var img = rt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.08f, 0.1f, 0.16f, 0.9f);
+        Bauhaus.Panel(img, Bauhaus.Ink, 0f);
         img.raycastTarget = false;
         _coachText = UiKit.Text(rt, "Text", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.92f), "",
-            UiTypography.Scale(tablet ? 30 : 27), RuntimeUiPolish.TitleIvory, FontStyles.Bold);
+            UiTypography.Scale(tablet ? 30 : 27), Bauhaus.Card, FontStyles.Bold);
         _coachRoot = rt.gameObject;
         SetCoachStep(0);
     }
@@ -530,10 +528,10 @@ public class LevelRunDirector : MonoBehaviour
                 break;
             case 2:
                 text = LocalizationManager.Get("coach.air",
-                    "Gaps open where the slope f′(x) dips. Touch the glowing f′ curve in mid-air and jump again for a double jump");
+                    "Gaps open where the slope f′(x) dips. Touch the red f′ curve in mid-air and jump again for a double jump");
                 break;
             case 3:
-                text = LocalizationManager.Get("coach.exit", "Reach the blue exit on the right. Fewer falls = more stars");
+                text = LocalizationManager.Get("coach.exit", "Reach the yellow exit on the right. Fewer falls = more stars");
                 break;
             default:
                 FinishCoach();

@@ -8,12 +8,13 @@ using UnityEngine.UI;
 /// </summary>
 public class GraphCalculatorAnalysisControls : MonoBehaviour
 {
+    // Bauhaus plot: f in blue, f′ in red, ∫ strips in yellow.
     static readonly Color[] DerivativePalette =
     {
-        new Color(0.98f, 0.45f, 0.55f, 1f),
-        new Color(0.55f, 0.88f, 1f, 1f),
-        new Color(0.78f, 0.55f, 0.98f, 1f),
-        new Color(0.55f, 0.94f, 0.68f, 1f),
+        Bauhaus.Red,
+        Bauhaus.YellowLine,
+        Bauhaus.Ink,
+        Bauhaus.Blue,
     };
 
     /// <summary>How many derivative taps allowed per equation (only f′).</summary>
@@ -32,10 +33,10 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
     float integralCachedXStart;
     float integralCachedXEnd;
 
-    static readonly Color CalculatorRiemannFill = new Color(0.28f, 0.62f, 1f, 0.52f);
+    static readonly Color CalculatorRiemannFill = Bauhaus.WithAlpha(Bauhaus.Yellow, 0.6f);
 
-    const string DerivativeSuffixHex = "fb7c8f";
-    const string IntegralSuffixHex = "5cabff";
+    const string DerivativeSuffixHex = "D7261E"; // Bauhaus red (matches the f′ line)
+    const string IntegralSuffixHex = "1F4FA0";   // Bauhaus blue
 
     string derivativeSuffixText = "";
     string integralSuffixText = "";
@@ -131,7 +132,7 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
 
         string outerHex = hasDeriv && !hasIntegral ? DerivativeSuffixHex
                         : !hasDeriv && hasIntegral ? IntegralSuffixHex
-                        : "a8b2d1";
+                        : "57534A";
         plotter.SetEquationExtraSuffix(combined, outerHex);
     }
 
@@ -333,16 +334,9 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
         rt.anchoredPosition = anchoredPos;
 
         var img = go.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = new Color(0.16f, 0.18f, 0.24f, 0.96f);
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
-        var colors = btn.colors;
-        colors.highlightedColor = new Color(0.95f, 0.95f, 1f, 1f);
-        colors.pressedColor = new Color(0.85f, 0.87f, 0.95f, 1f);
-        colors.disabledColor = new Color(0.45f, 0.47f, 0.52f, 0.65f);
-        btn.colors = colors;
         btn.onClick.AddListener(onClick);
 
         var textGo = new GameObject("Text");
@@ -357,7 +351,6 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
         tmp.text = label;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.fontSize = UiTypography.Scale(DeviceLayout.IsTabletLike() ? 30 : 26);
-        tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
         tmp.fontStyle = FontStyles.Bold;
         tmp.raycastTarget = false;
         if (fontRef != null && fontRef.font != null)
@@ -369,6 +362,8 @@ public class GraphCalculatorAnalysisControls : MonoBehaviour
         else
             UiTypography.ApplyDefaultFontAsset(tmp);
 
+        // Keypad keys share the Bauhaus button: f′ key red (its line colour), ∫ key yellow (its strips).
+        Bauhaus.Button(btn, objectName.Contains("Deriv") ? Bauhaus.Tone.Red : Bauhaus.Tone.Yellow);
         return go;
     }
 

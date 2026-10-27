@@ -140,8 +140,8 @@ public class FeelDirector : MonoBehaviour
         ProgressStore.AddFall();
         Shake(0.32f, 16f);
         HitStop(0.07f);
-        Burst(worldPos, new Color(0.98f, 0.45f, 0.4f, 1f), 14, 420f);
-        Flash(new Color(0.95f, 0.3f, 0.28f, 0.22f), 0.28f);
+        Burst(worldPos, Bauhaus.Red, 14, 420f);
+        Flash(Bauhaus.WithAlpha(Bauhaus.Red, 0.18f), 0.28f); // flat red flash, no glow
     }
 
     void OnGraze()
@@ -158,7 +158,7 @@ public class FeelDirector : MonoBehaviour
 
     void OnFinished(Vector3 worldPos)
     {
-        Burst(worldPos, new Color(0.55f, 0.85f, 1f, 1f), 18, 520f);
+        Burst(worldPos, Bauhaus.Blue, 18, 520f);
     }
 
     // ------------------------------------------------------------------ shake / hit-stop / flash
@@ -295,7 +295,8 @@ public class FeelDirector : MonoBehaviour
             tmp.text = BurstGlyphs[UnityEngine.Random.Range(0, BurstGlyphs.Length)];
             tmp.fontSize = UnityEngine.Random.Range(26f, 44f);
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = Color.Lerp(color, Color.white, UnityEngine.Random.Range(0f, 0.45f));
+            tmp.color = color; // flat primary glyphs (no white wash on paper)
+            tmp.fontStyle = FontStyles.Bold;
             tmp.raycastTarget = false;
             tmp.fontStyle = FontStyles.Bold;
             float ang = UnityEngine.Random.Range(0f, Mathf.PI * 2f);

@@ -60,7 +60,7 @@ public sealed class MandelbrotFractalBackdrop : MonoBehaviour
             rt.offsetMax = Vector2.zero;
             var raw = go.GetComponent<RawImage>();
             raw.raycastTarget = false;
-            raw.color = new Color(1f, 1f, 1f, 0.76f);
+            raw.color = Color.white;
         }
         else
             go = existing.gameObject;
@@ -92,7 +92,7 @@ public sealed class MandelbrotFractalBackdrop : MonoBehaviour
         {
             _tex = new Texture2D(TexW, TexH, TextureFormat.RGBA32, false)
             {
-                filterMode = FilterMode.Bilinear,
+                filterMode = FilterMode.Point,
                 wrapMode = TextureWrapMode.Clamp
             };
             _raw.texture = _tex;
@@ -111,7 +111,7 @@ public sealed class MandelbrotFractalBackdrop : MonoBehaviour
                 float sm = MandelbrotEscapeMath.SmoothIterations(cr, ci, maxIter);
                 Color col = ColorFromSmooth(sm, maxIter);
                 if (Mathf.Abs(i - slicePx) <= 1)
-                    col = Color.Lerp(col, new Color(1f, 0.92f, 0.25f, 0.95f), 0.52f);
+                    col = Bauhaus.Red; // slice line
                 pixels[row + i] = (Color32)col;
             }
         }
@@ -120,16 +120,19 @@ public sealed class MandelbrotFractalBackdrop : MonoBehaviour
         _tex.Apply(false);
     }
 
+    /// <summary>Bauhaus: flat poster bands (no hue gradient). Inside the set is ink; escape bands cycle
+    /// yellow / red / blue at low alpha so the curve and grid stay readable on paper.</summary>
     static Color ColorFromSmooth(float smoothIter, int maxIter)
     {
         if (smoothIter >= maxIter - 0.001f)
-            return new Color(0.035f, 0.045f, 0.14f, 0.93f);
-
+            return Bauhaus.WithAlpha(Bauhaus.Ink, 0.82f);
         float t = Mathf.Clamp01(smoothIter / maxIter);
-        float hue = (t * 5.85f + 0.52f) % 1f;
-        Color c = Color.HSVToRGB(hue, 0.84f, Mathf.Lerp(0.28f, 1f, t));
-        c.a = 0.9f;
-        return c;
+        if (t < 0.06f)
+            return new Color(0f, 0f, 0f, 0f);
+        int band = Mathf.FloorToInt(smoothIter / 3f) % 3;
+        return band == 0 ? Bauhaus.WithAlpha(Bauhaus.Yellow, 0.55f)
+            : band == 1 ? Bauhaus.WithAlpha(Bauhaus.Red, 0.32f)
+            : Bauhaus.WithAlpha(Bauhaus.Blue, 0.32f);
     }
 
     void OnDestroy()

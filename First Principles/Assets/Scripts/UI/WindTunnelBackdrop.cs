@@ -19,7 +19,8 @@ public sealed class WindTunnelBackdrop : MonoBehaviour
     static readonly int IdStreakScale = Shader.PropertyToID("_StreakScale");
     static readonly int IdColor = Shader.PropertyToID("_Color");
 
-    static readonly Color WindTint = new Color(0.9f, 0.96f, 1f, 0.54f);
+    // Bauhaus: flow streaks drawn in blue ink on the paper plot.
+    static readonly Color WindTint = new Color(0.12f, 0.31f, 0.63f, 0.4f);
 
     RawImage _raw;
     Material _mat;

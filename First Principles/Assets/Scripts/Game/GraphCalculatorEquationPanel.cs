@@ -66,9 +66,9 @@ public static class GraphCalculatorEquationPanel
             rt.sizeDelta = new Vector2(w, panelHeight);
         }
 
+        // Bauhaus expression entry: card with a black rule, field as a white well with its own rule.
         var bg = root.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(bg);
-        bg.color = new Color(0.1f, 0.11f, 0.15f, 0.92f);
+        Bauhaus.Panel(bg, Bauhaus.Card, Bauhaus.ButtonRule);
         bg.raycastTarget = true;
 
         var labelGo = new GameObject("Label");
@@ -83,7 +83,7 @@ public static class GraphCalculatorEquationPanel
         label.text = LocalizationManager.Get("graph.label_fu", "f(u) =");
         label.fontSize = UiTypography.Scale(tablet ? 26 : 24);
         label.alignment = TextAlignmentOptions.MidlineLeft;
-        label.color = new Color(0.85f, 0.88f, 0.95f, 0.9f);
+        label.color = Bauhaus.Ink;
         CopyFont(label, typographyReference);
         label.fontStyle = FontStyles.Bold;
 
@@ -92,12 +92,12 @@ public static class GraphCalculatorEquationPanel
         irt.SetParent(rt, false);
         irt.anchorMin = new Vector2(0f, 0f);
         irt.anchorMax = new Vector2(1f, 1f);
-        irt.offsetMin = new Vector2(tablet ? 96f : 88f, 10f);
-        irt.offsetMax = new Vector2(-14f, -36f);
+        // Field under the "f(u) =" label, full width, with the status line below it (no overlap).
+        irt.offsetMin = new Vector2(12f, 34f);
+        irt.offsetMax = new Vector2(-12f, -38f);
 
         var inputBg = inputShell.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(inputBg);
-        inputBg.color = new Color(0.15f, 0.16f, 0.21f, 0.95f);
+        Bauhaus.Panel(inputBg, Color.white, 2f);
 
         var textArea = new GameObject("Text Area", typeof(RectTransform), typeof(RectMask2D));
         textArea.transform.SetParent(inputShell.transform, false);
@@ -117,7 +117,7 @@ public static class GraphCalculatorEquationPanel
         var textMesh = textGo.AddComponent<TextMeshProUGUI>();
         textMesh.text = plotter.customExpression;
         textMesh.fontSize = UiTypography.Scale(tablet ? 24 : 21);
-        textMesh.color = Color.white;
+        textMesh.color = Bauhaus.Ink;
         textMesh.alignment = TextAlignmentOptions.MidlineLeft;
         CopyFont(textMesh, typographyReference);
         textMesh.fontStyle = FontStyles.Bold;
@@ -132,8 +132,8 @@ public static class GraphCalculatorEquationPanel
         var ph = phGo.AddComponent<TextMeshProUGUI>();
         ph.text = LocalizationManager.Get("graph.placeholder", "x^2 + sin(x)*ln(x) for x>0 | min(x,3)...");
         ph.fontSize = UiTypography.Scale(tablet ? 24 : 21);
-        ph.color = new Color(1f, 1f, 1f, 0.32f);
-        ph.fontStyle = FontStyles.Bold | FontStyles.Italic;
+        ph.color = Bauhaus.WithAlpha(Bauhaus.InkSoft, 0.7f);
+        ph.fontStyle = FontStyles.Normal;
         ph.alignment = TextAlignmentOptions.MidlineLeft;
         CopyFont(ph, typographyReference);
 
@@ -153,7 +153,7 @@ public static class GraphCalculatorEquationPanel
         srt.pivot = new Vector2(0.5f, 0f);
         var status = statusGo.AddComponent<TextMeshProUGUI>();
         status.alignment = TextAlignmentOptions.Midline;
-        status.color = new Color(0.75f, 0.92f, 0.8f, 0.95f);
+        status.color = Bauhaus.InkSoft;
         status.richText = true;
         status.text = LocalizationManager.Get("graph.status_enter", "Enter / tap away to graph");
         CopyFont(status, typographyReference);
@@ -197,12 +197,12 @@ public static class GraphCalculatorEquationPanel
         if (!MathExpressionEvaluator.TryValidateRough(t, out string err))
         {
             if (status != null)
-                status.text = $"<color=#ff9a9a>{TmpEscape(err)}</color>";
+                status.text = $"<color=#D7261E>{TmpEscape(err)}</color>";
             return;
         }
 
         if (status != null)
-            status.text = LocalizationManager.Get("graph.status_graphed", "<color=#8fd9b3>Graphed</color>");
+            status.text = LocalizationManager.Get("graph.status_graphed", "<color=#1F4FA0>Graphed</color>");
         plotter.SetCustomExpression(t);
         GraphCalculatorAnalysisControls.NotifyExpressionChanged(plotter);
     }
@@ -219,7 +219,7 @@ public static class GraphCalculatorEquationPanel
             placeholderTmp.text = LocalizationManager.Get("graph.placeholder", "x^2 + sin(x)*ln(x) for x>0 | min(x,3)...");
             LocalizationManager.ApplyTextDirection(placeholderTmp);
         }
-        if (statusTmp != null && statusTmp.text.IndexOf("#ff9a9a", StringComparison.Ordinal) < 0)
+        if (statusTmp != null && statusTmp.text.IndexOf("#D7261E", StringComparison.Ordinal) < 0)
         {
             statusTmp.text = LocalizationManager.Get("graph.status_enter", "Enter / tap away to graph");
             LocalizationManager.ApplyTextDirection(statusTmp);
@@ -262,7 +262,7 @@ public static class GraphCalculatorEquationPanel
             bool placeholder = t == placeholderTmp
                 || t.gameObject.name.IndexOf("Placeholder", StringComparison.OrdinalIgnoreCase) >= 0;
             CopyFont(t, typographyReference);
-            t.fontStyle = placeholder ? (FontStyles.Bold | FontStyles.Italic) : FontStyles.Bold;
+            t.fontStyle = placeholder ? FontStyles.Normal : FontStyles.Bold;
         }
 
         bool tablet = DeviceLayout.IsTabletLike();
@@ -281,7 +281,7 @@ public static class GraphCalculatorEquationPanel
         status.fontSize = UiTypography.Scale(tablet ? 19 : 17);
         if (srt != null)
         {
-            srt.anchoredPosition = new Vector2(0f, 0f);
+            srt.anchoredPosition = new Vector2(0f, 3f);
             srt.sizeDelta = new Vector2(-24f, 28f);
         }
     }

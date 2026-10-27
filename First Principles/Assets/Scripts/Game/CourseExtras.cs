@@ -255,11 +255,8 @@ public class CourseExtras : MonoBehaviour
     {
         float h = TokenSize * 0.5f;
         var rt = Place("Token", new GridRect(c.x - h, c.x + h, c.y - h, c.y + h));
-        var glow = rt.gameObject.AddComponent<Image>();
-        glow.sprite = RuntimeUiPolish.SoftCharacterBlob;
-        glow.color = new Color(1f, 0.82f, 0.36f, 0.35f);
-        glow.raycastTarget = false;
-        var t = UiKit.Text(rt, "Glyph", Vector2.zero, Vector2.one, "∂", 40f, UiKit.Gold, FontStyles.Bold);
+        // Bauhaus: a bold red ∂, no glow halo.
+        var t = UiKit.Text(rt, "Glyph", Vector2.zero, Vector2.one, "∂", 40f, Bauhaus.Red, FontStyles.Bold);
         t.enableAutoSizing = true;
         t.fontSizeMin = 10f;
         t.fontSizeMax = 80f;
@@ -274,7 +271,7 @@ public class CourseExtras : MonoBehaviour
         var rt = Place("Spring", new GridRect(a.xMax - w, a.xMax, a.yMax - 0.42f, a.yMax + 0.14f));
         var img = rt.gameObject.AddComponent<Image>();
         img.sprite = StarGlyph.Spring;
-        img.color = UiKit.Mint;
+        img.color = Bauhaus.Blue;
         img.preserveAspect = false;
         img.raycastTarget = false;
         _springs.Add(new Spring { Pad = pad, Rt = rt, Img = img });
@@ -286,7 +283,7 @@ public class CourseExtras : MonoBehaviour
         var rt = Place("Sentry", new GridRect(center.x - h, center.x + h, center.y - h, center.y + h));
         var img = rt.gameObject.AddComponent<Image>();
         img.sprite = StarGlyph.Flame;
-        img.color = new Color(1f, 0.45f, 0.4f, 0.95f);
+        img.color = Bauhaus.Red;
         img.preserveAspect = true;
         img.raycastTarget = false;
         _sentries.Add(new Sentry { Center = center, Amp = amp, Speed = speed, Phase = k * 0.9f, Rt = rt, Layout = rt.GetComponent<GraphObstacleUILayout>(), Pos = center });
@@ -298,7 +295,7 @@ public class CourseExtras : MonoBehaviour
         _flagRt = Place("Checkpoint", new GridRect(cx - 0.45f, cx + 0.55f, p.yMax, p.yMax + 1.5f));
         _flagImg = _flagRt.gameObject.AddComponent<Image>();
         _flagImg.sprite = StarGlyph.Flag;
-        _flagImg.color = new Color(0.7f, 0.74f, 0.85f, 0.75f);
+        _flagImg.color = Bauhaus.RuleStrong;
         _flagImg.preserveAspect = true;
         _flagImg.raycastTarget = false;
     }
@@ -307,14 +304,14 @@ public class CourseExtras : MonoBehaviour
     {
         _checkpointReached = true;
         if (_flagImg != null)
-            _flagImg.color = UiKit.Gold;
+            _flagImg.color = Bauhaus.Red;
         if (!celebrate)
             return;
         FeelDirector.Play(SfxId.StagePop, 0.7f, 1.2f);
         if (_flagRt != null)
         {
             StartCoroutine(FeelDirector.PopScale(_flagRt, 0.4f, 1.4f));
-            FeelDirector.Instance.Burst(_flagRt.position, UiKit.Gold, 10, 300f);
+            FeelDirector.Instance.Burst(_flagRt.position, Bauhaus.Red, 10, 300f);
         }
         Toast(LocalizationManager.Get("course.checkpoint", "Checkpoint"));
         Buzz();
@@ -349,7 +346,7 @@ public class CourseExtras : MonoBehaviour
             s.Kick = Mathf.MoveTowards(s.Kick, 0f, Time.deltaTime * 4f);
             float squash = on ? 0.82f : 1f + 0.35f * s.Kick;
             s.Rt.localScale = new Vector3(1f, squash, 1f);
-            s.Img.color = on ? Color.Lerp(UiKit.Mint, Color.white, 0.4f + 0.3f * Mathf.Sin(t * 10f)) : UiKit.Mint;
+            s.Img.color = on ? Color.Lerp(Bauhaus.Blue, Bauhaus.Ink, 0.4f + 0.3f * Mathf.Sin(t * 10f)) : Bauhaus.Blue;
         }
 
         // Sentries: sine patrol, touch = fall.
@@ -394,7 +391,7 @@ public class CourseExtras : MonoBehaviour
         TokensTaken++;
         AddFlow();
         FeelDirector.Play(SfxId.Star1, 0.75f, 1f + 0.08f * Mathf.Min(_flow, 8));
-        FeelDirector.Instance.Burst(tk.Rt.position, UiKit.Gold, 10, 320f);
+        FeelDirector.Instance.Burst(tk.Rt.position, Bauhaus.Red, 10, 320f);
         if (_lm != null)
             _lm.AddScoreBonus(TokenPoints);
         StartCoroutine(Vanish(tk.Glyph.rectTransform, tk.Rt));
@@ -451,7 +448,7 @@ public class CourseExtras : MonoBehaviour
         _hudRt.pivot = new Vector2(0.5f, 1f);
         _hudRt.sizeDelta = new Vector2(420f, 52f);
         _hudRt.anchoredPosition = new Vector2(0f, DeviceLayout.PreferOnScreenGameControls ? -14f : -22f);
-        _hud = UiKit.Text(_hudRt, "Text", Vector2.zero, Vector2.one, "", UiTypography.Scale(26), UiKit.Gold, FontStyles.Bold);
+        _hud = UiKit.Text(_hudRt, "Text", Vector2.zero, Vector2.one, "", UiTypography.Scale(26), Bauhaus.Ink, FontStyles.Bold);
     }
 
     void RefreshHud()
@@ -459,7 +456,7 @@ public class CourseExtras : MonoBehaviour
         if (_hud == null)
             return;
         string tokens = _tokens.Count > 0 ? $"∂ {TokensTaken}/{_tokens.Count}" : "";
-        string flow = _flow >= 2 ? $"   <color=#9fe8d8>{LocalizationManager.Get("course.flow", "Flow")} ×{_flow}</color>" : "";
+        string flow = _flow >= 2 ? $"   <color=#1F4FA0>{LocalizationManager.Get("course.flow", "Flow")} ×{_flow}</color>" : "";
         _hud.text = tokens + flow;
     }
 
@@ -468,7 +465,7 @@ public class CourseExtras : MonoBehaviour
         if (_hudRt == null)
             return;
         var t = UiKit.Text(_hudRt.parent, "CourseToast", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), text,
-            UiTypography.Scale(30), UiKit.Gold, FontStyles.Bold);
+            UiTypography.Scale(30), Bauhaus.Red, FontStyles.Bold);
         t.rectTransform.pivot = new Vector2(0.5f, 1f);
         t.rectTransform.sizeDelta = new Vector2(500f, 56f);
         t.rectTransform.anchoredPosition = new Vector2(0f, -72f);

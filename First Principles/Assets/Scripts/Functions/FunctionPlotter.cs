@@ -42,7 +42,7 @@ public class FunctionPlotter : MonoBehaviour
 
     public int baseN = 2;
 
-    /// <summary>When <see cref="functionType"/> is <see cref="FunctionType.CustomExpression"/>, evaluates this as <c>f(u)</c> with <c>u = transK·(x−transD)</c>; plotted <c>y = transA·f(u)+transC</c>.</summary>
+    /// <summary>When <see cref="functionType"/> is <see cref="FunctionType.CustomExpression"/>, evaluates this as <c>f(u)</c> with <c>u = transK×(x−transD)</c>; plotted <c>y = transA×f(u)+transC</c>.</summary>
     [TextArea(1, 3)]
     public string customExpression = "x^2";
 
@@ -91,7 +91,7 @@ public class FunctionPlotter : MonoBehaviour
     /// <summary>Optional second line under the main equation (e.g. Riemann / integral note).</summary>
     private string equationExtraSuffix = "";
     /// <summary>Hex color (no leading <c>#</c>) wrapping <see cref="equationExtraSuffix"/>; inline <c>&lt;color&gt;</c> tags inside the suffix override per-span.</summary>
-    private string equationExtraSuffixColorHex = "a8b2d1";
+    private string equationExtraSuffixColorHex = "57534A";
 
     private LineRendererUI lineRenderer;
     private DerivRendererUI derivRenderer;
@@ -109,8 +109,8 @@ public class FunctionPlotter : MonoBehaviour
     // AeroDragPolarTriple: extra polylines (cloned once from main LineRendererUI).
     private LineRendererUI overlayParasitic;
     private LineRendererUI overlayInduced;
-    private Color overlayDragPolarParasiticColor = new Color(0.55f, 0.66f, 0.85f, 1f);
-    private Color overlayDragPolarInducedColor = new Color(0.96f, 0.52f, 0.55f, 0.92f);
+    private Color overlayDragPolarParasiticColor = Bauhaus.Ink;
+    private Color overlayDragPolarInducedColor = Bauhaus.YellowLine;
 
     private void Reset()
     {
@@ -344,7 +344,7 @@ public class FunctionPlotter : MonoBehaviour
     /// Horizontal axis readout at a tick <paramref name="tickOffsetFromCenter"/> grid columns right of center
     /// (one column = one plotter unit in <c>x</c> or polar <c>θ</c>).
     /// • Level / preset graphs: tick shows plotter <c>x</c> (or <c>θ</c>).
-    /// • Graphing calculator (<see cref="FunctionType.CustomExpression"/>): tick shows inner <c>u = transK·(x−transD)</c>
+    /// • Graphing calculator (<see cref="FunctionType.CustomExpression"/>): tick shows inner <c>u = transK×(x−transD)</c>
     ///   so numbers match <b>Trans</b> the same way your <c>f(u)</c> does.
     /// </summary>
     public float AxisTickOffsetToMathX(float tickOffsetFromCenter)
@@ -370,14 +370,14 @@ public class FunctionPlotter : MonoBehaviour
     public void SetEquationExtraSuffix(string suffix)
     {
         equationExtraSuffix = suffix ?? "";
-        equationExtraSuffixColorHex = "a8b2d1";
+        equationExtraSuffixColorHex = "57534A";
     }
 
     /// <param name="colorHex">With or without leading <c>#</c>; <c>null</c>/empty restores the default grey-blue.</param>
     public void SetEquationExtraSuffix(string suffix, string colorHex)
     {
         equationExtraSuffix = suffix ?? "";
-        equationExtraSuffixColorHex = string.IsNullOrEmpty(colorHex) ? "a8b2d1" : colorHex.TrimStart('#');
+        equationExtraSuffixColorHex = string.IsNullOrEmpty(colorHex) ? "57534A" : colorHex.TrimStart('#');
     }
 
     /// <summary>True when the curve is the polar graph <c>r(θ)</c> (horizontal axis = θ, vertical = r), not Cartesian <c>y(x)</c>.</summary>
@@ -639,10 +639,10 @@ public class FunctionPlotter : MonoBehaviour
             // Boss / BC: logarithmic “golden” spiral r ∝ φ^{kθ} with φ = (1+√5)/2; horizontal axis is θ (same as other polar presets).
             FunctionType.PolarGoldenLogSpiral => GoldenLogSpiralPolarY(u, transA, transC, baseN),
 
-            // Upper half of (u)² + (y−k)² = R² with u = transK·(x−h), R = |transA|, k = transC, h = transD.
+            // Upper half of (u)² + (y−k)² = R² with u = transK×(x−h), R = |transA|, k = transC, h = transD.
             FunctionType.CircleUpper => CircleUpperY(u, transA, transC),
 
-            // Aerospace / aerodynamics teaching curves (u = transK·(x−transD)).
+            // Aerospace / aerodynamics teaching curves (u = transK×(x−transD)).
             FunctionType.AeroLiftVsAlpha => AeroLiftVsAlphaY(u, transA, transC),
             FunctionType.AeroIsothermalDensity => AeroIsothermalDensityY(u, transA, transC, baseN),
             FunctionType.AeroNewtonianSinSquared => AeroNewtonianSinSquaredY(u, transA, transC),
@@ -650,7 +650,7 @@ public class FunctionPlotter : MonoBehaviour
             // Thermodynamics: reversible adiabatic ideal gas, P ∝ V^{-γ} with γ from baseN/100 (e.g. 140 → 1.40); u > 0 is “volume-like”.
             FunctionType.ThermoAdiabaticPV => ThermoAdiabaticPvY(u, transA, transC, baseN),
 
-            // Drag polar total C_D,tot: same closed form as Power — A·(u^power + C); overlays plot C_D,par = A·C and C_D,ind = A·u^power.
+            // Drag polar total C_D,tot: same closed form as Power — A×(u^power + C); overlays plot C_D,par = A×C and C_D,ind = A×u^power.
             FunctionType.AeroDragPolarTriple => transA * (Mathf.Pow(u, power) + transC),
 
             // Mandelbrot: escape-time vs Im(c) with Re(c)=transA; use |Im| inside iteration (same count as c̄) — cheap symmetry about the real axis.
@@ -735,7 +735,7 @@ public class FunctionPlotter : MonoBehaviour
     }
 
     /// <summary>
-    /// 1D slice: c = c_r + i·u with u = transK·(x−D); height ∝ <b>smooth</b> escape-time (fractional iteration count).
+    /// 1D slice: c = c_r + i×u with u = transK×(x−D); height ∝ <b>smooth</b> escape-time (fractional iteration count).
     /// Uses |u| in the iteration because escape-time is even in Im(c) (conjugate symmetry). See <see cref="MandelbrotFractalBackdrop"/> for the 2D set.
     /// </summary>
     private static float MandelbrotEscapeImSliceY(float u, float cr, float yOffset, int maxIter, int heightScaleFromBaseN)
@@ -785,7 +785,7 @@ public class FunctionPlotter : MonoBehaviour
     /// <summary>Golden ratio φ for spiral presets.</summary>
     private static float GoldenRatioPhi => (1f + Mathf.Sqrt(5f)) * 0.5f;
 
-    /// <summary>r(θ) = A·φ^{kθ} + C with k scaled from <paramref name="baseNRaw"/> (growth rate knob).</summary>
+    /// <summary>r(θ) = A×φ^{kθ} + C with k scaled from <paramref name="baseNRaw"/> (growth rate knob).</summary>
     private static float GoldenLogSpiralPolarY(float u, float a, float c, int baseNRaw)
     {
         float k = Mathf.Clamp(Mathf.Max(1, baseNRaw) / 750f, 0.055f, 0.19f);
@@ -862,7 +862,7 @@ public class FunctionPlotter : MonoBehaviour
 
     private static float SpringMassUndampedOmega(int power) => 0.118f * Mathf.Max(1, power);
 
-    /// <summary>Underdamped-style envelope A·e^(-α|u|)·sin(ωu) + C (u = scaled time/position).</summary>
+    /// <summary>Underdamped-style envelope A×e^(-α|u|)×sin(ωu) + C (u = scaled time/position).</summary>
     private static float DampedOscillatorY(float u, float a, float c, int power, int baseN)
     {
         float omega = 0.28f * Mathf.Max(1, power);
@@ -1007,7 +1007,7 @@ public class FunctionPlotter : MonoBehaviour
                 float omegaDisp = SpringMassUndampedOmega(power);
                 equationText.text =
                     $@"<b>\(\text{{Spring–mass (undamped)}}\)</b> \(x \approx {a}\cos({omegaDisp:0.###}\,u)+{c},\; u={k}(x-{d})\)\n" +
-                    $@"<size=88%><color=#a8b2d1>Hooke \(F=-kx\Rightarrow \ddot{{x}}=-\omega^2 x\), \(\omega=\sqrt{{k/m}}\).</color></size>";
+                    $@"<size=88%><color=#57534A>Hooke \(F=-kx\Rightarrow \ddot{{x}}=-\omega^2 x\), \(\omega=\sqrt{{k/m}}\).</color></size>";
                 break;
             }
             case FunctionType.DampedOscillator:
@@ -1036,7 +1036,7 @@ public class FunctionPlotter : MonoBehaviour
                 float thLo = Mathf.Min(transK * (xStart - transD), transK * (xEnd - transD));
                 float thHi = Mathf.Max(transK * (xStart - transD), transK * (xEnd - transD));
                 equationText.text =
-                    $@"\(r(\theta)={a}(1+\cos\theta)+{c}\)\n<size=88%><color=#a8b2d1>\(\theta\in[{thLo:0.##},{thHi:0.##}]\)</color></size>";
+                    $@"\(r(\theta)={a}(1+\cos\theta)+{c}\)\n<size=88%><color=#57534A>\(\theta\in[{thLo:0.##},{thHi:0.##}]\)</color></size>";
                 break;
             }
             case FunctionType.PolarRose:
@@ -1045,7 +1045,7 @@ public class FunctionPlotter : MonoBehaviour
                 float thLo = Mathf.Min(transK * (xStart-transD), transK * (xEnd-transD));
                 float thHi = Mathf.Max(transK * (xStart-transD), transK * (xEnd-transD));
                 equationText.text =
-                    $@"\(r(\theta)={a}\cos({nRose}\theta)+{c}\)\n<size=88%><color=#a8b2d1>\(\theta\in[{thLo:0.##},{thHi:0.##}]\)</color></size>";
+                    $@"\(r(\theta)={a}\cos({nRose}\theta)+{c}\)\n<size=88%><color=#57534A>\(\theta\in[{thLo:0.##},{thHi:0.##}]\)</color></size>";
                 break;
             }
             case FunctionType.PolarGoldenLogSpiral:
@@ -1056,7 +1056,7 @@ public class FunctionPlotter : MonoBehaviour
                 string phiStr = GoldenRatioPhi.ToString("0.###");
                 equationText.text =
                     $@"<b>\(\text{{Golden spiral}}\)</b> \(r(\theta)\approx {a}\varphi^{{{kk:0.###}\theta}}+{c}\)\n" +
-                    $@"<size=88%><color=#a8b2d1>\(\varphi=\frac{{1+\sqrt{{5}}}}{{2}}\approx {phiStr}\), \(\theta\in[{thLo:0.##},{thHi:0.##}]\), \(u={k}(x-{d})\).</color></size>";
+                    $@"<size=88%><color=#57534A>\(\varphi=\frac{{1+\sqrt{{5}}}}{{2}}\approx {phiStr}\), \(\theta\in[{thLo:0.##},{thHi:0.##}]\), \(u={k}(x-{d})\).</color></size>";
                 break;
             }
             case FunctionType.CircleUpper:
@@ -1074,7 +1074,7 @@ public class FunctionPlotter : MonoBehaviour
             case FunctionType.AeroDragPolarTriple:
                 equationText.text =
                     $@"<b>\(\text{{Drag polar — three traces}}\)</b>\n" +
-                    $@"<size=92%><color=#a8b2d1><b>Parasitic</b> \(C_{{D,\text{{par}}}} \approx {a}\cdot({c})\) (flat) | " +
+                    $@"<size=92%><color=#57534A><b>Parasitic</b> \(C_{{D,\text{{par}}}} \approx {a}\cdot({c})\) (flat) | " +
                     $@"<b>Induced</b> \(C_{{D,\text{{ind}}}} = {a}\,u^{{{power}}}\) | " +
                     $@"<b>Total</b> \(C_{{D,\text{{tot}}}} = {a}\,(u^{{{power}}}+{c})\), \(u={k}(x-{d})\).</color></size>";
                 break;
@@ -1083,7 +1083,7 @@ public class FunctionPlotter : MonoBehaviour
                 float g = Mathf.Clamp(baseN / 100f, 1.02f, 2.2f);
                 equationText.text =
                     $@"<b>Adiabatic ideal gas</b> \(PV^{{\gamma}}=\text{{const}}\)\n" +
-                    $@"<size=92%><color=#a8b2d1>Sketch: \(P \propto u^{{-{g:0.##}}}\), \(u={k}(x-{d})\) (&gt;0). " +
+                    $@"<size=92%><color=#57534A>Sketch: \(P \propto u^{{-{g:0.##}}}\), \(u={k}(x-{d})\) (&gt;0). " +
                     $@"\(\gamma\) from <b>N</b>={baseN} → \(\gamma\approx {g:0.##}\).</color></size>";
                 break;
             }
@@ -1094,50 +1094,50 @@ public class FunctionPlotter : MonoBehaviour
             case FunctionType.EconomyDotcomBubbleStylized:
                 equationText.text =
                     "<b>Stylized equity index path</b> (dot-com era <i>mood</i>)\n" +
-                    $"<size=92%><color=#a8b2d1>Not S&amp;P 500 or Nasdaq data — a smooth teaching curve through a <color=#86efac>late-90s run-up</color>, <color=#fca5a5>2000–02 drawdown</color>, and slow recovery. " +
-                    $"Height = <b>{c}</b> + <b>{a}</b>·(piecewise path), <i>u</i> = <b>{k}</b>(x−<b>{d}</b>).</color></size>";
+                    $"<size=92%><color=#57534A>Not S&amp;P 500 or Nasdaq data — a smooth teaching curve through a <color=#1F4FA0>late-90s run-up</color>, <color=#D7261E>2000–02 drawdown</color>, and slow recovery. " +
+                    $"Height = <b>{c}</b> + <b>{a}</b>×(piecewise path), <i>u</i> = <b>{k}</b>(x−<b>{d}</b>).</color></size>";
                 break;
             case FunctionType.EconomySubprime2008Stylized:
                 equationText.text =
                     "<b>Stylized index path</b> (2008 crisis <i>mood</i>)\n" +
-                    $"<size=92%><color=#a8b2d1>Not GSPC / real estate indices — qualitative <color=#fde047>pre-crisis climb</color>, <color=#f87171>sharp stress pocket</color>, then crawl. " +
-                    $"Height = <b>{c}</b> + <b>{a}</b>·(piecewise path), <i>u</i> = <b>{k}</b>(x−<b>{d}</b>).</color></size>";
+                    $"<size=92%><color=#57534A>Not GSPC / real estate indices — qualitative <color=#D7261E>pre-crisis climb</color>, <color=#D7261E>sharp stress pocket</color>, then crawl. " +
+                    $"Height = <b>{c}</b> + <b>{a}</b>×(piecewise path), <i>u</i> = <b>{k}</b>(x−<b>{d}</b>).</color></size>";
                 break;
             case FunctionType.TransformFourierSinc:
                 equationText.text =
                     $@"<b>Fourier mood — \(\mathrm{{sinc}}\)</b> \(\mathrm{{sinc}}(u)=\frac{{\sin u}}{{u}},\; u={k}(x-{d})\)\n" +
-                    $@"<size=88%><color=#a8b2d1>Rect pulse in time ↔ tall \(\mathrm{{sinc}}\) in frequency; side lobes are interference homework.</color></size>";
+                    $@"<size=88%><color=#57534A>Rect pulse in time ↔ tall \(\mathrm{{sinc}}\) in frequency; side lobes are interference homework.</color></size>";
                 break;
             case FunctionType.TransformLaplaceCausalDecay:
             {
                 float sL = Mathf.Clamp(baseN / 100f, 0.1f, 4.5f);
                 equationText.text =
                     $@"<b>Laplace mood — causal decay</b> \(f(t)=H(t)\, e^{{-{sL:0.##}t}},\; t\propto u={k}(x-{d})\)\n" +
-                    $@"<size=88%><color=#a8b2d1>Table entry \(\mathcal{{L}}\{{e^{{-at}}\}}=\frac{{1}}{{s+a}}\); walk the exponential after \(t=0\).</color></size>";
+                    $@"<size=88%><color=#57534A>Table entry \(\mathcal{{L}}\{{e^{{-at}}\}}=\frac{{1}}{{s+a}}\); walk the exponential after \(t=0\).</color></size>";
                 break;
             }
             case FunctionType.ChaosLorenzButterflyX:
                 equationText.text =
                     $@"<b>\(\text{{Chaos theory}}\)</b> — Lorenz \(x(t)\), \(\sigma=10,\rho=28,\beta=8/3\), \(u={k}(x-{d})\approx t\)\n" +
-                    $@"<size=88%><color=#a8b2d1>Tiny initial changes diverge on the attractor — this curve is a <b>time slice</b> of that chaos, normalized to read on the grid.</color></size>";
+                    $@"<size=88%><color=#57534A>Tiny initial changes diverge on the attractor — this curve is a <b>time slice</b> of that chaos, normalized to read on the grid.</color></size>";
                 break;
             case FunctionType.PhysicsGravityWellInverseSqrt:
                 equationText.text =
                     $@"<b>\(\text{{Gravity well}}\)</b> slice \(f \propto -1/\sqrt{{u^{2}+\varepsilon^{2}}}+C,\; u={k}(x-{d}),\; \varepsilon\sim |{d}|\)\n" +
-                    $@"<size=88%><color=#a8b2d1>Softened \(1/r\) potential — steep near the center, flattens away; a readable stand-in for “falling into” a deep well.</color></size>";
+                    $@"<size=88%><color=#57534A>Softened \(1/r\) potential — steep near the center, flattens away; a readable stand-in for “falling into” a deep well.</color></size>";
                 break;
             case FunctionType.BigONLogN:
                 equationText.text =
                     $@"<b>\(O(n\log n)\)</b> growth mood: \(f \propto u\ln u + C,\; u=\max({k}(x-{d}),\text{{small}})\)\n" +
-                    $@"<size=88%><color=#a8b2d1>Classic merge-sort / balanced-tree flavor: work grows a bit faster than linear, slower than quadratic.</color></size>";
+                    $@"<size=88%><color=#57534A>Classic merge-sort / balanced-tree flavor: work grows a bit faster than linear, slower than quadratic.</color></size>";
                 break;
             case FunctionType.CustomExpression:
             {
                 string esc = EscapeTmpRichText(customExpression);
                 equationText.text =
                     $"<b>Typed f(u)</b>\n" +
-                    $"<size=94%><color=#f2f4ff>{esc}</color></size>\n" +
-                    $"<size=78%><color=#94a3b8>Plotted: <b>y = A·f(u)+C</b>, u = k·(x−D). Edit below. Use sin, cos, tan, sqrt, ln, log, exp, ^, pi, e …</color></size>";
+                    $"<size=94%><color=#141414>{esc}</color></size>\n" +
+                    $"<size=78%><color=#57534A>Plotted: <b>y = A×f(u)+C</b>, u = k×(x−D). Edit below. Use sin, cos, tan, sqrt, ln, log, exp, ^, pi, e …</color></size>";
                 if (!string.IsNullOrEmpty(equationExtraSuffix))
                     equationText.text += $"\n<size=85%><color=#{equationExtraSuffixColorHex}>{equationExtraSuffix}</color></size>";
                 return;
@@ -1266,7 +1266,7 @@ public enum FunctionType
     PolarCardioid,
     PolarRose,
 
-    // Upper semicircle: y = k + √(R²−u²), u = transK·(x−transD), R = |transA|, center (transD, transC) when transK = 1.
+    // Upper semicircle: y = k + √(R²−u²), u = transK×(x−transD), R = |transA|, center (transD, transC) when transK = 1.
     CircleUpper,
 
     // Aerospace / aerodynamics (toy models for instruction — not a CFD solver)

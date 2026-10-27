@@ -45,13 +45,18 @@ public sealed class BlackHoleGargantuaBackdrop : MonoBehaviour
     }
 
     /// <summary>Creates / hides the child on <paramref name="gridPanel"/>; drives shader params when visible.</summary>
+    /// <summary>Off since the Bauhaus redesign.</summary>
+    public static bool Enabled = false;
+
     public static void Sync(RectTransform gridPanel, FunctionPlotter fp)
     {
         if (gridPanel == null || fp == null)
             return;
 
         Transform existing = gridPanel.Find(ChildName);
-        if (fp.functionType != FunctionType.PhysicsGravityWellInverseSqrt)
+        // 1.4 Bauhaus: the glowing accretion-disk render is retired (no glows); the gravity-well
+        // curve itself carries the level.
+        if (!Enabled || fp.functionType != FunctionType.PhysicsGravityWellInverseSqrt)
         {
             if (existing != null)
                 existing.gameObject.SetActive(false);

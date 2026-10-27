@@ -158,9 +158,9 @@ public class GraphCalculatorToolbar : MonoBehaviour
         // Title lives in the top story banner (graph.calculator_intro); keep this hint to controls + params only.
         string line2 = polar
             ? LocalizationManager.Get("graph.polar.line2",
-                "<size=88%><color=#c4d0e8>Polar plot: horizontal axis is <b>θ</b>, vertical is <b>r(θ)</b>. <b>Trans</b> adjusts A, k, C, D in the polar equation.</color></size>")
+                "<size=88%><color=#57534A>Polar plot: horizontal axis is <b>θ</b>, vertical is <b>r(θ)</b>. <b>Trans</b> adjusts A, k, C, D in the polar equation.</color></size>")
             : LocalizationManager.Get("graph.line2",
-                "<size=88%><color=#c4d0e8>Type <b>f(u)</b> below (variable <b>x</b> in the box = inner u). Then:</color></size>");
+                "<size=88%><color=#57534A>Type <b>f(u)</b> below (variable <b>x</b> in the box = inner u). Then:</color></size>");
         string line3Fmt = LocalizationManager.Get("graph.line3",
             "<size=96%><b>Deriv</b> adds f′ once (numeric) | <b>∫ area</b> Riemann strips once + primitive guess | <b>Trans</b> → {0} | double-tap <b>+</b> | hold <b>−</b> | <b>Scale</b> / <b>pinch</b></size>");
         string line3 = string.Format(line3Fmt, names[paramIndex]);
@@ -168,9 +168,9 @@ public class GraphCalculatorToolbar : MonoBehaviour
         float th1 = plot.transK * (plot.xEnd - plot.transD);
         string line4Fmt = polar
             ? LocalizationManager.Get("graph.polar.line4",
-                "<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}  θ∈[{4},{5}]</color></size>")
+                "<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}  θ∈[{4},{5}]</color></size>")
             : LocalizationManager.Get("graph.line4",
-                "<size=88%><color=#a8b2d1>A={0}  k={1}  C={2}  D={3}  x∈[{4},{5}]</color></size>");
+                "<size=88%><color=#57534A>A={0}  k={1}  C={2}  D={3}  x∈[{4},{5}]</color></size>");
         string line4 = polar
             ? string.Format(line4Fmt,
                 plot.transA.ToString("0.##"),

@@ -17,7 +17,8 @@ public sealed class GoldenSpiralBackdrop : MonoBehaviour
     static readonly int IdAspect = Shader.PropertyToID("_Aspect");
     static readonly int IdColor = Shader.PropertyToID("_Color");
 
-    static readonly Color GoldenTint = new Color(1f, 0.88f, 0.52f, 0.5f);
+    // Bauhaus: spiral drawn in ink on the paper plot.
+    static readonly Color GoldenTint = new Color(0.08f, 0.08f, 0.08f, 0.35f);
 
     RawImage _raw;
     Material _mat;

@@ -52,7 +52,7 @@ public class PlayerControllerUI2D : MonoBehaviour
     [Tooltip("Brief cool tint on the graph backdrop (Game scene → Grid Background) when you graze f′ — mobile & desktop.")]
     [SerializeField] private bool derivativeHitBackgroundTint = true;
     [SerializeField] private float derivativeHitBackgroundTintSeconds = 0.32f;
-    [SerializeField] private Color derivativeHitBackgroundTintDelta = new Color(0.048f, 0.06f, 0.1f, 0f);
+    [SerializeField] private Color derivativeHitBackgroundTintDelta = new Color(-0.05f, -0.045f, -0.02f, 0f); // paper darkens a touch on an f′ graze
 
     [Header("Player Size (Grid Units)")]
     [SerializeField] private float playerWidthGrid = 0.78f;
@@ -67,7 +67,8 @@ public class PlayerControllerUI2D : MonoBehaviour
     [Range(0f, 0.6f)] [SerializeField] private float landingSquashStrength = 0.22f;
 
     [Header("Skyblue Aura")]
-    [SerializeField] private bool showSphereAura = true;
+    [Tooltip("Soft glow behind the glyph. Off since the 1.4 Bauhaus redesign (no glows).")]
+    [SerializeField] private bool showSphereAura = false;
     [SerializeField] private Color sphereAuraColor = new Color(0.49f, 0.78f, 1f, 0.55f);
     [Tooltip("Sphere overlay size relative to the player AABB (1 = same size).")]
     [SerializeField] private float sphereAuraScale = 1.55f;

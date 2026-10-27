@@ -578,9 +578,9 @@ public class GraphObstacleGenerator : MonoBehaviour
 
         var grad = go.AddComponent<UiHorizontalGradientGraphic>();
         grad.raycastTarget = false;
-        grad.SetGradientColors(
-            new Color(0.58f, 0.88f, 1f, 0f),
-            new Color(0.32f, 0.74f, 0.98f, 0.52f));
+        // Bauhaus: flat yellow exit block (no gradient).
+        var exit = Bauhaus.WithAlpha(Bauhaus.Yellow, 0.55f);
+        grad.SetGradientColors(exit, exit);
     }
 
     private static bool IsFiniteFloat(float v) => !float.IsNaN(v) && !float.IsInfinity(v);
@@ -612,8 +612,8 @@ public class GraphObstacleGenerator : MonoBehaviour
         var img = go.AddComponent<Image>();
         img.sprite = obstacleSprite;
         bool isHazard = name.StartsWith("Hazard", System.StringComparison.OrdinalIgnoreCase);
-        var c = isHazard ? color : Color.Lerp(color, Color.white, 0.12f);
-        img.color = new Color(c.r, c.g, c.b, isHazard ? 0.88f : 0.93f);
+        // Flat Bauhaus blocks: platforms in the curve colour, hazards in the f′ colour.
+        img.color = new Color(color.r, color.g, color.b, isHazard ? 0.92f : 1f);
         if (obstacleSprite != null && obstacleSprite.border.sqrMagnitude > 0.001f &&
             RuntimeUiPolish.ShouldUseSlicedForSize(pxW, pxH))
             img.type = Image.Type.Sliced;

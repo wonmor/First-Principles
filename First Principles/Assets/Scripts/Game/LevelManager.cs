@@ -198,9 +198,7 @@ public class LevelManager : MonoBehaviour
             float eqBottom = GraphCalculatorEquationPanelBottomY(transRow);
             if (functionPlotter != null && calcParent != null)
                 GraphCalculatorEquationPanel.Ensure(calcParent, functionPlotter, FindPrimaryEquationTmp(), eqBottom, 108f);
-            var paramTmp = GameObject.Find("GraphicCalculatorParamHint")?.GetComponent<TextMeshProUGUI>();
-            LayoutGraphCalculatorParamHintBelowStory(paramTmp, storyText != null ? storyText.rectTransform : null,
-                DeviceLayout.IsTabletLike() ? 144f : 132f, 10f);
+            LayoutGraphCalculatorBauhaus();
         }
         else if (levels.Count > 0 && currentLevelIndex >= 0 && currentLevelIndex < levels.Count)
             RefreshStoryBannerForCurrentMode(levels[currentLevelIndex]);
@@ -246,14 +244,16 @@ public class LevelManager : MonoBehaviour
         if (GameLevelCatalog.IsAerospaceLevel(currentLevelIndex))
         {
             string dragPreamble = LocalizationManager.Get("aerospace.story_drag_polar_preamble",
-                "<b><color=#c4b5fd>Drag polar refresher</color></b> (every <b>Aerospace</b> stage)\n" +
+                "<b><color=#1F4FA0>Drag polar refresher</color></b> (every <b>Aerospace</b> stage)\n" +
                 "<size=92%><b>Parasitic (zero-lift) drag</b> — skin friction, form drag, interference lumped as <b>C<sub>D0</sub></b> in the parabolic model (roughly <i>not</i> the part that grows with lift).\n" +
                 "<b>Induced drag</b> — the cost of making lift: trailing vortices add ~ <b>K C<sub>L</sub>²</b> (higher C<sub>L</sub> / tighter turns → more induced).\n" +
                 "<b>Overall drag polar</b> — <b>C<sub>D</sub> = C<sub>D0</sub> + K C<sub>L</sub>²</b>: an upward-opening parabola in C<sub>L</sub>; min-drag <b>C<sub>L</sub></b> sits between “too slow / high α” and “too fast / low α” for real missions.</size>");
             story = $"{dragPreamble}\n\n{story}";
         }
 
-        storyText.text = TmpLatex.Process($"<b>{title}</b>\n{story}");
+        // Paper highlight behind each line so the banner reads over the plot (TMP clamps the mark's
+        // alpha to the text alpha, so it fades with the banner).
+        storyText.text = $"<mark=#F2EEE4F2 padding=\"14,14,6,6\">" + TmpLatex.Process($"<b>{title}</b>\n{story}") + "</mark>";
         // Use RTL for Arabic / Urdu; Latin-heavy mixed math still renders with TMP bidi when possible.
         LocalizationManager.ApplyTextDirection(storyText);
     }
@@ -577,7 +577,7 @@ public class LevelManager : MonoBehaviour
         {
             storyText.gameObject.SetActive(true);
             RefreshStoryBannerForCurrentMode(null);
-            storyText.color = new Color(1f, 1f, 1f, 0.94f);
+            storyText.color = Bauhaus.Ink;
             storyText.fontStyle = FontStyles.Bold;
             TightenGraphCalculatorStoryBanner();
         }
@@ -614,14 +614,14 @@ public class LevelManager : MonoBehaviour
 
         if (curveRenderer != null)
         {
-            curveRenderer.color = new Color(0.95f, 0.8f, 0.38f, 1f);
+            curveRenderer.color = Bauhaus.Blue;
             curveRenderer.enabled = false;
             curveRenderer.enabled = true;
         }
 
         if (derivRenderer != null)
         {
-            derivRenderer.color = new Color(0.55f, 0.78f, 1f, 1f);
+            derivRenderer.color = Bauhaus.Red;
             derivRenderer.enabled = false;
         }
 
@@ -664,7 +664,7 @@ public class LevelManager : MonoBehaviour
             paramHint.overflowMode = TextOverflowModes.Overflow;
             paramHint.fontSize = UiTypography.Scale(tabletHint ? 31 : 27);
             paramHint.alignment = TextAlignmentOptions.Top;
-            paramHint.color = new Color(0.9f, 0.93f, 0.98f, 0.96f);
+            paramHint.color = Bauhaus.InkSoft;
             ApplyPrimaryUiTypography(paramHint, FindPrimaryEquationTmp(), outlineWidth: 0.12f, outlineAlpha: 0.45f);
             paramHint.fontStyle = FontStyles.Bold;
         }
@@ -710,6 +710,116 @@ public class LevelManager : MonoBehaviour
         if (calcAnalysis == null)
             calcAnalysis = gameObject.AddComponent<GraphCalculatorAnalysisControls>();
         calcAnalysis.Configure(functionPlotter, riemannRenderer, curveRenderer, equationStyleRef, transRowBottom);
+
+        LayoutGraphCalculatorBauhaus();
+    }
+
+    // ------------------------------------------------------------------ graphing calculator: Bauhaus layout (1.4)
+    // A ruled control column on the left (title, parameter readout, f(u) entry, keypad) and the paper
+    // plot in the remaining width, so no control sits on top of the curves. Only positions change;
+    // every control keeps its handlers.
+
+    const float CalcPanelWidthFraction = 0.34f;
+    const float CalcPanelBottom = 236f; // clears the footer (Back + equation readout)
+
+    void LayoutGraphCalculatorBauhaus()
+    {
+        var canvas = FindAnyObjectByType<Canvas>();
+        var safe = canvas != null ? MobileUiRoots.GetSafeContentParent(canvas.transform) as RectTransform : null;
+        if (safe == null)
+            return;
+
+        var panel = safe.Find("CalcPanel") as RectTransform;
+        if (panel == null)
+        {
+            panel = UiKit.Rect("CalcPanel", safe, new Vector2(0f, 0f), new Vector2(CalcPanelWidthFraction, 1f));
+            var img = panel.gameObject.AddComponent<Image>();
+            Bauhaus.Panel(img, Bauhaus.Card, Bauhaus.PanelRule);
+            img.raycastTarget = true;
+            UiKit.Band(panel, Bauhaus.Blue, 16f);
+        }
+        panel.offsetMin = new Vector2(18f, CalcPanelBottom);
+        panel.offsetMax = new Vector2(0f, -18f);
+        panel.SetAsLastSibling();
+
+        void Place(RectTransform rt, float y0, float y1)
+        {
+            if (rt == null)
+                return;
+            rt.SetParent(panel, false);
+            rt.anchorMin = new Vector2(0f, y0);
+            rt.anchorMax = new Vector2(1f, y1);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.localScale = Vector3.one;
+            rt.offsetMin = new Vector2(20f, 0f);
+            rt.offsetMax = new Vector2(-20f, 0f);
+        }
+
+        void PlacePair(GameObject left, GameObject right, float y0, float y1)
+        {
+            if (left != null)
+            {
+                Place(left.GetComponent<RectTransform>(), y0, y1);
+                var rt = left.GetComponent<RectTransform>();
+                rt.anchorMax = new Vector2(0.5f, y1);
+                rt.offsetMax = new Vector2(-6f, 0f);
+            }
+            if (right != null)
+            {
+                Place(right.GetComponent<RectTransform>(), y0, y1);
+                var rt = right.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, y0);
+                rt.offsetMin = new Vector2(6f, 0f);
+            }
+        }
+
+        // Trans / Scale only exist when the scene enables them; without them the keypad sits lower.
+        var transGo = GameObject.Find("TransButton");
+        var scaleGo = GameObject.Find("ScaleButton");
+        bool transRow = transGo != null || scaleGo != null;
+
+        if (storyText != null)
+        {
+            Place(storyText.rectTransform, 0.79f, 0.965f);
+            storyText.alignment = TextAlignmentOptions.TopLeft;
+            storyText.enableAutoSizing = true;
+            storyText.fontSizeMin = UiTypography.Scale(14);
+            storyText.fontSizeMax = UiTypography.Scale(30);
+        }
+        var hint = GameObject.Find("GraphicCalculatorParamHint")?.GetComponent<TextMeshProUGUI>();
+        if (hint != null)
+        {
+            Place(hint.rectTransform, transRow ? 0.565f : 0.52f, 0.78f);
+            hint.alignment = TextAlignmentOptions.TopLeft;
+            hint.enableAutoSizing = true;
+            hint.fontSizeMin = UiTypography.Scale(12);
+            hint.fontSizeMax = UiTypography.Scale(22);
+            hint.fontStyle = FontStyles.Normal;
+        }
+        var eq = GameObject.Find(GraphCalculatorEquationPanel.EquationRootObjectName);
+        if (eq != null)
+            Place(eq.GetComponent<RectTransform>(), transRow ? 0.39f : 0.27f, transRow ? 0.55f : 0.5f);
+        PlacePair(GameObject.Find("GraphCalcDerivButton"), GameObject.Find("GraphCalcIntegralButton"),
+            transRow ? 0.205f : 0.035f, transRow ? 0.365f : 0.235f);
+        if (transRow)
+            PlacePair(transGo, scaleGo, 0.03f, 0.19f);
+
+        // Plot fills the space right of the column (and above the footer).
+        var plotParent = cartesianPlaneRect != null ? cartesianPlaneRect.parent as RectTransform : null;
+        if (plotParent != null)
+        {
+            float pw = plotParent.rect.width, ph = plotParent.rect.height;
+            float left = pw * CalcPanelWidthFraction + 30f;
+            float w = Mathf.Max(200f, pw - left - 24f);
+            float h = Mathf.Max(200f, ph - CalcPanelBottom - 30f);
+            cartesianPlaneRect.anchorMin = cartesianPlaneRect.anchorMax = new Vector2(0f, 0f);
+            cartesianPlaneRect.pivot = new Vector2(0f, 0f);
+            cartesianPlaneRect.sizeDelta = new Vector2(w, h);
+            cartesianPlaneRect.anchoredPosition = new Vector2(left, CalcPanelBottom - 6f);
+            StretchGameplayGridStackToCartesianPlane();
+            if (functionPlotter != null)
+                functionPlotter.InitPlotFunction();
+        }
     }
 
     /// <summary>Trans / Scale labels use the project TMP default font and bold weight in calculator mode.</summary>
@@ -743,7 +853,7 @@ public class LevelManager : MonoBehaviour
         storyText.ForceMeshUpdate();
         float w = storyText.rectTransform.rect.width;
         if (w < 48f)
-            w = Mathf.Max(320f, Screen.safeArea.width * 0.88f);
+            w = Mathf.Max(320f, DeviceLayout.SafeArea.width * 0.88f);
         Vector2 pv = storyText.GetPreferredValues(storyText.text, w, 0f);
         float h = Mathf.Clamp(pv.y + 14f, 52f, 280f);
         storyText.rectTransform.sizeDelta = new Vector2(0f, h);
@@ -867,9 +977,8 @@ public class LevelManager : MonoBehaviour
         ApplyPrimaryUiTypography(glyphTmp, FindPrimaryEquationTmp(), outlineWidth: 0.18f, outlineAlpha: 0.42f);
         // ApplyPrimaryUiTypography copies reference fontStyle; keep the player glyph visibly bold/thick.
         glyphTmp.fontStyle = FontStyles.Bold;
-        // Slight rim so the bright fill still separates from lime/purple graph lines.
-        glyphTmp.outlineWidth = 0.22f;
-        glyphTmp.outlineColor = new Color(0.04f, 0.06f, 0.12f, 0.40f);
+        // Solid ink glyph, no rim: it sits on paper and on the blue / red Bauhaus curves.
+        glyphTmp.outlineWidth = 0f;
 
         playerController = playerGo.AddComponent<PlayerControllerUI2D>();
         playerController.BindVisual(rect, img);
@@ -915,7 +1024,7 @@ public class LevelManager : MonoBehaviour
         rt.anchoredPosition = new Vector2(0, -64f);
         rt.sizeDelta = new Vector2(0f, StoryBannerLayoutHeightPx);
 
-        tmp.color = new Color(1f, 1f, 1f, 0f);
+        tmp.color = Bauhaus.WithAlpha(Bauhaus.Ink, 0f);
 
         storyText = tmp;
     }
@@ -955,26 +1064,22 @@ public class LevelManager : MonoBehaviour
             panelRt.sizeDelta = new Vector2(wideHud ? 620f : 560f, wideHud ? 92f : 88f);
             RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(2f, -3f), 0.26f);
 
+            // Bauhaus HUD: card with a thick black rule and a red block on the left edge.
             var panelBg = panelGo.AddComponent<Image>();
-            panelBg.sprite = panelSprite;
-            panelBg.color = new Color(0.08f, 0.09f, 0.13f, 0.91f);
+            Bauhaus.Panel(panelBg, Bauhaus.Card, Bauhaus.ButtonRule);
             panelBg.raycastTarget = false;
-            panelBg.type = Image.Type.Sliced;
-            // If sprite isn't 9-slice, Simple still works for a soft tile look.
-            if (panelSprite != null && panelSprite.border.sqrMagnitude < 0.001f)
-                panelBg.type = Image.Type.Simple;
 
             var accentGo = new GameObject("StageHudAccent");
             var accentRt = accentGo.AddComponent<RectTransform>();
             accentRt.SetParent(panelGo.transform, false);
-            accentRt.anchorMin = new Vector2(0f, 1f);
-            accentRt.anchorMax = new Vector2(1f, 1f);
-            accentRt.pivot = new Vector2(0.5f, 1f);
+            accentRt.anchorMin = new Vector2(0f, 0f);
+            accentRt.anchorMax = new Vector2(0f, 1f);
+            accentRt.pivot = new Vector2(0f, 0.5f);
             accentRt.anchoredPosition = Vector2.zero;
-            accentRt.sizeDelta = new Vector2(0f, 3f);
+            accentRt.sizeDelta = new Vector2(12f, 0f);
             var accentImg = accentGo.AddComponent<Image>();
-            accentImg.sprite = panelSprite;
-            accentImg.color = new Color(0.92f, 0.55f, 0.42f, 0.95f);
+            accentImg.sprite = Bauhaus.Square;
+            accentImg.color = Bauhaus.Red;
             accentImg.raycastTarget = false;
 
             var textGo = new GameObject("StageHud");
@@ -982,7 +1087,7 @@ public class LevelManager : MonoBehaviour
             textRt.SetParent(panelGo.transform, false);
             textRt.anchorMin = new Vector2(0f, 0f);
             textRt.anchorMax = new Vector2(0.54f, 1f);
-            textRt.offsetMin = new Vector2(18f, 12f);
+            textRt.offsetMin = new Vector2(28f, 12f);
             textRt.offsetMax = new Vector2(-6f, -14f);
 
             var tmp = textGo.AddComponent<TextMeshProUGUI>();
@@ -994,7 +1099,7 @@ public class LevelManager : MonoBehaviour
             tmp.fontSizeMin = UiTypography.Scale(16);
             tmp.fontSizeMax = UiTypography.Scale(30);
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
-            tmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
+            tmp.color = Bauhaus.Ink;
             tmp.characterSpacing = 0.35f;
             tmp.lineSpacing = -4f;
             ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.16f, outlineAlpha: 0.55f);
@@ -1018,7 +1123,7 @@ public class LevelManager : MonoBehaviour
             scoreTmp.fontSizeMin = UiTypography.Scale(16);
             scoreTmp.fontSizeMax = UiTypography.Scale(30);
             scoreTmp.alignment = TextAlignmentOptions.MidlineRight;
-            scoreTmp.color = new Color(0.94f, 0.95f, 0.98f, 1f);
+            scoreTmp.color = Bauhaus.Ink;
             scoreTmp.lineSpacing = -4f;
             ApplyPrimaryUiTypography(scoreTmp, equationStyle, outlineWidth: 0.16f, outlineAlpha: 0.55f);
             scoreHudText = scoreTmp;
@@ -1046,11 +1151,10 @@ public class LevelManager : MonoBehaviour
         rt.anchorMax = new Vector2(1f, 1f);
         rt.pivot = new Vector2(1f, 1f);
         rt.anchoredPosition = new Vector2(-18f, -topPad);
-        rt.sizeDelta = new Vector2(tablet ? 292f : 262f, tablet ? 60f : 56f);
+        rt.sizeDelta = new Vector2(tablet ? 330f : 300f, tablet ? 64f : 60f);
 
         var img = go.AddComponent<Image>();
         RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = RuntimeUiPolish.AccentTeal;
 
         var btn = go.AddComponent<Button>();
         btn.targetGraphic = img;
@@ -1079,11 +1183,12 @@ public class LevelManager : MonoBehaviour
         tmp.overflowMode = TextOverflowModes.Truncate;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = new Color(0.92f, 0.97f, 1f, 1f);
         tmp.raycastTarget = false;
         ApplyPrimaryUiTypography(tmp, equationStyle, outlineWidth: 0.14f, outlineAlpha: 0.48f);
         tmp.fontStyle = FontStyles.Bold;
         LocalizationManager.ApplyTextDirection(tmp);
+        Bauhaus.Button(btn, Bauhaus.Tone.Blue);
+        Bauhaus.LeadGlyph(rt, tmp, StarGlyph.Book);
     }
 
     /// <summary>The big equation label in <c>Game</c> — used as the typography reference for all gameplay HUD copy.</summary>
@@ -1118,16 +1223,16 @@ public class LevelManager : MonoBehaviour
         else if (TMP_Settings.defaultFontAsset != null)
             target.font = TMP_Settings.defaultFontAsset;
 
-        target.outlineWidth = outlineWidth;
-        target.outlineColor = new Color(0f, 0f, 0f, outlineAlpha);
+        // Bauhaus: flat type, no outline (the old dark theme needed a rim; ink on paper does not).
+        target.outlineWidth = 0f;
     }
 
     private static string FormatStageHudLine(int stage, int total)
     {
         string stageWord = LocalizationManager.Get("hud.stage", "STAGE");
         return
-            $"<color=#9aa3b8><size=78%><b>{stageWord}</b></size></color>\n" +
-            $"<b><color=#f2f4ff>{stage}</color></b><color=#5c6578> / </color><b><color=#e8ebf7>{total}</color></b>";
+            $"<color=#57534A><size=74%><b>{stageWord}</b></size></color>\n" +
+            $"<b>{stage}</b><color=#57534A> / </color><b>{total}</b>";
     }
 
     private void RefreshStageHud()
@@ -1165,7 +1270,7 @@ public class LevelManager : MonoBehaviour
             return;
         string label = LocalizationManager.Get("hud.points", "PTS");
         scoreHudText.text =
-            $"<color=#9aa3b8><size=78%><b>{label}</b></size></color>\n<b><color=#fde68a>{gameplayScore}</color></b>";
+            $"<color=#57534A><size=74%><b>{label}</b></size></color>\n<b><color=#D7261E>{gameplayScore}</color></b>";
         LocalizationManager.ApplyTextDirection(scoreHudText);
     }
 
@@ -1339,10 +1444,10 @@ public class LevelManager : MonoBehaviour
             baseN: 2,
             forcePlatformsAtStartColumns: 5,
             story:
-                "<color=#c4b5fd><b>Derivative</b></color> = slope of the tangent — how fast <b>f(x)</b> rises or falls at each step.\n\n" +
-                "<color=#fde047>Gold light</color> traces your path; <color=#7dd3fc>ice-blue</color> is f'(x) sculpting <i>where the floor exists</i>.\n\n" +
-                "<size=92%><color=#a8b2d1>Where f'(x) clears the rule, platforms hold; where it falls short, the void opens. Each bright <b>pop</b> is another act in the analysis you're walking through.</color></size>\n\n" +
-                "<size=88%><color=#94a3b8><b>First principles (business habit):</b> like builders at Tesla / SpaceX-style talks — peel analogy until you hit bedrock facts, then reason upward. Here, <b>f(x)</b> is your outcome model; <b>f'(x)</b> is where small input changes move the outcome fastest. Open <b>Math tips & snippets → First principles thinking</b> or <b>docs/first-principles-business.md</b> for the map.</color></size>",
+                "<color=#1F4FA0><b>Derivative</b></color> = slope of the tangent — how fast <b>f(x)</b> rises or falls at each step.\n\n" +
+                "<color=#D7261E>Gold light</color> traces your path; <color=#1F4FA0>ice-blue</color> is f'(x) sculpting <i>where the floor exists</i>.\n\n" +
+                "<size=92%><color=#57534A>Where f'(x) clears the rule, platforms hold; where it falls short, the void opens. Each bright <b>pop</b> is another act in the analysis you're walking through.</color></size>\n\n" +
+                "<size=88%><color=#57534A><b>First principles (business habit):</b> like builders at Tesla / SpaceX-style talks — peel analogy until you hit bedrock facts, then reason upward. Here, <b>f(x)</b> is your outcome model; <b>f'(x)</b> is where small input changes move the outcome fastest. Open <b>Math tips & snippets → First principles thinking</b> or <b>docs/first-principles-business.md</b> for the map.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.55f, 0.45f, 0.92f, 0.4f),
@@ -1429,7 +1534,7 @@ public class LevelManager : MonoBehaviour
             power: 10,
             baseN: 2,
             story:
-                "<color=#86efac>Taylor polynomials</color> hug a smooth function near a point. <b>Maclaurin</b> is Taylor centered at <b>0</b>.\n\n" +
+                "<color=#1F4FA0>Taylor polynomials</color> hug a smooth function near a point. <b>Maclaurin</b> is Taylor centered at <b>0</b>.\n\n" +
                 "Here the trail is a high-degree partial sum of <b>e^u</b> — polynomials stacking toward the infinite series that rebuilds the exponential.",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
@@ -1450,7 +1555,7 @@ public class LevelManager : MonoBehaviour
             power: 8,
             baseN: 2,
             story:
-                "<color=#7dd3fc>Odd powers of u</color> alternate signs — that is the Maclaurin DNA of <b>sin(u)</b>.\n\n" +
+                "<color=#1F4FA0>Odd powers of u</color> alternate signs — that is the Maclaurin DNA of <b>sin(u)</b>.\n\n" +
                 "This graph is a truncated Taylor stack climbing toward the endless sine wave; every extra term is another promise the series keeps near 0.",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
@@ -1471,7 +1576,7 @@ public class LevelManager : MonoBehaviour
             power: 16,
             baseN: 2,
             story:
-                "A <color=#f5d0fe>geometric series</color> stacks powers of <b>u</b>. Inside its radius of convergence the tail shrinks — partial sums <i>stabilize</i> toward a limit.\n\n" +
+                "A <color=#1F4FA0>geometric series</color> stacks powers of <b>u</b>. Inside its radius of convergence the tail shrinks — partial sums <i>stabilize</i> toward a limit.\n\n" +
                 "Feel how the derivative of that finite stack reshapes the terrain as you move along <b>x</b>.",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
@@ -1492,7 +1597,7 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "Think <b>z = x² − y₀²</b> with <b>y₀</b> fixed — a <color=#38bdf8>slice</color> through a <i>saddle surface</i>.\n\n" +
+                "Think <b>z = x² − y₀²</b> with <b>y₀</b> fixed — a <color=#1F4FA0>slice</color> through a <i>saddle surface</i>.\n\n" +
                 "The x-derivative still reads the landscape: multivariable ideas, one-variable motion.",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
@@ -1513,7 +1618,7 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "Now <b>z = x² + y₀²</b>: an <color=#fde047>elliptic paraboloid</color>. Freezing <b>y₀</b> traces a <i>bowl</i> in your plane.\n\n" +
+                "Now <b>z = x² + y₀²</b>: an <color=#D7261E>elliptic paraboloid</color>. Freezing <b>y₀</b> traces a <i>bowl</i> in your plane.\n\n" +
                 "Gradients in multivar calculus point uphill; here the slice still shows how steeply the bowl climbs as you sprint.",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
@@ -1541,9 +1646,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "The <color=#fde047>definite integral</color> of a nonnegative rate is the <b>accumulated amount</b> — here, the <i>area under the curve</i> between two x-values.\n\n" +
-                "The blue glass columns are a <b>Riemann sum</b>: chop the interval into equal widths Δx, pick a sample height f(x*) in each slice, and add up <b>f(x*)·Δx</b>. With more rectangles, the sum hugs the true area — <b>∫ f(x) dx</b>.\n\n" +
-                "<size=92%><color=#a8b2d1>Your trail still follows the smooth graph; the shading only <i>approximates</i> what integration measures.</color></size>",
+                "The <color=#D7261E>definite integral</color> of a nonnegative rate is the <b>accumulated amount</b> — here, the <i>area under the curve</i> between two x-values.\n\n" +
+                "The blue glass columns are a <b>Riemann sum</b>: chop the interval into equal widths Δx, pick a sample height f(x*) in each slice, and add up <b>f(x*)×Δx</b>. With more rectangles, the sum hugs the true area — <b>∫ f(x) dx</b>.\n\n" +
+                "<size=92%><color=#57534A>Your trail still follows the smooth graph; the shading only <i>approximates</i> what integration measures.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.22f, 0.4f, 0.58f, 0.38f),
@@ -1576,9 +1681,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Left-handed Riemann sum:</b> in each subinterval [xᵢ, xᵢ₊₁], take the rectangle height <b>f(xᵢ)</b> — the <color=#f87171>left endpoint</color>.\n\n" +
+                "<b>Left-handed Riemann sum:</b> in each subinterval [xᵢ, xᵢ₊₁], take the rectangle height <b>f(xᵢ)</b> — the <color=#D7261E>left endpoint</color>.\n\n" +
                 "If f is increasing, left samples are always the <i>shortest</i> side of the strip, so the sum <b>underestimates</b> the area.\n\n" +
-                "<size=92%><color=#a8b2d1>Platforms are flat steps at those left heights — feel the conservative staircase under the parabola.</color></size>",
+                "<size=92%><color=#57534A>Platforms are flat steps at those left heights — feel the conservative staircase under the parabola.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.52f, 0.28f, 0.22f, 0.36f),
@@ -1612,9 +1717,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Right-handed Riemann sum:</b> height <b>f(xᵢ₊₁)</b> — the <color=#38bdf8>right endpoint</color> of each slice.\n\n" +
+                "<b>Right-handed Riemann sum:</b> height <b>f(xᵢ₊₁)</b> — the <color=#1F4FA0>right endpoint</color> of each slice.\n\n" +
                 "For an increasing function, right endpoints are <i>taller</i>, so this rule <b>overestimates</b> the area — the mirror story of the left sum.\n\n" +
-                "<size=92%><color=#a8b2d1>Each step jumps at the right edge; compare mentally with the left-endpoint stage.</color></size>",
+                "<size=92%><color=#57534A>Each step jumps at the right edge; compare mentally with the left-endpoint stage.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.2f, 0.38f, 0.55f, 0.37f),
@@ -1648,9 +1753,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Midpoint rule:</b> sample at the <color=#86efac>center</color> (xᵢ + xᵢ₊₁)/2. The rectangle straddles the strip symmetrically.\n\n" +
+                "<b>Midpoint rule:</b> sample at the <color=#1F4FA0>center</color> (xᵢ + xᵢ₊₁)/2. The rectangle straddles the strip symmetrically.\n\n" +
                 "On curved graphs, midpoints often cancel over/under-shoot from one side to the other — a practical choice when you want a <i>tight</i> approximation without taking many rectangles.\n\n" +
-                "<size=92%><color=#a8b2d1>Steps sit halfway along each slice; notice how the walk hugs the bowl more evenly than pure left or right rules.</color></size>",
+                "<size=92%><color=#57534A>Steps sit halfway along each slice; notice how the walk hugs the bowl more evenly than pure left or right rules.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.25f, 0.48f, 0.28f, 0.36f),
@@ -1685,8 +1790,8 @@ public class LevelManager : MonoBehaviour
             baseN: 2,
             story:
                 "<b>Damped oscillation</b> shows up everywhere in engineering: springs, circuits, structures.\n\n" +
-                "Imagine a weight bobbing on a spring with friction: it still wiggles, but the wiggle <color=#38bdf9>shrinks over time</color> — that decay is the exponential envelope; the sine part is the vibration.\n\n" +
-                "<size=92%><color=#a8b2d1>Your path is the graph; the derivative still decides safe columns — watch how the slope behaves near the peaks of each ring-down.</color></size>",
+                "Imagine a weight bobbing on a spring with friction: it still wiggles, but the wiggle <color=#1F4FA0>shrinks over time</color> — that decay is the exponential envelope; the sine part is the vibration.\n\n" +
+                "<size=92%><color=#57534A>Your path is the graph; the derivative still decides safe columns — watch how the slope behaves near the peaks of each ring-down.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.15f, 0.38f, 0.5f, 0.38f),
@@ -1714,9 +1819,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "A hanging chain or cable suspended at two points forms a <b>catenary</b>. In many idealized setups it is modeled with <color=#fde047>cosh</color> — the hyperbolic cosine.\n\n" +
+                "A hanging chain or cable suspended at two points forms a <b>catenary</b>. In many idealized setups it is modeled with <color=#D7261E>cosh</color> — the hyperbolic cosine.\n\n" +
                 "Unlike a parabola (projectile motion in uniform gravity), the catenary comes from balancing tension along a flexible rope under its own weight — a classic intro to <i>hyperbolic functions</i> in statics.\n\n" +
-                "<size=92%><color=#a8b2d1>The graph climbs gently at first then steepens; engineers use these curves for arches and cables.</color></size>",
+                "<size=92%><color=#57534A>The graph climbs gently at first then steepens; engineers use these curves for arches and cables.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.48f, 0.36f, 0.2f, 0.36f),
@@ -1744,9 +1849,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>|sin(x)|</b> is a <color=#f0abfc>full-wave rectified</color> AC sine: flip everything below the axis upward — like a simple model after a rectifier in power electronics.\n\n" +
+                "<b>|sin(x)|</b> is a <color=#1F4FA0>full-wave rectified</color> AC sine: flip everything below the axis upward — like a simple model after a rectifier in power electronics.\n\n" +
                 "The smooth humps touch zero; the corners where sin crosses zero become sharp points, so the derivative jumps (engineering tasks often use averages / RMS values for power calculations).\n\n" +
-                "<size=92%><color=#a8b2d1>Use this stage as a bridge from pure trig to how waveforms look after circuits reshape them.</color></size>",
+                "<size=92%><color=#57534A>Use this stage as a bridge from pure trig to how waveforms look after circuits reshape them.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.45f, 0.22f, 0.42f, 0.36f),
@@ -1771,9 +1876,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 5,
             forcePlatformsAtEndColumns: 2,
             story:
-                "<b>AP Calculus BC — inverse trig.</b> <color=#38bdf8>Arctan</color> is the hero of bounded slopes: d/dx arctan(x) = 1/(1+x²).\n\n" +
+                "<b>AP Calculus BC — inverse trig.</b> <color=#1F4FA0>Arctan</color> is the hero of bounded slopes: d/dx arctan(x) = 1/(1+x²).\n\n" +
                 "It shows up in integrals that produce arctangent, in related‑rate geometry problems, and whenever an angle is defined from a ratio that grows slowly.\n\n" +
-                "<size=92%><color=#a8b2d1>The graph levels toward horizontal asymptotes — a visual for limits at ±∞.</color></size>",
+                "<size=92%><color=#57534A>The graph levels toward horizontal asymptotes — a visual for limits at ±∞.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.22f, 0.4f, 0.55f, 0.36f),
@@ -1793,9 +1898,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 4,
             story:
-                "<b>Logistic differential equation</b> (BC staple): dP/dt = kP(1 − P/L). Growth is nearly exponential when P is small, then <color=#86efac>curves</color> as it nears carrying capacity <b>L</b>.\n\n" +
+                "<b>Logistic differential equation</b> (BC staple): dP/dt = kP(1 − P/L). Growth is nearly exponential when P is small, then <color=#1F4FA0>curves</color> as it nears carrying capacity <b>L</b>.\n\n" +
                 "Population models, rumor spread, and saturated chemical reactions share this S‑shape. Separation of variables leads here; the inflection point is where growth is fastest.\n\n" +
-                "<size=92%><color=#a8b2d1>Read the rise as “early exponential,” the bend as competition, the top as equilibrium.</color></size>",
+                "<size=92%><color=#57534A>Read the rise as “early exponential,” the bend as competition, the top as equilibrium.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.2f, 0.45f, 0.32f, 0.35f),
@@ -1815,9 +1920,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Polar coordinates</b>: describe points by <color=#fde047>(r, θ)</color> instead of (x, y). A <b>cardioid</b> has the family flavor r ~ 1 + cos θ — a heartbeat‑shaped loop.\n\n" +
+                "<b>Polar coordinates</b>: describe points by <color=#D7261E>(r, θ)</color> instead of (x, y). A <b>cardioid</b> has the family flavor r ~ 1 + cos θ — a heartbeat‑shaped loop.\n\n" +
                 "The big equation shows <b>r(θ)</b> with a <b>θ</b> window — an <b>r-vs-θ</b> plot (AP-style), not <b>y</b> versus Cartesian <b>x</b> on the labels. Later you convert to the plane with <b>x = r cos θ</b>, <b>y = r sin θ</b>.\n\n" +
-                "<size=92%><color=#a8b2d1>Area in polar uses ½∫ r² dθ; tangent slope needs dr/dθ.</color></size>",
+                "<size=92%><color=#57534A>Area in polar uses ½∫ r² dθ; tangent slope needs dr/dθ.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.5f, 0.34f, 0.18f, 0.35f),
@@ -1839,7 +1944,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>Polar rose</b>: r ~ cos(nθ) traces petals meeting at the origin. Odd <b>n</b> here gives <b>n</b> petals for this cosine form (a classic exam plot).\n\n" +
                 "Symmetry and period tell you how many times the radius returns to zero — great practice for converting polar area and arc length integrals.\n\n" +
-                "<size=92%><color=#a8b2d1>Watch derivative pops where r changes fastest — those are steep walls on the petal edges.</color></size>",
+                "<size=92%><color=#57534A>Watch derivative pops where r changes fastest — those are steep walls on the petal edges.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.42f, 0.22f, 0.48f, 0.36f),
@@ -1864,7 +1969,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>Hyperbolic sine & cosine</b> (BC): sinh x = (e^x − e^{−x})/2, cosh x = (e^x + e^{−x})/2, and cosh² − sinh² = 1 (a hyperbola identity).\n\n" +
                 "They solve linear ODEs, describe hanging cables alongside cosh, and mirror trig identities with occasional sign flips.\n\n" +
-                "<size=92%><color=#a8b2d1>You already met the catenary’s cosh; sinh is its odd, rise‑from‑zero partner.</color></size>",
+                "<size=92%><color=#57534A>You already met the catenary’s cosh; sinh is its odd, rise‑from‑zero partner.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.22f, 0.48f, 0.28f, 0.35f),
@@ -1889,8 +1994,8 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 3,
             story:
                 "<b>AP Physics C (calculus‑based)</b> — exponential decay: charge on a discharging capacitor, current in an RL loop, or any quantity Q(t) with dQ/dt ~ −Q.\n\n" +
-                "Solution: <color=#38bdf9>Q = Q₀ e^{−t/τ}</color>; τ (time constant) sets how fast the tail relaxes — the same picture as “half‑life” thinking.\n\n" +
-                "<size=92%><color=#a8b2d1>The graph is a one‑sided bump; the derivative carries the sign of “still leaking toward zero.”</color></size>",
+                "Solution: <color=#1F4FA0>Q = Q₀ e^{−t/τ}</color>; τ (time constant) sets how fast the tail relaxes — the same picture as “half‑life” thinking.\n\n" +
+                "<size=92%><color=#57534A>The graph is a one‑sided bump; the derivative carries the sign of “still leaking toward zero.”</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.15f, 0.35f, 0.5f, 0.36f),
@@ -1910,9 +2015,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Physics C — rotation & angular momentum.</b> For rigid spin about a fixed axis, <color=#7dd3fc>L = I ω</color> (angular momentum = moment of inertia × angular speed).\n\n" +
+                "<b>Physics C — rotation & angular momentum.</b> For rigid spin about a fixed axis, <color=#1F4FA0>L = I ω</color> (angular momentum = moment of inertia × angular speed).\n\n" +
                 "Net torque τ = dL/dt (like F = dp for linear motion). Small oscillations of many rotational systems look <i>sinusoidal</i> — the same graph as linear SHM, now dressed as θ(t) or ω(t).\n\n" +
-                "<size=92%><color=#a8b2d1>Energy sloshes between kinetic ½Iω² and restoring “spring” terms in ϕ — walk the cosine as a rotation story.</color></size>",
+                "<size=92%><color=#57534A>Energy sloshes between kinetic ½Iω² and restoring “spring” terms in ϕ — walk the cosine as a rotation story.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.24f, 0.36f, 0.55f, 0.35f),
@@ -1936,9 +2041,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 5,
             forcePlatformsAtEndColumns: 3,
             story:
-                "<b>Projectile height vs time</b> (constant g): y(t) = y₀ + v₀ t − ½ g t² — a <color=#fde047>downward parabola</color> in t for vertical motion.\n\n" +
+                "<b>Projectile height vs time</b> (constant g): y(t) = y₀ + v₀ t − ½ g t² — a <color=#D7261E>downward parabola</color> in t for vertical motion.\n\n" +
                 "Derivatives give vertical velocity, then acceleration −g: the Physics C calculus trilogy x, v, a shows up in every kinematics sprint.\n\n" +
-                "<size=92%><color=#a8b2d1>Peak is where velocity (derivative) crosses zero — a free optimization problem.</color></size>",
+                "<size=92%><color=#57534A>Peak is where velocity (derivative) crosses zero — a free optimization problem.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.48f, 0.38f, 0.2f, 0.34f),
@@ -1960,7 +2065,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>Maclaurin for cos(x)</b> uses even powers alternating signs: 1 − x²/2! + x⁴/4! − … — the partner series to sine’s odd powers.\n\n" +
                 "On the AP exam you estimate errors with Taylor remainders and reason about radius of convergence — here you get to <i>see</i> the polynomial hug the true cosine near 0.\n\n" +
-                "<size=92%><color=#a8b2d1>More terms ⇢ wider trustworthy fit; the derivative polynomials track −sin x in spirit.</color></size>",
+                "<size=92%><color=#57534A>More terms ⇢ wider trustworthy fit; the derivative polynomials track −sin x in spirit.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.2f, 0.42f, 0.55f, 0.35f),
@@ -1985,7 +2090,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>Natural logarithm</b> is the star of ∫ (1/x) dx = ln|x| + C and shows up in p‑growth comparisons, half‑lives, and ε–δ arguments about slow divergence.\n\n" +
                 "Domain x > 0 (here ensured by shifting the graph so u stays positive): slopes are always positive but shrink as x grows — classic “diminishing returns.”\n\n" +
-                "<size=92%><color=#a8b2d1>BC links ln x to harmonic series / integral test intuitions.</color></size>",
+                "<size=92%><color=#57534A>BC links ln x to harmonic series / integral test intuitions.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.28f, 0.45f, 0.24f, 0.35f),
@@ -2010,7 +2115,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>√x</b> — domain restriction hero. d/dx √x = 1/(2√x) blows up approaching 0 from the right: infinite slope at the vertical tangent place (a classic BC “improper behavior” discussion).\n\n" +
                 "Substitution integrals and arc length formulas love √(1 + (dy/dx)²); the cusp language matches “watch the derivative.”\n\n" +
-                "<size=92%><color=#a8b2d1>Gameplay still samples smooth pieces; the story is the analytic caution at the boundary.</color></size>",
+                "<size=92%><color=#57534A>Gameplay still samples smooth pieces; the story is the analytic caution at the boundary.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.48f, 0.3f, 0.18f, 0.35f),
@@ -2035,7 +2140,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>Tangent</b> packs vertical asymptotes where cos → 0 — limits sprint material on every AP sheet.\n\n" +
                 "Here the window is chosen so you explore a single smooth branch between asymptotes: sec²x is the derivative, always ≥ 1 when defined.\n\n" +
-                "<size=92%><color=#a8b2d1>BC parametric/polar work often reduces to chasing trig identities; tan is a spine in those algebra stories.</color></size>",
+                "<size=92%><color=#57534A>BC parametric/polar work often reduces to chasing trig identities; tan is a spine in those algebra stories.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.2f, 0.38f, 0.52f, 0.35f),
@@ -2059,7 +2164,7 @@ public class LevelManager : MonoBehaviour
             story:
                 "<b>Exponential growth ODE</b>: if y′ = k y then y = Ce^{kx} — the reason e^x is “its own derivative” up to scaling.\n\n" +
                 "Separable equations, slope fields, and half‑life problems all orbit this curve before you meet logistic saturation next door.\n\n" +
-                "<size=92%><color=#a8b2d1>Contrast with the ∫ e^x dx level earlier: there we shaded area; here we emphasize <i>rate proportional to amount</i>.</color></size>",
+                "<size=92%><color=#57534A>Contrast with the ∫ e^x dx level earlier: there we shaded area; here we emphasize <i>rate proportional to amount</i>.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.18f, 0.42f, 0.3f, 0.35f),
@@ -2079,9 +2184,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Phase & SHM.</b> sin(ωt + ϕ) is the same motion as cosine, just time‑shifted — <color=#e9d5ff>energy swaps</color> between kinetic and potential in an ideal spring.\n\n" +
+                "<b>Phase & SHM.</b> sin(ωt + ϕ) is the same motion as cosine, just time‑shifted — <color=#1F4FA0>energy swaps</color> between kinetic and potential in an ideal spring.\n\n" +
                 "Parametric circles (x = R cos t, y = R sin t) project to these components; BC’s vector‑valued motion unit leans on the same trig backbone.\n\n" +
-                "<size=92%><color=#a8b2d1>Derivative cos tracks velocity up to constants: the platform logic is “who leads, who lags?”</color></size>",
+                "<size=92%><color=#57534A>Derivative cos tracks velocity up to constants: the platform logic is “who leads, who lags?”</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.38f, 0.22f, 0.5f, 0.35f),
@@ -2104,8 +2209,8 @@ public class LevelManager : MonoBehaviour
             maxGapColumns: 6,
             story:
                 "<b>Cubic graph sketching</b> — a BC classroom ritual: find critical points, inflection where y″ flips sign, end behavior ±∞.\n\n" +
-                "<color=#fca5a5>Inflection</color> is where curvature changes; the derivative has a local max/min there for smooth cubics.\n\n" +
-                "<size=92%><color=#a8b2d1>Your feet feel one hump + one valley pattern typical of monotone‑derivative pieces between flexes.</color></size>",
+                "<color=#D7261E>Inflection</color> is where curvature changes; the derivative has a local max/min there for smooth cubics.\n\n" +
+                "<size=92%><color=#57534A>Your feet feel one hump + one valley pattern typical of monotone‑derivative pieces between flexes.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.5f, 0.24f, 0.2f, 0.34f),
@@ -2126,8 +2231,8 @@ public class LevelManager : MonoBehaviour
             baseN: 2,
             story:
                 "<b>General exponential</b> b^x has derivative proportional to itself: d/dx b^x = (ln b) b^x.\n\n" +
-                "That constant <color=#c4b5fd>ln b</color> is the bridge from base‑10 or base‑2 growth to the natural base e where the constant becomes 1.\n\n" +
-                "<size=92%><color=#a8b2d1>Pair mentally with the Maclaurin and logistic levels — three lenses on “growth language.”</color></size>",
+                "That constant <color=#1F4FA0>ln b</color> is the bridge from base‑10 or base‑2 growth to the natural base e where the constant becomes 1.\n\n" +
+                "<size=92%><color=#57534A>Pair mentally with the Maclaurin and logistic levels — three lenses on “growth language.”</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.4f, 0.32f, 0.55f, 0.35f),
@@ -2151,9 +2256,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 3,
             maxGapColumns: 5,
             story:
-                "<b>Circle equation</b> in standard form: <color=#7dd3fc>(x − h)² + (y − k)² = R²</color>. A full circle is not a single y = f(x) graph — it fails the vertical line test — so we walk the <b>upper semicircle</b>:\n\n" +
+                "<b>Circle equation</b> in standard form: <color=#1F4FA0>(x − h)² + (y − k)² = R²</color>. A full circle is not a single y = f(x) graph — it fails the vertical line test — so we walk the <b>upper semicircle</b>:\n\n" +
                 "y = k + √(R² − (x − h)²) on |x − h| ≤ R. <b>Implicit differentiation</b> on the circle gives dy/dx = −(x − h)/(y − k) (away from y = k on the full curve).\n\n" +
-                "<size=92%><color=#a8b2d1>Parametric form x = h + R cos t, y = k + R sin t is another AP favorite; this stage keeps you on the top arc.</color></size>",
+                "<size=92%><color=#57534A>Parametric form x = h + R cos t, y = k + R sin t is another AP favorite; this stage keeps you on the top arc.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.22f, 0.36f, 0.52f, 0.36f),
@@ -2177,9 +2282,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 3,
             maxGapColumns: 5,
             story:
-                "<b>Thermodynamics — reversible adiabatic path</b> — for an ideal gas, <color=#fdba74>quasi-static adiabats</color> obey <b>PV<sup>γ</sup> = constant</b> (no heat exchange, work comes only from internal energy bookkeeping).\n\n" +
-                "Here the horizontal walk is a scaled <color=#7dd3fc>“volume-like”</color> coordinate; height tracks <b>pressure mood</b> as P ∝ V<sup>−γ</sup>. We set <b>N = 140</b> so γ ≈ 1.40 — a familiar air/diatomic story problem vibe, not a lab instrument.\n\n" +
-                "<size=92%><color=#a8b2d1>Teaching sketch only: real pistons have losses, gradients, and non-equilibrium corners — but the slope story you feel underfoot is still γ.</color></size>",
+                "<b>Thermodynamics — reversible adiabatic path</b> — for an ideal gas, <color=#D7261E>quasi-static adiabats</color> obey <b>PV<sup>γ</sup> = constant</b> (no heat exchange, work comes only from internal energy bookkeeping).\n\n" +
+                "Here the horizontal walk is a scaled <color=#1F4FA0>“volume-like”</color> coordinate; height tracks <b>pressure mood</b> as P ∝ V<sup>−γ</sup>. We set <b>N = 140</b> so γ ≈ 1.40 — a familiar air/diatomic story problem vibe, not a lab instrument.\n\n" +
+                "<size=92%><color=#57534A>Teaching sketch only: real pistons have losses, gradients, and non-equilibrium corners — but the slope story you feel underfoot is still γ.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.38f, 0.18f, 0.1f, 0.36f),
@@ -2204,9 +2309,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Lift vs angle of attack</b> — on a wing, <color=#38bdf8>coefficient C_L</color> grows roughly linearly with α in the attached‑flow regime (thin‑airfoil / small‑angle mood).\n\n" +
+                "<b>Lift vs angle of attack</b> — on a wing, <color=#1F4FA0>coefficient C_L</color> grows roughly linearly with α in the attached‑flow regime (thin‑airfoil / small‑angle mood).\n\n" +
                 "Past the <b>stall</b> angle the boundary layer separates; lift drops sharply — a nonlinear break your feet feel as the graph stops climbing.\n\n" +
-                "<size=92%><color=#a8b2d1>Real design couples Mach, Reynolds, sweep, twist; this graph is a calculus “shape class” for slope & saturation.</color></size>",
+                "<size=92%><color=#57534A>Real design couples Mach, Reynolds, sweep, twist; this graph is a calculus “shape class” for slope & saturation.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.16f, 0.32f, 0.48f, 0.37f),
@@ -2233,9 +2338,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Drag polar — three traces at once</b> — the graph shows <color=#93c5fd><b>parasitic (zero‑lift / profile) drag</b></color> as a flat baseline, <color=#fb7185><b>induced drag</b></color> as the bowl that grows with |C_L|, and <color=#c4b5fd><b>total C_D</b></color> as their sum (walk the thick total — same parabola as before).\n\n" +
-                "Classic identity: <color=#c4b5fd>C_D = C_{D0} + K C_L²</color>; min‑drag C_L is where the marginal induced penalty balances mission speed/α choices.\n\n" +
-                "<size=92%><color=#a8b2d1>Horizontal axis: u ~ C_L. Purple = C_D,tot (platforms); blue = C_D,par; coral = C_D,ind alone (from zero lift).</color></size>",
+                "<b>Drag polar — three traces at once</b> — the graph shows <color=#1F4FA0><b>parasitic (zero‑lift / profile) drag</b></color> as a flat baseline, <color=#D7261E><b>induced drag</b></color> as the bowl that grows with |C_L|, and <color=#1F4FA0><b>total C_D</b></color> as their sum (walk the thick total — same parabola as before).\n\n" +
+                "Classic identity: <color=#1F4FA0>C_D = C_{D0} + K C_L²</color>; min‑drag C_L is where the marginal induced penalty balances mission speed/α choices.\n\n" +
+                "<size=92%><color=#57534A>Horizontal axis: u ~ C_L. Purple = C_D,tot (platforms); blue = C_D,par; coral = C_D,ind alone (from zero lift).</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.35f, 0.25f, 0.5f, 0.36f),
@@ -2261,9 +2366,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 3,
             maxGapColumns: 5,
             story:
-                "<b>Atmosphere (isothermal cartoon)</b> — pressure and density drop roughly <color=#86efac>exponentially</color> with altitude: p, ρ ~ e^{−h/H} with <b>scale height</b> H (temperature & mean molar mass set the mood in the real ISA).\n\n" +
+                "<b>Atmosphere (isothermal cartoon)</b> — pressure and density drop roughly <color=#1F4FA0>exponentially</color> with altitude: p, ρ ~ e^{−h/H} with <b>scale height</b> H (temperature & mean molar mass set the mood in the real ISA).\n\n" +
                 "Aero engineers live in these curves: thrust, Reynolds, Mach, dynamic pressure q = ½ρV² all track ρ(h).\n\n" +
-                "<size=92%><color=#a8b2d1>Plot uses h ≥ 0 on the transformed axis; negative side clips—like launching from sea level only.</color></size>",
+                "<size=92%><color=#57534A>Plot uses h ≥ 0 on the transformed axis; negative side clips—like launching from sea level only.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.18f, 0.42f, 0.34f, 0.36f),
@@ -2291,9 +2396,9 @@ public class LevelManager : MonoBehaviour
             power: 4,
             baseN: 2,
             story:
-                "<b>Longitudinal dynamics</b> — a rigid aircraft has <color=#7dd3fc>short‑period</color> (quick pitch / heave) and <b>phugoid</b> (slow exchange of altitude & speed) modes.\n\n" +
+                "<b>Longitudinal dynamics</b> — a rigid aircraft has <color=#1F4FA0>short‑period</color> (quick pitch / heave) and <b>phugoid</b> (slow exchange of altitude & speed) modes.\n\n" +
                 "Linearized state‑space models are eigenvalues & eigenvectors; cartooned here as a <b>damped oscillation</b> — exponential envelope × sine — the same mathematics as mass–spring–damper labs.\n\n" +
-                "<size=92%><color=#a8b2d1>Flight control & autopilot designers tame these modes with feedback; feel the derivative change at crests and troughs.</color></size>",
+                "<size=92%><color=#57534A>Flight control & autopilot designers tame these modes with feedback; feel the derivative change at crests and troughs.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.14f, 0.35f, 0.48f, 0.36f),
@@ -2315,9 +2420,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Newtonian / impact theory mood</b> — in hypersonic teaching models, surface <color=#fca5a5>pressure coefficient</color> scales like sin²α for windward facets (turning momentum of molecules).\n\n" +
+                "<b>Newtonian / impact theory mood</b> — in hypersonic teaching models, surface <color=#D7261E>pressure coefficient</color> scales like sin²α for windward facets (turning momentum of molecules).\n\n" +
                 "Not a replacement for CFD or shock‑expansion — but the right <i>calculus vocabulary</i>: nonlinear trig powering heat‑shield and entry corridor conversations.\n\n" +
-                "<size=92%><color=#a8b2d1>Horizontal axis plays local slope angle; only α ≥ 0 is meaningful on this branch.</color></size>",
+                "<size=92%><color=#57534A>Horizontal axis plays local slope angle; only α ≥ 0 is meaningful on this branch.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.48f, 0.22f, 0.2f, 0.35f),
@@ -2338,9 +2443,9 @@ public class LevelManager : MonoBehaviour
             power: 2,
             baseN: 2,
             story:
-                "<b>Strouhal number</b> — bluff bodies shed vortices at a characteristic frequency <color=#93c5fd>f ≈ St · U / D</color> (St ≈ 0.2 for cylinders in the textbook band).\n\n" +
+                "<b>Strouhal number</b> — bluff bodies shed vortices at a characteristic frequency <color=#1F4FA0>f ≈ St × U / D</color> (St ≈ 0.2 for cylinders in the textbook band).\n\n" +
                 "That periodicity drives vibrations, noise, and fatigue loading on antennas, cables, and control surfaces in wake turbulence.\n\n" +
-                "<size=92%><color=#a8b2d1>Sine waves are the fingerprint of linearized unsteady aero & flutter thinking — walk the cycle as if reading a hot‑wire trace.</color></size>",
+                "<size=92%><color=#57534A>Sine waves are the fingerprint of linearized unsteady aero & flutter thinking — walk the cycle as if reading a hot‑wire trace.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.22f, 0.28f, 0.52f, 0.36f),
@@ -2365,9 +2470,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 5,
             forcePlatformsAtEndColumns: 3,
             story:
-                "<b>Re‑entry & hypersonic heating mood</b> — heat flux scales with <color=#fde047>dynamic pressure × velocity</color> roughly like ρ V³ in many order‑of‑magnitude chats (models vary!), so as altitude climbs (ρ↓) and speed bleeds off, the <i>threat curve</i> relaxes exponentially in time in simplified histories.\n\n" +
+                "<b>Re‑entry & hypersonic heating mood</b> — heat flux scales with <color=#D7261E>dynamic pressure × velocity</color> roughly like ρ V³ in many order‑of‑magnitude chats (models vary!), so as altitude climbs (ρ↓) and speed bleeds off, the <i>threat curve</i> relaxes exponentially in time in simplified histories.\n\n" +
                 "Thermal protection, trajectory shaping, and bank angle modulation all serve to keep material beneath limits — calculus is the language of those trade curves.\n\n" +
-                "<size=92%><color=#a8b2d1>Use this stage as a qualitative decay envelope, not a quantitative SpaceX memo.</color></size>",
+                "<size=92%><color=#57534A>Use this stage as a qualitative decay envelope, not a quantitative SpaceX memo.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.42f, 0.3f, 0.18f, 0.35f),
@@ -2392,9 +2497,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 2,
             maxGapColumns: 5,
             story:
-                "<b>Dot‑com bubble — stylized chart walk</b> — equity indices like the broad <color=#86efac>S&amp;P 500</color> (or the racier <color=#7dd3fc>Nasdaq Composite</color>) climbed through the late 1990s, then <color=#fca5a5>gapped down</color> as the 2000–02 tech hangover unwound years of euphoria.\n\n" +
+                "<b>Dot‑com bubble — stylized chart walk</b> — equity indices like the broad <color=#1F4FA0>S&amp;P 500</color> (or the racier <color=#1F4FA0>Nasdaq Composite</color>) climbed through the late 1990s, then <color=#D7261E>gapped down</color> as the 2000–02 tech hangover unwound years of euphoria.\n\n" +
                 "This path is a <b>smooth teaching silhouette</b> — not downloaded tick data — but it catches the storytelling shape: **grind, parabolic enthusiasm, air pocket, slow rebuild**. Slopes and concavity still read like real market moods.\n\n" +
-                "<size=92%><color=#a8b2d1>Educational allegory only; not investment advice or a replica of any index.</color></size>",
+                "<size=92%><color=#57534A>Educational allegory only; not investment advice or a replica of any index.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.18f, 0.32f, 0.22f, 0.38f),
@@ -2418,9 +2523,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 2,
             maxGapColumns: 5,
             story:
-                "<b>Global financial crisis — stylized stress curve</b> — US <color=#fde047>housing & mortgage</color> risk, structured credit losses, and institutional fragility fed a <color=#fca5a5>violent repricing</color> in 2007–09 that spilled across banks, money markets, and real economies (familiar names in history books: Lehman’s collapse in Sept 2008 as a flashpoint).\n\n" +
+                "<b>Global financial crisis — stylized stress curve</b> — US <color=#D7261E>housing & mortgage</color> risk, structured credit losses, and institutional fragility fed a <color=#D7261E>violent repricing</color> in 2007–09 that spilled across banks, money markets, and real economies (familiar names in history books: Lehman’s collapse in Sept 2008 as a flashpoint).\n\n" +
                 "Again: <b>no real GSPC series here</b> — just a qualitative spline with a **crest near complacency**, a **cliff**, and a **long crawl** that matches how people <i>remember</i> the V‑shock conversation.\n\n" +
-                "<size=92%><color=#a8b2d1>Simplified drama for calculus class; markets are vastly richer than one line.</color></size>",
+                "<size=92%><color=#57534A>Simplified drama for calculus class; markets are vastly richer than one line.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.36f, 0.14f, 0.12f, 0.36f),
@@ -2444,9 +2549,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 2,
             maxGapColumns: 5,
             story:
-                "<b>Fourier transform — sinc glimpse</b> — a sharp pulse in time smears into a tall <color=#7dd3fc>sinc</color> in frequency: the side lobes are the price of band-limiting dreams.\n\n" +
+                "<b>Fourier transform — sinc glimpse</b> — a sharp pulse in time smears into a tall <color=#1F4FA0>sinc</color> in frequency: the side lobes are the price of band-limiting dreams.\n\n" +
                 "Here the horizontal axis is an angular-frequency style <i>u</i>; height follows <b>sin(u)/u</b> (normalized to 1 at the origin). It is the magnitude mood of a rectangular window — not a full FFT engine, but the canonical homework picture.\n\n" +
-                "<size=92%><color=#a8b2d1>Real transforms add phase; this stage is the clean symmetric <b>even sinc</b> silhouette.</color></size>",
+                "<size=92%><color=#57534A>Real transforms add phase; this stage is the clean symmetric <b>even sinc</b> silhouette.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.12f, 0.22f, 0.38f, 0.38f),
@@ -2473,9 +2578,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 3,
             maxGapColumns: 5,
             story:
-                "<b>Laplace transform — causal exponential</b> — for <b>t ≥ 0</b>, the table favorite <color=#86efac>f(t) = e<sup>−at</sup></color> is the polite ancestor of every damped pole in your s-domain algebra.\n\n" +
+                "<b>Laplace transform — causal exponential</b> — for <b>t ≥ 0</b>, the table favorite <color=#1F4FA0>f(t) = e<sup>−at</sup></color> is the polite ancestor of every damped pole in your s-domain algebra.\n\n" +
                 "We plot that decay with <b>N = 125</b> so the rate is about <b>a ≈ 1.25</b>: horizontal axis as time after the jump, vertical as amplitude.\n\n" +
-                "<size=92%><color=#a8b2d1>Heaviside <b>H(t)</b> hides the past: nothing before <b>t = 0</b>. The transform pairs it with <b>1/(s+a)</b> in your cheat sheet dreams.</color></size>",
+                "<size=92%><color=#57534A>Heaviside <b>H(t)</b> hides the past: nothing before <b>t = 0</b>. The transform pairs it with <b>1/(s+a)</b> in your cheat sheet dreams.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.14f, 0.28f, 0.18f, 0.36f),
@@ -2501,9 +2606,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 4,
             forcePlatformsAtEndColumns: 2,
             story:
-                "<b>Secret boss — golden spiral</b> — nature’s favorite growth curve is a <color=#fbbf24>logarithmic spiral</color>: each time angle θ advances steadily, radius scales by a fixed factor tied to the <color=#fde68a>golden ratio φ = (1+√5)/2</color>.\n\n" +
+                "<b>Secret boss — golden spiral</b> — nature’s favorite growth curve is a <color=#D7261E>logarithmic spiral</color>: each time angle θ advances steadily, radius scales by a fixed factor tied to the <color=#D7261E>golden ratio φ = (1+√5)/2</color>.\n\n" +
                 "Fibonacci rectangles, nautilus moods, and phyllotaxis in sunflowers all whisper the same proportion — here you walk the graph as <b>r(θ) ∝ φ^{kθ}</b> on a polar-style readout (horizontal = θ, vertical = r).\n\n" +
-                "<size=92%><color=#a8b2d1>Exact classical spirals use arc-length subtleties; this stage is the clean calculus headline: exponential growth in φ as you turn.</color></size>",
+                "<size=92%><color=#57534A>Exact classical spirals use arc-length subtleties; this stage is the clean calculus headline: exponential growth in φ as you turn.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.42f, 0.34f, 0.14f, 0.38f),
@@ -2529,9 +2634,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 4,
             forcePlatformsAtEndColumns: 2,
             story:
-                "<b>True finale — Mandelbrot encore</b> — the <color=#a8b2d1>backdrop</color> is again the classic <b>c-plane</b> (Re horizontal, Im vertical) colored by <color=#a7f3d0>smooth escape time</color>; your path follows the same slice: height vs <color=#86efac>Im(c)</color> at fixed <color=#86efac>Re(c)</color>.\n\n" +
+                "<b>True finale — Mandelbrot encore</b> — the <color=#57534A>backdrop</color> is again the classic <b>c-plane</b> (Re horizontal, Im vertical) colored by <color=#1F4FA0>smooth escape time</color>; your path follows the same slice: height vs <color=#1F4FA0>Im(c)</color> at fixed <color=#1F4FA0>Re(c)</color>.\n\n" +
                 "This is the <b>final boss gate</b>: every step still reads Julia–Mandelbrot folklore — bulbs, filaments, and the cardioid where behavior flips.\n\n" +
-                "<size=92%><color=#a8b2d1>Fractional escape counts + <b>|Im|</b> symmetry on this slice — the Mandelbrot coastline in one graph.</color></size>",
+                "<size=92%><color=#57534A>Fractional escape counts + <b>|Im|</b> symmetry on this slice — the Mandelbrot coastline in one graph.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.12f, 0.32f, 0.48f, 0.4f),
@@ -2561,9 +2666,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 4,
             forcePlatformsAtEndColumns: 2,
             story:
-                "<b>True finale — Chaos Theory</b> — the <color=#a8b2d1>horizontal axis</color> is a long stretch of <color=#86efac>simulation time</color>; height tracks the classic Lorenz <color=#7dd3fc>x(t)</color> with σ=10, ρ=28, β=8/3.\n\n" +
-                "Watch how the attractor <b>keeps retuning</b>: the same law, sensitive dependence, a path that never quite repeats — <color=#fda4af>chaos theory</color> made legible as motion.\n\n" +
-                "<size=92%><color=#a8b2d1>Normalized after burn-in so the wings fill your grid; the curve scrolls through phase so the stage feels alive.</color></size>",
+                "<b>True finale — Chaos Theory</b> — the <color=#57534A>horizontal axis</color> is a long stretch of <color=#1F4FA0>simulation time</color>; height tracks the classic Lorenz <color=#1F4FA0>x(t)</color> with σ=10, ρ=28, β=8/3.\n\n" +
+                "Watch how the attractor <b>keeps retuning</b>: the same law, sensitive dependence, a path that never quite repeats — <color=#D7261E>chaos theory</color> made legible as motion.\n\n" +
+                "<size=92%><color=#57534A>Normalized after burn-in so the wings fill your grid; the curve scrolls through phase so the stage feels alive.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.1f, 0.18f, 0.34f, 0.42f),
@@ -2590,9 +2695,9 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 4,
             forcePlatformsAtEndColumns: 2,
             story:
-                "<b>BOSS: Black hole — gravity well</b> — the curve is a <color=#7dd3fc>softened 1/r</color> slice: depth spikes toward the center, then relaxes into a gentle far-field shoulder.\n\n" +
-                "It is a <b>teaching stand-in</b> for how gravitational potential tightens near mass — not a full GR embedding, but the right <color=#fda4af>“falling in”</color> intuition on a 1D graph.\n\n" +
-                "<size=92%><color=#a8b2d1>ε from <b>D</b> keeps the well finite so the derivative game stays fair; ride the rim, respect the steep core.</color></size>",
+                "<b>BOSS: Black hole — gravity well</b> — the curve is a <color=#1F4FA0>softened 1/r</color> slice: depth spikes toward the center, then relaxes into a gentle far-field shoulder.\n\n" +
+                "It is a <b>teaching stand-in</b> for how gravitational potential tightens near mass — not a full GR embedding, but the right <color=#D7261E>“falling in”</color> intuition on a 1D graph.\n\n" +
+                "<size=92%><color=#57534A>ε from <b>D</b> keeps the well finite so the derivative game stays fair; ride the rim, respect the steep core.</color></size>",
             derivativePopTriggerCountOverride: 4,
             applyGridTheming: true,
             gridCenter: new Color(0.06f, 0.08f, 0.22f, 0.48f),
@@ -2622,9 +2727,9 @@ public class LevelManager : MonoBehaviour
             power: 14,
             baseN: 2,
             story:
-                "<b>Spring–mass without damping</b> — Hooke’s law says the restoring force points toward equilibrium: <color=#86efac><b>F = −k x</b></color> for displacement from rest.\n\n" +
-                "For a block on a frictionless horizontal surface, Newton gives <color=#7dd3fc>m ẍ = −k x</color>, so <color=#fde047>x(t) = A cos(ωt) + x₀</color> with <color=#a5b4fc>ω = √(k/m)</color> — simple harmonic motion.\n\n" +
-                "<size=92%><color=#a8b2d1>Horizontal axis here is a time-like <i>t</i> (via <b>u = k(x−D)</b>); height is position. Compare with <b>Engineering: damped oscillation</b> — same spring intuition with friction draining energy.</color></size>",
+                "<b>Spring–mass without damping</b> — Hooke’s law says the restoring force points toward equilibrium: <color=#1F4FA0><b>F = −k x</b></color> for displacement from rest.\n\n" +
+                "For a block on a frictionless horizontal surface, Newton gives <color=#1F4FA0>m ẍ = −k x</color>, so <color=#D7261E>x(t) = A cos(ωt) + x₀</color> with <color=#1F4FA0>ω = √(k/m)</color> — simple harmonic motion.\n\n" +
+                "<size=92%><color=#57534A>Horizontal axis here is a time-like <i>t</i> (via <b>u = k(x−D)</b>); height is position. Compare with <b>Engineering: damped oscillation</b> — same spring intuition with friction draining energy.</color></size>",
             derivativePopTriggerCountOverride: 3,
             applyGridTheming: true,
             gridCenter: new Color(0.14f, 0.36f, 0.32f, 0.38f),
@@ -2653,8 +2758,8 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtEndColumns: 3,
             maxGapColumns: 4,
             story:
-                "<b>Big O: O(1)</b> — constant time: the work doesn’t grow with input size. Here <color=#7dd3fc>u⁰ = 1</color>, so height stays flat as <i>u</i> (our stand-in for <i>n</i>) marches.\n\n" +
-                "<size=92%><color=#a8b2d1>Hash lookups and array indexing are classic O(1) <i>when the model fits</i> — the graph is the calm horizontal proof.</color></size>",
+                "<b>Big O: O(1)</b> — constant time: the work doesn’t grow with input size. Here <color=#1F4FA0>u⁰ = 1</color>, so height stays flat as <i>u</i> (our stand-in for <i>n</i>) marches.\n\n" +
+                "<size=92%><color=#57534A>Hash lookups and array indexing are classic O(1) <i>when the model fits</i> — the graph is the calm horizontal proof.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.11f,
             levelXStart: -12f,
@@ -2675,8 +2780,8 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 5,
             forcePlatformsAtEndColumns: 2,
             story:
-                "<b>Big O: O(log n)</b> — each step shrinks the problem by a constant factor (binary search, balanced trees). <color=#86efac>ln u</color> climbs gently forever.\n\n" +
-                "<size=92%><color=#a8b2d1>Domain needs <i>u</i> &gt; 0 — we sample away from zero so the law stays finite on the grid.</color></size>",
+                "<b>Big O: O(log n)</b> — each step shrinks the problem by a constant factor (binary search, balanced trees). <color=#1F4FA0>ln u</color> climbs gently forever.\n\n" +
+                "<size=92%><color=#57534A>Domain needs <i>u</i> &gt; 0 — we sample away from zero so the law stays finite on the grid.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.1f,
             levelXStart: 0.45f,
@@ -2695,8 +2800,8 @@ public class LevelManager : MonoBehaviour
             power: 1,
             baseN: 2,
             story:
-                "<b>Big O: O(√n)</b> — sublinear growth: think nested loops that only walk up to √n, or some number-theory sieves. <color=#7dd3fc>√u</color> bends upward but bows to log in the long run.\n\n" +
-                "<size=92%><color=#a8b2d1>We keep <i>u</i> ≥ 0 so the square root stays real.</color></size>",
+                "<b>Big O: O(√n)</b> — sublinear growth: think nested loops that only walk up to √n, or some number-theory sieves. <color=#1F4FA0>√u</color> bends upward but bows to log in the long run.\n\n" +
+                "<size=92%><color=#57534A>We keep <i>u</i> ≥ 0 so the square root stays real.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.095f,
             levelXStart: 0f,
@@ -2715,8 +2820,8 @@ public class LevelManager : MonoBehaviour
             power: 1,
             baseN: 2,
             story:
-                "<b>Big O: O(n)</b> — scan the input once: summing a list, finding a max, a single loop. <color=#86efac>u¹</color> is the straight-ahead ramp.\n\n" +
-                "<size=92%><color=#a8b2d1>Slope (derivative) stays in the same growth class — still linear in this stylized picture.</color></size>",
+                "<b>Big O: O(n)</b> — scan the input once: summing a list, finding a max, a single loop. <color=#1F4FA0>u¹</color> is the straight-ahead ramp.\n\n" +
+                "<size=92%><color=#57534A>Slope (derivative) stays in the same growth class — still linear in this stylized picture.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.1f,
             levelXStart: -9f,
@@ -2737,8 +2842,8 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 5,
             forcePlatformsAtEndColumns: 2,
             story:
-                "<b>Big O: O(n log n)</b> — the sweet spot for sorting lower bounds (comparison sorts) and many divide steps. <color=#7dd3fc>u ln u</color> pulls away from linear but loses to n².\n\n" +
-                "<size=92%><color=#a8b2d1>We clamp the small‑u end so ln doesn’t sing on zero — same idea as “n big enough” in proofs.</color></size>",
+                "<b>Big O: O(n log n)</b> — the sweet spot for sorting lower bounds (comparison sorts) and many divide steps. <color=#1F4FA0>u ln u</color> pulls away from linear but loses to n².\n\n" +
+                "<size=92%><color=#57534A>We clamp the small‑u end so ln doesn’t sing on zero — same idea as “n big enough” in proofs.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.095f,
             levelXStart: 0.5f,
@@ -2759,8 +2864,8 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 5,
             maxGapColumns: 5,
             story:
-                "<b>Big O: O(n²)</b> — nested loops, many pairwise checks, naive matrix setups. <color=#fda4af>u²</color> accelerates — the derivative warns you early.\n\n" +
-                "<size=92%><color=#a8b2d1>When you see the parabola in complexity class, look for a double walk over data.</color></size>",
+                "<b>Big O: O(n²)</b> — nested loops, many pairwise checks, naive matrix setups. <color=#D7261E>u²</color> accelerates — the derivative warns you early.\n\n" +
+                "<size=92%><color=#57534A>When you see the parabola in complexity class, look for a double walk over data.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.09f,
             levelXStart: -7.5f,
@@ -2781,8 +2886,8 @@ public class LevelManager : MonoBehaviour
             forcePlatformsAtStartColumns: 5,
             maxGapColumns: 5,
             story:
-                "<b>Big O: O(n³)</b> — triple loops, naive Floyd–Warshall mood, dense cubic work. <color=#fbbf24>u³</color> rockets faster than n² — small constants don’t save you forever.\n\n" +
-                "<size=92%><color=#a8b2d1>Good algorithms often <b>avoid</b> this exponent; the graph shows why.</color></size>",
+                "<b>Big O: O(n³)</b> — triple loops, naive Floyd–Warshall mood, dense cubic work. <color=#D7261E>u³</color> rockets faster than n² — small constants don’t save you forever.\n\n" +
+                "<size=92%><color=#57534A>Good algorithms often <b>avoid</b> this exponent; the graph shows why.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.085f,
             levelXStart: -6f,
@@ -2801,8 +2906,8 @@ public class LevelManager : MonoBehaviour
             power: 1,
             baseN: 2,
             story:
-                "<b>Big O: O(2ⁿ)</b> — exhaustive subsets, brute-force SAT-ish nightmares. <color=#86efac>2ᵘ</color> explodes; we keep the window modest so the grid survives.\n\n" +
-                "<size=92%><color=#a8b2d1>Memoization, pruning, and smarter structure exist precisely because this curve leaves polite bounds.</color></size>",
+                "<b>Big O: O(2ⁿ)</b> — exhaustive subsets, brute-force SAT-ish nightmares. <color=#1F4FA0>2ᵘ</color> explodes; we keep the window modest so the grid survives.\n\n" +
+                "<size=92%><color=#57534A>Memoization, pruning, and smarter structure exist precisely because this curve leaves polite bounds.</color></size>",
             derivativePopTriggerCountOverride: 3,
             graphStep: 0.11f,
             levelXStart: -5.5f,
@@ -2814,6 +2919,9 @@ public class LevelManager : MonoBehaviour
     /// Factory for a runtime <see cref="LevelDefinition"/> ScriptableObject instance (not saved as an asset).
     /// Optional Riemann args apply integral / stair visualization stages.
     /// </summary>
+    // f′ stays red on every stage (the pop animation flashes it); one meaning per colour.
+    static readonly Color[] BauhausStageColors = { Bauhaus.Red };
+
     private LevelDefinition MakeLevel(
         string name,
         FunctionType functionType,
@@ -2862,8 +2970,10 @@ public class LevelManager : MonoBehaviour
         def.power = power;
         def.baseN = baseN;
 
-        def.curveColor = curveColor;
-        def.derivativeColor = derivativeColor;
+        // 1.4 Bauhaus plot: every level draws f in blue and f′ in red on the paper grid (the per-level
+        // neon colours passed in were tuned for the old dark background and are no longer used).
+        def.curveColor = Bauhaus.Blue;
+        def.derivativeColor = Bauhaus.Red;
 
         def.derivativeSafeThreshold = derivativeSafeThreshold;
         def.forcePlatformsAtStartColumns = forcePlatformsAtStartColumns;
@@ -2884,20 +2994,10 @@ public class LevelManager : MonoBehaviour
         if (storyPauseSecondsOverride > 0.01f)
             def.storyPauseSeconds = storyPauseSecondsOverride;
 
+        // Stage pops cycle through the primaries (f′ flashes red, yellow, ink) so each stage reads on paper.
         def.stageDerivativePopColors = new List<Color>(popN);
-        if (levelStageColors != null && levelStageColors.Length >= popN)
-        {
-            for (int i = 0; i < popN; i++)
-                def.stageDerivativePopColors.Add(levelStageColors[i]);
-        }
-        else
-        {
-            for (int i = 0; i < popN; i++)
-            {
-                float t = popN == 1 ? 0f : (float)i / (popN - 1);
-                def.stageDerivativePopColors.Add(Color.Lerp(derivativeColor, Color.white, 0.35f * t));
-            }
-        }
+        for (int i = 0; i < popN; i++)
+            def.stageDerivativePopColors.Add(BauhausStageColors[i % BauhausStageColors.Length]);
 
         def.storyText = story;
 
@@ -2905,18 +3005,14 @@ public class LevelManager : MonoBehaviour
         def.riemannRectCount = riemannRectCount;
         def.showRiemannVisualization = showRiemannVisualization;
         def.useRiemannStairPlatforms = useRiemannStairPlatforms;
-        if (riemannFillColor.HasValue)
-            def.riemannFillColor = riemannFillColor.Value;
+        // Riemann rectangles: flat yellow blocks under the blue curve.
+        def.riemannFillColor = Bauhaus.WithAlpha(Bauhaus.Yellow, 0.6f);
         if (riemannPlatformCoverage.HasValue)
             def.riemannPlatformCoverage = Mathf.Clamp(riemannPlatformCoverage.Value, 0.22f, 1f);
 
         if (dragPolarOverlayColors != null && dragPolarOverlayColors.Length >= 2)
         {
-            def.dragPolarOverlayColors = new List<Color>
-            {
-                dragPolarOverlayColors[0],
-                dragPolarOverlayColors[1]
-            };
+            def.dragPolarOverlayColors = new List<Color> { Bauhaus.Ink, Bauhaus.YellowLine };
         }
 
         def.showWindTunnelBackdrop = showWindTunnelBackdrop;
@@ -2990,7 +3086,7 @@ public class LevelManager : MonoBehaviour
         functionPlotter.differentiate = true;
         functionPlotter.showWindTunnelBackdrop = def.showWindTunnelBackdrop;
 
-        const string IntegralSuffixHex = "5cabff";
+        const string IntegralSuffixHex = "1F4FA0"; // Bauhaus blue
         if (def.showRiemannVisualization)
         {
             if (def.riemannRule == RiemannRule.None)
@@ -3011,8 +3107,8 @@ public class LevelManager : MonoBehaviour
 
         if (def.functionType == FunctionType.AeroDragPolarTriple)
         {
-            Color oc0 = new Color(0.55f, 0.68f, 0.9f, 0.95f);
-            Color oc1 = new Color(0.98f, 0.5f, 0.55f, 0.9f);
+            Color oc0 = Bauhaus.Ink;
+            Color oc1 = Bauhaus.YellowLine;
             if (def.dragPolarOverlayColors != null && def.dragPolarOverlayColors.Count >= 2)
             {
                 oc0 = def.dragPolarOverlayColors[0];
@@ -3033,8 +3129,7 @@ public class LevelManager : MonoBehaviour
             stagePopColors = new List<Color>(popN);
             for (int i = 0; i < popN; i++)
             {
-                float t = popN == 1 ? 0f : (float)i / (popN - 1);
-                stagePopColors.Add(Color.Lerp(def.derivativeColor, Color.white, 0.35f * t));
+                stagePopColors.Add(BauhausStageColors[i % BauhausStageColors.Length]);
             }
         }
 
@@ -3391,7 +3486,7 @@ public class LevelManager : MonoBehaviour
         dimRt.offsetMin = Vector2.zero;
         dimRt.offsetMax = Vector2.zero;
         var dimImg = dimGo.AddComponent<Image>();
-        dimImg.color = new Color(0.04f, 0.05f, 0.08f, 0.88f);
+        dimImg.color = Bauhaus.Scrim;
         dimImg.raycastTarget = false;
 
         var panelGo = new GameObject("Panel");
@@ -3402,10 +3497,10 @@ public class LevelManager : MonoBehaviour
         panelRt.pivot = new Vector2(0.5f, 0.5f);
         panelRt.sizeDelta = new Vector2(Mathf.Min(760f, Screen.width * 0.9f), Mathf.Min(520f, Screen.height * 0.72f));
         var panelImg = panelGo.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(panelImg);
-        panelImg.color = new Color(0.1f, 0.11f, 0.15f, 0.97f);
+        Bauhaus.Panel(panelImg);
         panelImg.raycastTarget = false;
-        RuntimeUiPolish.ApplyDropShadow(panelRt, new Vector2(2f, -4f), 0.35f);
+        // Red header block across the top of the story card.
+        UiKit.Band(panelRt, Bauhaus.Red, 18f);
 
         var titleGo = new GameObject("Title");
         var titleRt = titleGo.AddComponent<RectTransform>();
@@ -3413,8 +3508,8 @@ public class LevelManager : MonoBehaviour
         titleRt.anchorMin = new Vector2(0f, 1f);
         titleRt.anchorMax = new Vector2(1f, 1f);
         titleRt.pivot = new Vector2(0.5f, 1f);
-        titleRt.offsetMin = new Vector2(22f, -120f);
-        titleRt.offsetMax = new Vector2(-22f, -16f);
+        titleRt.offsetMin = new Vector2(22f, -136f);
+        titleRt.offsetMax = new Vector2(-22f, -36f);
         stageIntroTitle = titleGo.AddComponent<TextMeshProUGUI>();
         stageIntroTitle.fontSize = UiTypography.Scale(30);
         stageIntroTitle.fontStyle = FontStyles.Bold;
@@ -3435,7 +3530,7 @@ public class LevelManager : MonoBehaviour
         stageIntroBody = bodyGo.AddComponent<TextMeshProUGUI>();
         stageIntroBody.fontSize = UiTypography.Scale(23);
         stageIntroBody.alignment = TextAlignmentOptions.Top;
-        stageIntroBody.color = new Color(0.92f, 0.93f, 0.96f, 1f);
+        stageIntroBody.color = Bauhaus.Ink;
         stageIntroBody.richText = true;
         stageIntroBody.textWrappingMode = TextWrappingModes.Normal;
         stageIntroBody.lineSpacing = 2f;
@@ -3453,12 +3548,12 @@ public class LevelManager : MonoBehaviour
         stageIntroHint = hintGo.AddComponent<TextMeshProUGUI>();
         stageIntroHint.fontSize = UiTypography.Scale(stageIntroTablet ? 26 : 23);
         stageIntroHint.alignment = TextAlignmentOptions.Bottom;
-        stageIntroHint.color = new Color(0.75f, 0.8f, 0.95f, 0.85f);
-        stageIntroHint.fontStyle = FontStyles.Italic;
+        stageIntroHint.color = Bauhaus.InkSoft;
+        stageIntroHint.fontStyle = FontStyles.Bold;
         stageIntroHint.richText = true;
         stageIntroHint.raycastTarget = false;
         ApplyPrimaryUiTypography(stageIntroHint, FindPrimaryEquationTmp(), outlineWidth: 0.06f, outlineAlpha: 0.3f);
-        stageIntroHint.fontStyle = FontStyles.Italic;
+        stageIntroHint.fontStyle = FontStyles.Bold;
 
         var tapGo = new GameObject("TapToContinue");
         var tapRt = tapGo.AddComponent<RectTransform>();

@@ -169,7 +169,7 @@ public class DerivRendererUI : Graphic
         }
 
         UIVertex vertex = UIVertex.simpleVert;
-        Color drawCol = Color.Lerp(color, Color.white, Mathf.Clamp01(playerProximityHighlight));
+        Color drawCol = Color.Lerp(color, Bauhaus.Ink, Mathf.Clamp01(playerProximityHighlight)); // graze flash reads as ink on paper
         drawCol.a *= segAlpha;
         vertex.color = drawCol;
 

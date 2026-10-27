@@ -16,6 +16,14 @@ public class GridRendererUI : Graphic
     public Color centerLine  = new Color32(255, 255, 255, 100);
     public Color outsideLine = new Color32(255, 255, 255, 40);
 
+    [Tooltip("Bauhaus plot (1.4): thin black axes and a light rule grid on paper, regardless of the per-level tints above.")]
+    public bool bauhausPaper = true;
+    /// <summary>Axis stroke on the paper plot (canvas units).</summary>
+    public const float BauhausAxisThickness = 3f;
+
+    Color OutsideCol => bauhausPaper ? Bauhaus.Rule : outsideLine;
+    Color CenterCol => bauhausPaper ? Bauhaus.Ink : centerLine;
+
     private float width;
     private float height;
     private float cellWidth;
@@ -82,7 +90,7 @@ public class GridRendererUI : Graphic
         float yPos = cellHeight * y;
 
         UIVertex vertex = UIVertex.simpleVert;
-        vertex.color = outsideLine;
+        vertex.color = OutsideCol;
 
         float bx = _meshXMin + xPos;
         float by = _meshYMin + yPos;
@@ -138,10 +146,10 @@ public class GridRendererUI : Graphic
         float cx = _meshXMin;
         float cy = _meshYMin;
 
-        float centerLineOffset = centerLineThickness / 2;
+        float centerLineOffset = (bauhausPaper ? BauhausAxisThickness : centerLineThickness) / 2;
 
         UIVertex vertex = UIVertex.simpleVert;
-        vertex.color = centerLine;
+        vertex.color = CenterCol;
 
         float midY = cy + height * 0.5f;
         //Horizontal Line
