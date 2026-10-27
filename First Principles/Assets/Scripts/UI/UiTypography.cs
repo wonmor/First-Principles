@@ -16,12 +16,12 @@ public static class UiTypography
     public static float Scale(float px) => Mathf.Max(1f, Mathf.Round(px * GlobalScale));
 
     /// <summary>Same asset referenced by Menu/Game scenes; must live under a <c>Resources</c> folder for <see cref="Resources.Load"/>.</summary>
-    const string ProjectPrimaryTmpFontResourcePath = "Fonts/Nunito-VariableFont_wght SDF";
+    const string ProjectPrimaryTmpFontResourcePath = "Fonts/Outfit SDF";
 
     /// <summary>
     /// Picks a TMP font for runtime-built UI (level select, overlays, etc.): uses <see cref="TMP_Settings.defaultFontAsset"/>
     /// when you have replaced the stock Liberation default (e.g. Quicksand menu command); otherwise loads
-    /// <b>Resources/<see cref="ProjectPrimaryTmpFontResourcePath"/></b> so level select matches Menu/Game (Nunito in this repo).
+    /// <b>Resources/<see cref="ProjectPrimaryTmpFontResourcePath"/></b> so level select matches Menu/Game (Outfit since the 1.4 Bauhaus redesign, see BauhausFontSetup).
     /// </summary>
     public static void ApplyDefaultFontAsset(TextMeshProUGUI target)
     {

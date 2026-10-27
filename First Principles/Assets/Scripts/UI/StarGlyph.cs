@@ -28,6 +28,18 @@ public static class StarGlyph
     public static Sprite Restart => _restart != null ? _restart : (_restart = BuildSdf(RestartSdf));
     static Sprite _medal, _pin, _stopwatch, _spring, _flag, _restart;
 
+    // Navigation / menu line glyphs (Lucide-style strokes) for the Bauhaus UI.
+    public static Sprite ArrowLeft => _arrowL != null ? _arrowL : (_arrowL = BuildSdf(p => ArrowSdf(new Vector2(-p.x, p.y))));
+    public static Sprite ArrowRight => _arrowR != null ? _arrowR : (_arrowR = BuildSdf(p => ArrowSdf(p)));
+    public static Sprite Calculator => _calc != null ? _calc : (_calc = BuildSdf(CalculatorSdf));
+    public static Sprite Globe => _globe != null ? _globe : (_globe = BuildSdf(GlobeSdf));
+    public static Sprite Book => _book != null ? _book : (_book = BuildSdf(BookSdf));
+    public static Sprite Help => _help != null ? _help : (_help = BuildSdf(HelpSdf));
+    public static Sprite Close => _close != null ? _close : (_close = BuildSdf(CloseSdf));
+    public static Sprite Sliders => _sliders != null ? _sliders : (_sliders = BuildSdf(SlidersSdf));
+    public static Sprite User => _user != null ? _user : (_user = BuildSdf(UserSdf));
+    static Sprite _arrowL, _arrowR, _calc, _globe, _book, _help, _close, _sliders, _user;
+
     public static Image Add(RectTransform parent, string name, Sprite sprite, Color tint, Vector2 size)
     {
         var go = new GameObject(name);
@@ -40,6 +52,33 @@ public static class StarGlyph
         img.color = tint;
         img.raycastTarget = false;
         return img;
+    }
+
+    /// <summary>
+    /// Bauhaus star: earned = yellow fill with an ink rim (reads on paper), unearned = grey line star.
+    /// Returns the fill image; toggle it with <see cref="SetStar"/>.
+    /// </summary>
+    public static Image AddStar(RectTransform parent, string name, bool on, Vector2 size)
+    {
+        var img = Add(parent, name, Filled, UiKit.Gold, size);
+        var rim = Add(img.rectTransform, "Rim", Outline, Bauhaus.Ink, Vector2.zero);
+        rim.rectTransform.anchorMin = Vector2.zero;
+        rim.rectTransform.anchorMax = Vector2.one;
+        rim.rectTransform.offsetMin = Vector2.zero;
+        rim.rectTransform.offsetMax = Vector2.zero;
+        SetStar(img, on);
+        return img;
+    }
+
+    public static void SetStar(Image star, bool on)
+    {
+        if (star == null)
+            return;
+        star.sprite = on ? Filled : Outline;
+        star.color = on ? UiKit.Gold : UiKit.GoldDim;
+        var rim = star.transform.Find("Rim");
+        if (rim != null)
+            rim.gameObject.SetActive(on);
     }
 
     // ------------------------------------------------------------------ star
@@ -60,13 +99,15 @@ public static class StarGlyph
 
     static Sprite BuildStar(bool filled)
     {
-        return BuildSdf(p =>
+        var star = BuildSdf(p =>
         {
             float d = StarSdf(p, 44f, 19f);
             if (filled)
                 return d;
             return Mathf.Abs(d + 3f) - 3.2f; // line outline ~6.4px
         });
+        star.name = "Star"; // keeps its own tint inside buttons (see Bauhaus.Button)
+        return star;
     }
 
     // ------------------------------------------------------------------ line glyphs
@@ -241,6 +282,110 @@ public static class StarGlyph
         return d;
     }
 
+    static float ArrowSdf(Vector2 p)
+    {
+        const float w = 7f;
+        float d = Segment(p, new Vector2(-30f, 0f), new Vector2(30f, 0f), w);
+        d = Mathf.Min(d, Segment(p, new Vector2(30f, 0f), new Vector2(8f, 22f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(30f, 0f), new Vector2(8f, -22f), w));
+        return d;
+    }
+
+    static float RectLines(Vector2 p, float x0, float y0, float x1, float y1, float w)
+    {
+        float d = Segment(p, new Vector2(x0, y0), new Vector2(x1, y0), w);
+        d = Mathf.Min(d, Segment(p, new Vector2(x1, y0), new Vector2(x1, y1), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(x1, y1), new Vector2(x0, y1), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(x0, y1), new Vector2(x0, y0), w));
+        return d;
+    }
+
+    static float CalculatorSdf(Vector2 p)
+    {
+        const float w = 6f;
+        float d = RectLines(p, -26f, -36f, 26f, 36f, w);
+        d = Mathf.Min(d, RectLines(p, -14f, 12f, 14f, 24f, w));
+        for (int r = 0; r < 2; r++)
+            for (int c = 0; c < 3; c++)
+            {
+                var k = new Vector2(-13f + c * 13f, -6f - r * 16f);
+                d = Mathf.Min(d, Segment(p, k, k + new Vector2(0.01f, 0f), 8f));
+            }
+        return d;
+    }
+
+    static float GlobeSdf(Vector2 p)
+    {
+        const float w = 6f;
+        float d = Ring(p, Vector2.zero, 34f, w);
+        d = Mathf.Min(d, Segment(p, new Vector2(-34f, 0f), new Vector2(34f, 0f), w));
+        // Meridian: ellipse approximated by a horizontally squashed ring.
+        float m = Ring(new Vector2(p.x * 2.1f, p.y), Vector2.zero, 34f, w * 2.1f) / 2.1f;
+        d = Mathf.Min(d, m);
+        return d;
+    }
+
+    static float BookSdf(Vector2 p)
+    {
+        const float w = 6f;
+        Vector2 a = new Vector2(0f, -26f), b = new Vector2(-34f, -20f), c = new Vector2(-34f, 30f), e = new Vector2(0f, 24f);
+        float d = Segment(p, a, b, w);
+        d = Mathf.Min(d, Segment(p, b, c, w));
+        d = Mathf.Min(d, Segment(p, c, e, w));
+        d = Mathf.Min(d, Segment(p, e, a, w));
+        Vector2 q = new Vector2(-p.x, p.y);
+        d = Mathf.Min(d, Segment(q, a, b, w));
+        d = Mathf.Min(d, Segment(q, b, c, w));
+        d = Mathf.Min(d, Segment(q, c, e, w));
+        return d;
+    }
+
+    static float HelpSdf(Vector2 p)
+    {
+        const float w = 6f;
+        float d = Ring(p, Vector2.zero, 36f, w);
+        Vector2 c = new Vector2(0f, 9f);
+        float ang = Mathf.Atan2(p.y - c.y, p.x - c.x) * Mathf.Rad2Deg;
+        float hook = Ring(p, c, 11f, w);
+        if (ang < -60f && ang > -180f + 1f) hook = 999f;
+        d = Mathf.Min(d, hook);
+        Vector2 end = c + new Vector2(Mathf.Cos(-60f * Mathf.Deg2Rad), Mathf.Sin(-60f * Mathf.Deg2Rad)) * 11f;
+        d = Mathf.Min(d, Segment(p, end, new Vector2(0f, -8f), w));
+        d = Mathf.Min(d, Segment(p, new Vector2(0f, -19f), new Vector2(0f, -19.01f), 8f));
+        return d;
+    }
+
+    static float CloseSdf(Vector2 p)
+    {
+        const float w = 7f;
+        float d = Segment(p, new Vector2(-24f, -24f), new Vector2(24f, 24f), w);
+        return Mathf.Min(d, Segment(p, new Vector2(-24f, 24f), new Vector2(24f, -24f), w));
+    }
+
+    static float SlidersSdf(Vector2 p)
+    {
+        const float w = 6f;
+        float d = 999f;
+        float[] ys = { 24f, 0f, -24f };
+        float[] knob = { -12f, 14f, -4f };
+        for (int i = 0; i < 3; i++)
+        {
+            d = Mathf.Min(d, Segment(p, new Vector2(-34f, ys[i]), new Vector2(knob[i] - 9f, ys[i]), w));
+            d = Mathf.Min(d, Segment(p, new Vector2(knob[i] + 9f, ys[i]), new Vector2(34f, ys[i]), w));
+            d = Mathf.Min(d, Ring(p, new Vector2(knob[i], ys[i]), 7f, w));
+        }
+        return d;
+    }
+
+    static float UserSdf(Vector2 p)
+    {
+        const float w = 6f;
+        float d = Ring(p, new Vector2(0f, 14f), 15f, w);
+        float shoulders = Ring(p, new Vector2(0f, -36f), 28f, w);
+        if (p.y < -36f) shoulders = 999f;
+        return Mathf.Min(d, shoulders);
+    }
+
     // ------------------------------------------------------------------ helpers
 
     static float PolySdf(Vector2 p, Vector2[] v)
@@ -282,6 +427,8 @@ public static class StarGlyph
         }
         tex.SetPixels32(px);
         tex.Apply();
-        return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f);
+        var sprite = Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f);
+        sprite.name = "Glyph"; // Bauhaus.Button recolours "Glyph*" children with the label colour.
+        return sprite;
     }
 }

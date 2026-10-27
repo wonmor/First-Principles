@@ -2,29 +2,21 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // -----------------------------------------------------------------------------
-// RuntimeUiPolish — procedurally generated rounded UI sprites + shared styling
+// RuntimeUiPolish — shared styling entry points (now backed by the Bauhaus theme)
 // -----------------------------------------------------------------------------
 // No Asset Store download required. For higher-end art, see docs/optional-unity-assets.md
 // -----------------------------------------------------------------------------
 
-/// <summary>Cached rounded-rect & soft-circle sprites (white RGBA) for uGUI <see cref="Image"/> tinting.</summary>
+/// <summary>Legacy styling API used across the runtime UI; forwards to <see cref="Bauhaus"/> (flat, square, no shadows).</summary>
 public static class RuntimeUiPolish
 {
-    private const int RoundTexSize = 64;
-    private const int CornerRadius = 11;
-
-    private static Sprite _rounded9Slice;
     private static Sprite _softCircle;
 
-    public static Sprite Rounded9Slice
-    {
-        get
-        {
-            if (_rounded9Slice == null)
-                _rounded9Slice = BuildRoundedRectSprite(RoundTexSize, RoundTexSize, CornerRadius);
-            return _rounded9Slice;
-        }
-    }
+    /// <summary>
+    /// Historical name: since 1.4 (Bauhaus) this is the flat square <see cref="Bauhaus.Square"/>, so every
+    /// "rounded" panel and chip in the game renders with crisp square corners.
+    /// </summary>
+    public static Sprite Rounded9Slice => Bauhaus.Square;
 
     /// <summary>Soft-edged disk for the graph “character” (tint with <see cref="Image.color"/>).</summary>
     public static Sprite SoftCharacterBlob
@@ -37,50 +29,41 @@ public static class RuntimeUiPolish
         }
     }
 
-    // --- Palette (cool graphite + coral accents) --------------------------------
-    public static readonly Color PanelDeep = new Color(0.09f, 0.10f, 0.14f, 0.97f);
-    public static readonly Color PanelMid = new Color(0.14f, 0.16f, 0.22f, 0.98f);
-    public static readonly Color ButtonNeutral = new Color(0.20f, 0.23f, 0.30f, 0.95f);
-    public static readonly Color ButtonNeutralHover = new Color(0.27f, 0.31f, 0.42f, 1f);
-    public static readonly Color AccentTeal = new Color(0.18f, 0.42f, 0.48f, 0.98f);
-    public static readonly Color AccentCoral = new Color(0.95f, 0.42f, 0.38f, 0.98f);
-    public static readonly Color AccentJump = new Color(0.22f, 0.48f, 0.42f, 0.94f);
-    public static readonly Color TitleIvory = new Color(0.94f, 0.95f, 0.98f, 1f);
-    /// <summary>Graph player glyph fill — high luminance for readability on busy curves.</summary>
-    public static readonly Color PlayerBody = new Color(1f, 0.98f, 0.94f, 1f);
+    // --- Palette (Bauhaus: paper, ink, red / yellow / blue) ----------------------
+    // Names are kept from the old graphite theme so every call site picks up the new look.
+    public static readonly Color PanelDeep = Bauhaus.Paper;
+    public static readonly Color PanelMid = Bauhaus.Card;
+    public static readonly Color ButtonNeutral = Bauhaus.Card;
+    public static readonly Color ButtonNeutralHover = Bauhaus.Yellow;
+    public static readonly Color AccentTeal = Bauhaus.Blue;
+    public static readonly Color AccentCoral = Bauhaus.Red;
+    public static readonly Color AccentJump = Bauhaus.Blue;
+    /// <summary>Primary text colour (ink on paper).</summary>
+    public static readonly Color TitleIvory = Bauhaus.Ink;
+    /// <summary>Graph player glyph: solid ink so it reads on the paper plot and every curve colour.</summary>
+    public static readonly Color PlayerBody = Bauhaus.Ink;
 
     /// <summary>Lightens an accent (menu chip, etc.) so the math glyph pops on top.</summary>
     public static Color BrightenPlayerAccent(Color accent, float towardWhite = 0.42f) =>
         Color.Lerp(accent, Color.white, Mathf.Clamp01(towardWhite));
 
+    /// <summary>Bauhaus has no drop shadows: removes any legacy soft shadow instead of adding one.</summary>
     public static void ApplyDropShadow(RectTransform target, Vector2? distance = null, float alpha = 0.28f)
     {
-        if (target == null)
-            return;
-
-        var existing = target.gameObject.GetComponent<Shadow>();
-        if (existing == null)
-            existing = target.gameObject.AddComponent<Shadow>();
-
-        var d = distance ?? new Vector2(2f, -3f);
-        existing.effectDistance = d;
-        existing.effectColor = new Color(0f, 0f, 0f, alpha);
-        existing.useGraphicAlpha = true;
+        if (target != null)
+            Bauhaus.StripShadow(target.gameObject);
     }
 
+    /// <summary>
+    /// Flat Bauhaus button states. <paramref name="baseColor"/> picks the tone (coral = red, teal / violet = blue,
+    /// gold = yellow, dark neutrals = paper); the highlight / pressed arguments from old call sites are ignored
+    /// in favour of the shared crisp hover / press colours.
+    /// </summary>
     public static void ApplyButtonTransitions(Button button, Color baseColor, Color highlighted, Color pressed)
     {
         if (button == null)
             return;
-
-        var c = button.colors;
-        c.fadeDuration = 0.12f;
-        c.normalColor = baseColor;
-        c.highlightedColor = highlighted;
-        c.pressedColor = Color.Lerp(pressed, Color.black, 0.15f);
-        c.selectedColor = highlighted;
-        c.disabledColor = new Color(0.35f, 0.35f, 0.38f, 0.55f);
-        button.colors = c;
+        Bauhaus.Button(button, Bauhaus.ToneFor(baseColor));
     }
 
     public static void UseRoundedSliced(Image img)
@@ -88,11 +71,7 @@ public static class RuntimeUiPolish
         if (img == null)
             return;
 
-        var s = Rounded9Slice;
-        if (s == null)
-            return;
-
-        img.sprite = s;
+        img.sprite = Bauhaus.Square;
         img.type = Image.Type.Sliced;
         img.preserveAspect = false;
     }
@@ -100,49 +79,6 @@ public static class RuntimeUiPolish
     public static bool ShouldUseSlicedForSize(float pxWidth, float pxHeight)
     {
         return pxWidth >= 28f && pxHeight >= 20f;
-    }
-
-    private static Sprite BuildRoundedRectSprite(int w, int h, int r)
-    {
-        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-        tex.wrapMode = TextureWrapMode.Clamp;
-        tex.filterMode = FilterMode.Bilinear;
-
-        for (int y = 0; y < h; y++)
-        {
-            for (int x = 0; x < w; x++)
-            {
-                float a = RoundedBoxAlphaSmooth(x, y, w, h, r);
-                tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
-            }
-        }
-
-        tex.Apply();
-        var border = new Vector4(r, r, r, r);
-        return Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
-    }
-
-    private static float RoundedBoxAlphaSmooth(int x, int y, int w, int h, int r)
-    {
-        float feather = 1.15f;
-        // Interior cross
-        if (x >= r && x < w - r)
-            return 1f;
-        if (y >= r && y < h - r)
-            return 1f;
-
-        Vector2 c;
-        if (x < r && y < r)
-            c = new Vector2(r, r);
-        else if (x >= w - r && y < r)
-            c = new Vector2(w - 1 - r, r);
-        else if (x < r && y >= h - r)
-            c = new Vector2(r, h - 1 - r);
-        else
-            c = new Vector2(w - 1 - r, h - 1 - r);
-
-        float d = Vector2.Distance(new Vector2(x, y), c) - r;
-        return Mathf.Clamp01(0.5f - d / feather);
     }
 
     private static Sprite BuildRadialFalloffSprite(int size)

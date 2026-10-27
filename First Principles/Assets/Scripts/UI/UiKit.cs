@@ -5,15 +5,23 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Small builders shared by the runtime overlays (level complete, achievements, paywall, daily card)
-/// so they match <see cref="RuntimeUiPolish"/> styling and play the UI click sound.
+/// so they share the <see cref="Bauhaus"/> look (paper sheets, black rules, flat primary buttons)
+/// and play the UI click sound.
 /// </summary>
 public static class UiKit
 {
-    public static readonly Color Gold = new Color(1f, 0.82f, 0.36f, 1f);
-    public static readonly Color GoldDim = new Color(0.55f, 0.58f, 0.68f, 0.55f);
-    public static readonly Color Mint = new Color(0.55f, 0.88f, 0.8f, 1f);
-    public static readonly Color Muted = new Color(0.72f, 0.77f, 0.88f, 0.95f);
-    public static readonly Color PlusViolet = new Color(0.46f, 0.38f, 0.92f, 0.98f);
+    /// <summary>Earned-star fill (always drawn with an ink rim, see <see cref="StarGlyph.SetStar"/>).</summary>
+    public static readonly Color Gold = Bauhaus.Yellow;
+    /// <summary>Unearned star / locked glyph.</summary>
+    public static readonly Color GoldDim = Bauhaus.RuleStrong;
+    /// <summary>Positive / informational accent (was mint): Bauhaus blue.</summary>
+    public static readonly Color Mint = Bauhaus.Blue;
+    /// <summary>Secondary text on paper.</summary>
+    public static readonly Color Muted = Bauhaus.InkSoft;
+    /// <summary>Plus subscription accent (was violet): Bauhaus blue.</summary>
+    public static readonly Color PlusViolet = Bauhaus.Blue;
+    /// <summary>Highlight text / badges (was gold text, unreadable on paper): Bauhaus red.</summary>
+    public static readonly Color Accent = Bauhaus.Red;
 
     public static RectTransform Rect(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax)
     {
@@ -32,7 +40,8 @@ public static class UiKit
         var rt = Rect(name, canvas, Vector2.zero, Vector2.one);
         rt.SetAsLastSibling();
         var dim = rt.gameObject.AddComponent<Image>();
-        dim.color = new Color(0.04f, 0.05f, 0.1f, alpha);
+        // Flat ink scrim (alpha kept proportional to the caller's old dim strength).
+        dim.color = Bauhaus.WithAlpha(Bauhaus.Scrim, Mathf.Clamp01(alpha * 0.72f));
         dim.raycastTarget = true;
         if (onTapOutside != null)
         {
@@ -48,15 +57,27 @@ public static class UiKit
     {
         var rt = Rect("Panel", parent, anchorMin, anchorMax);
         var img = rt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = color ?? RuntimeUiPolish.PanelMid;
+        Bauhaus.Panel(img, color ?? Bauhaus.Card);
         img.raycastTarget = true;
         // Swallow taps so they don't reach the dim layer.
         var swallow = rt.gameObject.AddComponent<Button>();
         swallow.targetGraphic = img;
         swallow.transition = Selectable.Transition.None;
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(3f, -5f), 0.34f);
         return rt;
+    }
+
+    /// <summary>Solid colour bar (Bauhaus header band / rule) across the top of a sheet.</summary>
+    public static RectTransform Band(RectTransform panel, Color color, float height, float inset = 0f)
+    {
+        var band = Rect("Band", panel, new Vector2(0f, 1f), new Vector2(1f, 1f));
+        band.pivot = new Vector2(0.5f, 1f);
+        band.sizeDelta = new Vector2(-inset * 2f, height);
+        band.anchoredPosition = new Vector2(0f, -inset);
+        var img = band.gameObject.AddComponent<Image>();
+        img.sprite = Bauhaus.Square;
+        img.color = color;
+        img.raycastTarget = false;
+        return band;
     }
 
     public static TextMeshProUGUI Text(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
@@ -82,19 +103,22 @@ public static class UiKit
         return tmp;
     }
 
+    /// <param name="bg">Button colour; mapped to a Bauhaus tone (red / blue / yellow / ink / paper).</param>
+    /// <param name="textColor">Ignored since 1.4: labels always take the tone's contrast colour.</param>
     public static Button Button(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
         string label, Color bg, Action onClick, float fontSize = 26f, Color? textColor = null)
+        => Button(parent, name, anchorMin, anchorMax, label, Bauhaus.ToneFor(bg), onClick, fontSize);
+
+    public static Button Button(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
+        string label, Bauhaus.Tone tone, Action onClick, float fontSize = 26f)
     {
         var rt = Rect(name, parent, anchorMin, anchorMax);
         var img = rt.gameObject.AddComponent<Image>();
-        RuntimeUiPolish.UseRoundedSliced(img);
-        img.color = bg;
         var btn = rt.gameObject.AddComponent<Button>();
         btn.targetGraphic = img;
-        RuntimeUiPolish.ApplyButtonTransitions(btn, bg, Color.Lerp(bg, Color.white, 0.18f), Color.Lerp(bg, Color.black, 0.22f));
-        RuntimeUiPolish.ApplyDropShadow(rt, new Vector2(2f, -3f), 0.26f);
         Text(rt, "Text", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.92f), label,
-            UiTypography.Scale(fontSize), textColor ?? RuntimeUiPolish.TitleIvory, FontStyles.Bold);
+            UiTypography.Scale(fontSize), Bauhaus.OnFill(tone), FontStyles.Bold);
+        Bauhaus.Button(btn, tone);
         btn.onClick.AddListener(() =>
         {
             FeelDirector.Play(SfxId.Click, 0.6f);
@@ -103,7 +127,7 @@ public static class UiKit
         return btn;
     }
 
-    /// <summary>Row of three stars (earned filled gold, unearned outline).</summary>
+    /// <summary>Row of three stars (earned: yellow with an ink rim; unearned: grey outline).</summary>
     public static Image[] Stars(Transform parent, Vector2 anchorMin, Vector2 anchorMax, int earned, float size)
     {
         var row = Rect("Stars", parent, anchorMin, anchorMax);
@@ -118,7 +142,7 @@ public static class UiKit
         for (int i = 0; i < imgs.Length; i++)
         {
             bool on = i < earned;
-            imgs[i] = StarGlyph.Add(row, "Star" + i, on ? StarGlyph.Filled : StarGlyph.Outline, on ? Gold : GoldDim, new Vector2(size, size));
+            imgs[i] = StarGlyph.AddStar(row, "Star" + i, on, new Vector2(size, size));
         }
         return imgs;
     }

@@ -94,6 +94,8 @@ public static class LockGlyph
         }
 
         tex.Apply();
-        return Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f);
+        var sprite = Sprite.Create(tex, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), 100f);
+        sprite.name = "Glyph"; // Bauhaus.Button recolours "Glyph*" children with the label colour.
+        return sprite;
     }
 }
