@@ -24,8 +24,10 @@ public class QaShots : MonoBehaviour
     {
         get
         {
+#if !FP_QA_SHOTS
             if (!Debug.isDebugBuild && !Application.isEditor)
                 return false;
+#endif
             // Desktop: -fpShots <dir>. iOS Simulator: SIMCTL_CHILD_FP_SHOTS=1 xcrun simctl launch …
             return Array.IndexOf(Environment.GetCommandLineArgs(), "-fpShots") >= 0
                    || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("FP_SHOTS"));
@@ -71,6 +73,13 @@ public class QaShots : MonoBehaviour
         }
         Entitlements.DebugOverride = false; // show the free tier (locks, paywall)
         Entitlements.InstallQaStore(new QaPriceStore());
+        if (Array.IndexOf(Environment.GetCommandLineArgs(), "-fpStore") >= 0)
+        {
+            yield return StoreTour();
+            Debug.Log("QaShots: done");
+            Application.Quit();
+            yield break;
+        }
 
         yield return new WaitForSecondsRealtime(4f);
         yield return Shot("menu");
@@ -275,6 +284,216 @@ public class QaShots : MonoBehaviour
         Application.Quit();
     }
 
+    // ------------------------------------------------------------------ store screenshots
+    // -fpStore: the App Store set, rendered at the window size (no upscaling): menu, world map,
+    // achievements, gameplay after the intro and story banner have gone, hint, level complete,
+    // graphing calculator. Achievements are pre-seeded so no unlock toast covers a shot.
+    //   -fpStoreLevels "2,11"   gameplay levels (first one also runs the daily / hint / complete shots)
+    //   -fpStoreCalc "expr;expr" calculator expressions (each shot plain and with f' + area)
+
+    IEnumerator StoreTour()
+    {
+        var d = ProgressStore.Data;
+        foreach (var id in AchievementCatalog.Earned(ProgressStore.Snapshot(), ProgressStore.PlayableLevelCount))
+            if (!d.achievements.Contains(id))
+                d.achievements.Add(id);
+        foreach (var id in new[] { "FP_HINT_1", "FP_DAILY_1" })
+            if (!d.achievements.Contains(id))
+                d.achievements.Add(id);
+        for (int i = 0; i < 14; i++)
+            if (d.stars[i] > 0)
+                d.bestSeconds[i] = 18.4f + i * 1.7f;
+        foreach (var m in new[] { "f0", "t1", "f3" }) // a few challenge medals (flawless / time trial)
+            if (!d.medals.Contains(m))
+                d.medals.Add(m);
+        ProgressStore.MapTourDone = true;
+        ProgressStore.LevelTourDone = true;
+        ProgressStore.Save();
+
+        yield return new WaitForSecondsRealtime(4f);
+        yield return Shot("menu");
+
+        SceneManager.LoadScene("LevelSelect");
+        yield return new WaitForSecondsRealtime(3.5f);
+        yield return Shot("map");
+        var canvas = FindAnyObjectByType<Canvas>();
+        AchievementsOverlay.Open(canvas.transform);
+        yield return new WaitForSecondsRealtime(1.2f);
+        yield return Shot("achievements");
+        AchievementsOverlay.Close();
+        yield return new WaitForSecondsRealtime(0.6f);
+        MapLevelSheet.Open(canvas.transform, 6, ChallengeKind.None, "core", Bauhaus.Blue, null, null, null, null);
+        yield return new WaitForSecondsRealtime(1f);
+        yield return Shot("level-sheet");
+        MapLevelSheet.Close();
+
+        string[] levels = (Arg("-fpStoreLevels") ?? "2").Split(',');
+        for (int li = 0; li < levels.Length; li++)
+        {
+            if (!int.TryParse(levels[li], out int level))
+                continue;
+            bool first = li == 0;
+            if (first)
+            {
+                var spec = ProgressStore.TodaysChallenge();
+                DailyChallengeSession.Begin(new DailyChallengeSpec(spec.DateKey, level, spec.Goal));
+            }
+            else
+                DailyChallengeSession.End();
+            yield return PlayToMidLevel(level);
+            if (first)
+            {
+                // Deterministic mid-level poses: stand on a platform part-way along, then a jump off it.
+                var pc = FindAnyObjectByType<LevelManager>()?.Player;
+                string[] fr = (Arg("-fpStorePose") ?? "0.3,0.5").Split(',');
+                for (int pi = 0; pi < fr.Length && pc != null && pc.World != null; pi++)
+                {
+                    float f = float.Parse(fr[pi], System.Globalization.CultureInfo.InvariantCulture);
+                    float targetX = pc.World.gridSize.x * f;
+                    GridRect best = default;
+                    float bestD = float.MaxValue;
+                    foreach (var pl in pc.World.platforms)
+                    {
+                        float dx = Mathf.Abs((pl.xMin + pl.xMax) * 0.5f - targetX);
+                        if (pl.xMax - pl.xMin >= 0.6f && dx < bestD)
+                        {
+                            bestD = dx;
+                            best = pl;
+                        }
+                    }
+                    if (bestD == float.MaxValue)
+                        break;
+                    pc.TeleportTo((best.xMin + best.xMax) * 0.5f, best.yMax);
+                    yield return new WaitForSecondsRealtime(0.7f);
+                    yield return Shot($"pose-L{level}-{pi}-stand");
+                    MobileInputBridge.QueueJump();
+                    yield return new WaitForSecondsRealtime(0.22f);
+                    yield return Shot($"pose-L{level}-{pi}-jump");
+                    yield return new WaitForSecondsRealtime(1.2f);
+                }
+            }
+            float[] at = first ? new float[0] : new[] { 0.9f, 1.6f, 2.3f, 3.0f };
+            float t = 0f, jumpAt = 0.3f;
+            int k = 0;
+            while (k < at.Length)
+            {
+                if (MobileHoldAxis.Axis == 0f)
+                    MobileHoldAxis.PressRight();
+                if (t >= jumpAt)
+                {
+                    MobileInputBridge.QueueJump();
+                    jumpAt = t + 0.55f;
+                }
+                if (t >= at[k])
+                {
+                    yield return Shot($"gameplay-L{level}-{(char)('a' + k)}");
+                    k++;
+                    t += 0.4f;
+                    continue;
+                }
+                t += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            MobileHoldAxis.Clear();
+            if (!first)
+                continue;
+
+            yield return new WaitForSecondsRealtime(0.5f);
+            GameObject.Find("HintButton")?.GetComponent<Button>()?.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(1.0f);
+            yield return Shot($"hint-L{level}");
+            yield return new WaitForSecondsRealtime(3f);
+
+            canvas = FindAnyObjectByType<Canvas>();
+            var r = new RunResult(level, 95, 0, 38.6f);
+            var o = new ProgressStore.RecordOutcome { Stars = 3, PreviousStars = 2, FirstClear = false, DailyCompletedNow = true, DailyStreak = 5 };
+            LevelCompleteOverlay.Open(canvas.transform, r, o, DailyChallengeSession.Active, null, null, null);
+            yield return new WaitForSecondsRealtime(2.4f);
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null); // no keyboard-focus tint
+            yield return Shot($"level-complete-L{level}");
+            LevelCompleteOverlay.Close();
+            DailyChallengeSession.End();
+        }
+
+        string[] exprs = (Arg("-fpStoreCalc") ?? "sin(x)*x/2").Split(';');
+        for (int ei = 0; ei < exprs.Length; ei++)
+        {
+            GraphCalculatorSession.RequestEnterFromMenu();
+            SceneManager.LoadScene("Game");
+            yield return new WaitForSecondsRealtime(3f);
+            var input = GameObject.Find(GraphCalculatorEquationPanel.EquationRootObjectName)?.GetComponentInChildren<TMPro.TMP_InputField>();
+            if (input != null)
+            {
+                input.text = exprs[ei];
+                input.onSubmit.Invoke(input.text);
+                input.DeactivateInputField();
+            }
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+            yield return new WaitForSecondsRealtime(2.6f); // graph reveal is 2.1 s
+            yield return Shot($"calc{ei}");
+            GameObject.Find("GraphCalcDerivButton")?.GetComponent<Button>()?.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Shot($"calc{ei}-deriv");
+            GameObject.Find("GraphCalcIntegralButton")?.GetComponent<Button>()?.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(1.5f);
+            yield return Shot($"calc{ei}-analysis");
+        }
+
+        // -fpCalcTools: check Trans / Scale (short tap cycles the parameter, double tap nudges +, Scale tap zooms in).
+        if (Array.IndexOf(Environment.GetCommandLineArgs(), "-fpCalcTools") >= 0)
+        {
+            var trans = GameObject.Find("TransButton")?.GetComponent<UiShortLongPress>();
+            var scale = GameObject.Find("ScaleButton")?.GetComponent<UiShortLongPress>();
+            var fp = FindAnyObjectByType<FunctionPlotter>();
+            Debug.Log($"QaShots: calc tools trans={(trans != null)} scale={(scale != null)}");
+            if (trans != null && scale != null && fp != null)
+            {
+                Debug.Log($"QaShots: before A={fp.transA} k={fp.transK} x=[{fp.xStart},{fp.xEnd}]");
+                trans.onShortRelease?.Invoke(); // A -> k
+                yield return new WaitForSecondsRealtime(0.6f);
+                yield return Shot("calc-tools-trans-k");
+                trans.onShortRelease?.Invoke(); // k -> C
+                trans.onShortRelease?.Invoke(); // quick second tap: C + step
+                trans.onLongRelease?.Invoke();  // hold: C - step
+                trans.onLongRelease?.Invoke();  // hold: C - step
+                scale.onShortRelease?.Invoke(); // zoom in
+                yield return new WaitForSecondsRealtime(2.6f); // graph reveal is 2.1 s
+                Debug.Log($"QaShots: after A={fp.transA} k={fp.transK} C={fp.transC} x=[{fp.xStart},{fp.xEnd}]");
+                yield return Shot("calc-tools");
+                scale.onLongRelease?.Invoke(); // zoom back out
+                yield return new WaitForSecondsRealtime(2.6f);
+                Debug.Log($"QaShots: zoom out x=[{fp.xStart},{fp.xEnd}]");
+                yield return Shot("calc-tools-zoom-out");
+            }
+        }
+    }
+
+    /// <summary>Loads a level, skips the story card and waits until the story banner has faded.</summary>
+    IEnumerator PlayToMidLevel(int level)
+    {
+        // A hit-stop cut short by the previous scene change can leave timeScale low; reset it.
+        Time.timeScale = 1f;
+        LevelSelection.SetSelectedLevel(level);
+        SceneManager.LoadScene("Game");
+        yield return new WaitForSecondsRealtime(1.5f);
+        Time.timeScale = 1f;
+        var lm = FindAnyObjectByType<LevelManager>();
+        var flow = typeof(LevelManager).GetField("levelFlowRoutine", BindingFlags.Instance | BindingFlags.NonPublic);
+        for (float w = 0f; w < 20f; w += 0.2f)
+        {
+            var intro = GameObject.Find("StageIntroOverlay");
+            if (intro != null)
+                intro.GetComponentInChildren<Button>()?.onClick.Invoke();
+            if (w > 1f && (lm == null || flow == null || flow.GetValue(lm) == null))
+            {
+                Debug.Log($"QaShots: level {level} ready after {w:0.0}s (lm {(lm != null)}, timeScale {Time.timeScale})");
+                break;
+            }
+            yield return new WaitForSecondsRealtime(0.2f);
+        }
+        yield return new WaitForSecondsRealtime(0.5f);
+    }
+
     /// <summary>Gameplay clip for the report: autopilot run, frames written as PNGs (stitched into a GIF outside).</summary>
     IEnumerator Record(string dir, int level)
     {
@@ -315,6 +534,16 @@ public class QaShots : MonoBehaviour
 
     IEnumerator Shot(string name)
     {
+        if (Array.IndexOf(Environment.GetCommandLineArgs(), "-fpStore") >= 0)
+        {
+            // Store set: no keyboard / controller focus tint and no hover from wherever the desktop cursor
+            // happens to sit over the window (disabling the input module sends pointer-exit to everything).
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+            foreach (var es in FindObjectsByType<UnityEngine.EventSystems.EventSystem>())
+                es.enabled = false;
+            yield return null;
+            yield return null;
+        }
         yield return new WaitForEndOfFrame();
         string file = $"{++_n:00}-{name}.png";
         string path = Path.Combine(_dir, file);
@@ -342,6 +571,13 @@ public class QaShots : MonoBehaviour
         d.dailiesCompleted = 9;
         d.dailyLastKey = ProgressRules.DateKey(DateTime.Now.AddDays(-1));
         d.onboardingDone = true;
+        if (Array.IndexOf(Environment.GetCommandLineArgs(), "-fpStore") >= 0)
+        {
+            // Store set: already-earned achievements, so no unlock toast covers the menu.
+            foreach (var id in AchievementCatalog.Earned(ProgressStore.Snapshot(), ProgressStore.PlayableLevelCount))
+                if (!d.achievements.Contains(id))
+                    d.achievements.Add(id);
+        }
         ProgressStore.Save();
         ProgressStore.CheckAchievements();
     }

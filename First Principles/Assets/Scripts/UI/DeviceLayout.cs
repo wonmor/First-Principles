@@ -29,8 +29,13 @@ public static class DeviceLayout
             if (_qaDevice >= 0)
                 return _qaDevice;
             _qaDevice = 0;
+#if FP_QA_SHOTS
+            if (Application.isEditor)
+                return _qaDevice;
+#else
             if (!Debug.isDebugBuild || Application.isEditor)
                 return _qaDevice;
+#endif
             var a = System.Environment.GetCommandLineArgs();
             int i = System.Array.IndexOf(a, "-fpDevice");
             if (i >= 0 && i + 1 < a.Length)
@@ -44,6 +49,12 @@ public static class DeviceLayout
     {
         get
         {
+            if (QaDevice == 2)
+            {
+                // iPad Pro 13" landscape: 20 pt home indicator (1376 x 1032 pt).
+                float hb = Screen.height * (20f / 1032f);
+                return new Rect(0f, hb, Screen.width, Screen.height - hb);
+            }
             if (QaDevice != 1)
                 return Screen.safeArea;
             // iPhone 16 Pro Max landscape: 62 pt each side, 21 pt home indicator (956 x 440 pt).
