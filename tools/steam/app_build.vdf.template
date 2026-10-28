@@ -1,7 +1,7 @@
 "AppBuild"
 {
 	"AppID" "__APPID__"
-	"Desc" "First Principles __VERSION__ (world map, challenges, course layer)"
+	"Desc" "First Principles __VERSION__ (Bauhaus redesign, derivative graph and level fixes)"
 	"BuildOutput" "__OUTPUT__"
 	"ContentRoot" "__CONTENT__"
 	"SetLive" "__BRANCH__"
