@@ -50,10 +50,10 @@ public class CourseExtras : MonoBehaviour
         public Vector2 Pos;
     }
 
-    const float TokenSize = 0.95f;
-    const float SentrySize = 0.72f;
+    const float TokenSize = CourseLayout.TokenSize;
+    const float SentrySize = CourseLayout.SentrySize;
     public const int TokenPoints = 5;
-    public const float SpringBoost = 1.32f;
+    public const float SpringBoost = CourseLayout.SpringBoost;
 
     LevelManager _lm;
     PlayerControllerUI2D _player;
@@ -122,97 +122,27 @@ public class CourseExtras : MonoBehaviour
         _root.offsetMin = _root.offsetMax = Vector2.zero;
         _root.SetAsLastSibling();
 
-        var plats = new List<GridRect>(world.platforms);
-        plats.Sort((a, b) => a.xMin.CompareTo(b.xMin));
-        float yTopLimit = world.hasPlayBounds ? world.playBounds.YMax - 0.7f : world.gridSize.y - 0.7f;
-        float xMinLimit = world.spawnXGrid + 1.5f;
-        float xMaxLimit = world.finish.xMin - 0.8f;
-
-        // Gaps (pits) and big steps along the main line.
-        var gaps = new List<int>();
-        var springAt = new HashSet<int>();
-        for (int i = 0; i + 1 < plats.Count; i++)
+        // Placement is engine-free (CourseLayout) so the EditMode reachability audit checks the same spots.
+        var layout = CourseLayout.Compute(world, levelIndex);
+        foreach (var sp in layout.Springs)
+            AddSpring(sp);
+        foreach (var tk in layout.Tokens)
+            AddToken(tk.Pos, tk.Order);
+        foreach (var se in layout.Sentries)
+            AddSentry(se.Center, se.Amp, se.Speed, se.Phase);
+        if (layout.HasCheckpoint)
         {
-            var a = plats[i];
-            var b = plats[i + 1];
-            float gapW = b.xMin - a.xMax;
-            float step = b.yMax - a.yMax;
-            if (a.xMax < xMinLimit || b.xMin > xMaxLimit)
-                continue;
-            if (gapW > 0.5f)
-                gaps.Add(i);
-            bool big = gapW > 3.2f || step > 2.4f;
-            if (levelIndex >= 1 && big && springAt.Count < 3 && (springAt.Count == 0 || i - Last(springAt) > 3))
-                springAt.Add(i);
-        }
-
-        foreach (int i in springAt)
-            AddSpring(plats[i]);
-
-        // Tokens: evenly spread over the gaps; first one easy, the rest on the high route.
-        int want = levelIndex == 0 ? 1 : Mathf.Clamp(2 + levelIndex / 12, 2, 5);
-        want = Mathf.Min(want, gaps.Count);
-        var used = new HashSet<int>();
-        for (int k = 0; k < want; k++)
-        {
-            int gi = gaps[Mathf.Clamp(Mathf.RoundToInt((k + 0.5f) * gaps.Count / want - 0.5f), 0, gaps.Count - 1)];
-            if (!used.Add(gi))
-                continue;
-            var a = plats[gi];
-            var b = plats[gi + 1];
-            float top = Mathf.Max(a.yMax, b.yMax);
-            bool high = k > 0;
-            float y = top + (high ? 5.2f : 2.4f);
-            if (y > yTopLimit)
-                y = Mathf.Max(top + 2.2f, yTopLimit);
-            var pos = new Vector2((a.xMax + b.xMin) * 0.5f, y);
-            AddToken(pos, k);
-            // Sentries guard every other high token from the 5th level on (not over spring gaps).
-            if (high && levelIndex >= 4 && k % 2 == 1 && !springAt.Contains(gi) && y + 1.3f < yTopLimit + 0.6f)
-                AddSentry(new Vector2(pos.x, y + 1.3f), 1.3f, 1.5f + 0.02f * levelIndex, k);
-        }
-
-        // Checkpoint halfway on longer levels.
-        float span = xMaxLimit - world.spawnXGrid;
-        if (span > 22f)
-        {
-            float targetX = world.spawnXGrid + span * 0.5f;
-            int best = -1;
-            float bestD = float.MaxValue;
-            for (int i = 1; i < plats.Count - 1; i++)
-            {
-                if (springAt.Contains(i)) continue;
-                var p = plats[i];
-                float cx = (p.xMin + p.xMax) * 0.5f;
-                float d = Mathf.Abs(cx - targetX);
-                if (d < bestD && p.yMax + 2f < yTopLimit + 0.7f)
-                {
-                    bestD = d;
-                    best = i;
-                }
-            }
-            if (best >= 0)
-            {
-                var p = plats[best];
-                _hasCheckpoint = true;
-                _checkpoint = new Vector2((p.xMin + p.xMax) * 0.5f, p.yMax);
-                AddFlag(p);
-                if (hadCheckpoint)
-                    RaiseFlag(false);
-            }
+            _hasCheckpoint = true;
+            _checkpoint = layout.Checkpoint;
+            AddFlag(layout.CheckpointPlatform);
+            if (hadCheckpoint)
+                RaiseFlag(false);
         }
 
         _flow = 0;
         TokensTaken = 0;
         EnsureHud();
         RefreshHud();
-    }
-
-    static int Last(HashSet<int> set)
-    {
-        int m = int.MinValue;
-        foreach (var v in set) if (v > m) m = v;
-        return m;
     }
 
     void Clear()
@@ -263,12 +193,11 @@ public class CourseExtras : MonoBehaviour
         _tokens.Add(new Token { Pos = c, Rt = rt, Glyph = t, Phase = k * 1.3f });
     }
 
-    void AddSpring(GridRect a)
+    void AddSpring(CourseLayout.SpringSpot spot)
     {
-        float w = Mathf.Min(1f, a.xMax - a.xMin);
-        var pad = new GridRect(a.xMax - w, a.xMax, a.yMax, a.yMax);
+        var pad = spot.Pad;
         // The coil sits in the top of the take-off slab and pokes just above it.
-        var rt = Place("Spring", new GridRect(a.xMax - w, a.xMax, a.yMax - 0.42f, a.yMax + 0.14f));
+        var rt = Place("Spring", spot.Visual);
         var img = rt.gameObject.AddComponent<Image>();
         img.sprite = StarGlyph.Spring;
         img.color = Bauhaus.Blue;
@@ -277,7 +206,7 @@ public class CourseExtras : MonoBehaviour
         _springs.Add(new Spring { Pad = pad, Rt = rt, Img = img });
     }
 
-    void AddSentry(Vector2 center, float amp, float speed, int k)
+    void AddSentry(Vector2 center, float amp, float speed, float phase)
     {
         float h = SentrySize * 0.5f;
         var rt = Place("Sentry", new GridRect(center.x - h, center.x + h, center.y - h, center.y + h));
@@ -286,7 +215,7 @@ public class CourseExtras : MonoBehaviour
         img.color = Bauhaus.Red;
         img.preserveAspect = true;
         img.raycastTarget = false;
-        _sentries.Add(new Sentry { Center = center, Amp = amp, Speed = speed, Phase = k * 0.9f, Rt = rt, Layout = rt.GetComponent<GraphObstacleUILayout>(), Pos = center });
+        _sentries.Add(new Sentry { Center = center, Amp = amp, Speed = speed, Phase = phase, Rt = rt, Layout = rt.GetComponent<GraphObstacleUILayout>(), Pos = center });
     }
 
     void AddFlag(GridRect p)
@@ -332,15 +261,14 @@ public class CourseExtras : MonoBehaviour
         {
             if (tk.Taken || tk.Rt == null) continue;
             tk.Glyph.rectTransform.localScale = Vector3.one * (1f + 0.1f * Mathf.Sin(t * 4f + tk.Phase));
-            if (Mathf.Abs(p.x - tk.Pos.x) < half.x + TokenSize * 0.4f && Mathf.Abs(p.y - tk.Pos.y) < half.y + TokenSize * 0.4f)
+            if (CourseLayout.TouchesToken(tk.Pos, p, half))
                 Collect(tk);
         }
 
         // Springs: boost while standing on the pad.
         foreach (var s in _springs)
         {
-            bool on = _player.Grounded && p.x + half.x * 0.6f > s.Pad.xMin && p.x - half.x * 0.6f < s.Pad.xMax
-                      && Mathf.Abs((p.y - half.y) - s.Pad.yMin) < 0.2f;
+            bool on = CourseLayout.IsOnSpring(new CourseLayout.SpringSpot { Pad = s.Pad }, _player.Grounded, p, half);
             if (on)
                 _player.SetGroundJumpBoost(SpringBoost);
             s.Kick = Mathf.MoveTowards(s.Kick, 0f, Time.deltaTime * 4f);
@@ -368,7 +296,7 @@ public class CourseExtras : MonoBehaviour
         }
 
         // Checkpoint.
-        if (_hasCheckpoint && !_checkpointReached && _player.Grounded && p.x >= _checkpoint.x - 0.2f)
+        if (_hasCheckpoint && !_checkpointReached && _player.Grounded && p.x >= _checkpoint.x - CourseLayout.CheckpointTriggerLead)
             RaiseFlag(true);
 
         // Flow combo decays after a beat on the ground.

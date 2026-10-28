@@ -33,29 +33,43 @@ public readonly struct GameplayPlayBounds
         if (cartesianPlane == null || gridSize.x < 1 || gridSize.y < 1)
             return FullGrid(gridSize);
 
-        float w = Mathf.Max(1f, cartesianPlane.rect.width);
-        float h = Mathf.Max(1f, cartesianPlane.rect.height);
+        return Compute(cartesianPlane.rect.width, cartesianPlane.rect.height, gridSize,
+            DeviceLayout.IsTabletLike(),
+            DeviceLayout.PreferOnScreenGameControls,
+            DeviceLayout.GameplayUsesFullScreenTouchZones,
+            DeviceLayout.TouchControlBarHeight);
+    }
+
+    /// <summary>Engine-free core of <see cref="Compute(RectTransform, Vector2Int)"/> (plane size in canvas pixels).</summary>
+    public static GameplayPlayBounds Compute(float planeWidth, float planeHeight, Vector2Int gridSize,
+        bool tabletLike, bool onScreenControls, bool fullScreenTouchZones, float touchControlBarHeight)
+    {
+        if (gridSize.x < 1 || gridSize.y < 1)
+            return FullGrid(gridSize);
+
+        float w = Mathf.Max(1f, planeWidth);
+        float h = Mathf.Max(1f, planeHeight);
         float unitX = w / gridSize.x;
         float unitY = h / gridSize.y;
 
-        float hPad = DeviceLayout.IsTabletLike()
+        float hPad = tabletLike
             ? Mathf.Max(16f, w * 0.022f)
             : Mathf.Max(10f, w * 0.018f);
 
         // Narrow portrait: reserve a bit more side margin so the playfield matches the visibly inset graph.
         float aspectTall = h / Mathf.Max(1f, w);
-        if (!DeviceLayout.IsTabletLike() && aspectTall > 1.45f)
+        if (!tabletLike && aspectTall > 1.45f)
             hPad = Mathf.Max(hPad, w * 0.026f);
 
         float topPad = Mathf.Max(44f, h * 0.065f);
 
         float bottomPad = Mathf.Max(12f, h * 0.022f);
-        if (DeviceLayout.PreferOnScreenGameControls)
+        if (onScreenControls)
         {
-            if (DeviceLayout.GameplayUsesFullScreenTouchZones)
+            if (fullScreenTouchZones)
                 bottomPad = Mathf.Max(bottomPad, 28f);
             else
-                bottomPad = Mathf.Max(bottomPad, DeviceLayout.TouchControlBarHeight + 36f);
+                bottomPad = Mathf.Max(bottomPad, touchControlBarHeight + 36f);
         }
 
         float xMin = hPad / unitX;

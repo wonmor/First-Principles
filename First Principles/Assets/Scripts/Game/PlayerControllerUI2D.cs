@@ -8,8 +8,9 @@ using UnityEngine.UI;
 // PlayerControllerUI2D — UI RectTransform “character” in graph grid space
 // =============================================================================
 // Simulation runs in abstract grid units (same as GraphWorld / GridRect). Each frame:
-//   • Reads horizontal intent (keys → axis → MobileInputBridge touch cluster).
-//   • Applies gravity, resolves AABB vs platforms, hazards, fall death Y, finish band.
+//   - Reads horizontal intent (keys → axis → MobileInputBridge touch cluster) and the f′ band.
+//   - Runs PlayerMotor.Step (gravity, jumps, AABB vs platforms, hazards, fall death Y, finish band),
+//     the same step the EditMode reachability audit simulates.
 // Visual position maps grid → pixels via unitWidth/Height from LevelManager.
 // =============================================================================
 
@@ -297,116 +298,47 @@ public class PlayerControllerUI2D : MonoBehaviour
         if (Mathf.Approximately(inputX, 0f))
             inputX = MobileInputBridge.TouchHorizontal;
 
-        // Acceleration curve toward the target speed (top speed unchanged, so level tuning holds).
-        float target = inputX * moveSpeedGridPerSec;
-        float rate = !grounded ? airAccel
-            : Mathf.Abs(target) < 0.01f ? groundDecel
-            : Mathf.Sign(target) != Mathf.Sign(velGrid.x) && Mathf.Abs(velGrid.x) > 0.1f ? groundDecel * 1.4f
-            : groundAccel;
-        velGrid.x = Mathf.MoveTowards(velGrid.x, target, rate * dt);
-
-        if (grounded)
-        {
-            derivativeAirJumpConsumedThisBand = false;
-            coyoteTimer = coyoteSeconds;
-        }
-        else
-            coyoteTimer -= dt;
-
+        // f′ band (highlight, graze feedback) is read before the jump decision, as the air jump needs it.
         UpdateDerivativeTouchAndHighlight(dt);
 
-        bool jumpPressed = ReadJumpPressed();
-        if (!jumpPressed)
+        bool keyJump = ReadJumpPressed();
+        var input = new PlayerMotorInput
         {
-            jumpPressed = MobileInputBridge.ConsumeJump();
-            if (jumpPressed)
-                touchJumpHeld = true; // taps have no duration: full arc
+            MoveX = inputX,
+            KeyJumpPressed = keyJump,
+            TouchJumpPressed = !keyJump && MobileInputBridge.ConsumeJump(),
+            JumpHeld = ReadJumpHeld(),
+            TouchingDerivative = touchingDerivativeNow,
+        };
+
+        // One shared physics step (PlayerMotor): the EditMode reachability audit runs this same code.
+        var tuning = Tuning;
+        var st = PackMotorState();
+        var step = PlayerMotor.Step(ref st, input, tuning, world, deathMinYGrid, dt);
+        UnpackMotorState(st);
+
+        if (step.Has(PlayerMotorEvents.GroundJump))
+        {
+            stretchTimer = StretchSeconds;
+            GameFeel.RaiseJump(false);
+            GroundJumped?.Invoke(step.GroundJumpBoostUsed);
         }
-        else
-            touchJumpHeld = false;
-        if (jumpPressed)
-            jumpBufferTimer = jumpBufferSeconds;
-        else
-            jumpBufferTimer -= dt;
-
-        if (jumpBufferTimer > 0f)
+        if (step.Has(PlayerMotorEvents.AirJump))
         {
-            if (grounded || coyoteTimer > 0f)
-            {
-                float jv = jumpVelocityGridPerSec * groundJumpBoost;
-                if (strongFirstGroundJumpPending)
-                {
-                    jv *= 1.12f;
-                    strongFirstGroundJumpPending = false;
-                }
-                velGrid.y = jv;
-                grounded = false;
-                coyoteTimer = 0f;
-                jumpBufferTimer = 0f;
-                jumpCutAvailable = true;
-                stretchTimer = StretchSeconds;
-                GameFeel.RaiseJump(false);
-                GroundJumped?.Invoke(groundJumpBoost);
-            }
-            else if (jumpPressed && CanUseDerivativeAirJump())
-            {
-                velGrid.y = jumpVelocityGridPerSec * doubleJumpVelocityMultiplier;
-                derivativeAirJumpConsumedThisBand = true;
-                jumpBufferTimer = 0f;
-                jumpCutAvailable = true;
-                stretchTimer = StretchSeconds;
-                GameFeel.RaiseJump(true);
-                AirJumped?.Invoke();
-            }
+            stretchTimer = StretchSeconds;
+            GameFeel.RaiseJump(true);
+            AirJumped?.Invoke();
         }
-        groundJumpBoost = 1f;
-
-        // Variable jump height: let go early for a short hop (holding keeps the full tuned arc).
-        if (grounded && velGrid.y <= 0f)
-            touchJumpHeld = false;
-        bool held = touchJumpHeld || ReadJumpHeld();
-        if (jumpCutAvailable && !held && velGrid.y > 0f)
+        if (step.Has(PlayerMotorEvents.Landed))
         {
-            velGrid.y *= jumpCutMultiplier;
-            jumpCutAvailable = false;
+            LandedWithSpeed?.Invoke(step.LandingImpact);
+            TriggerLandingSquash(step.LandingImpact);
         }
-        if (velGrid.y <= 0f)
-            jumpCutAvailable = false;
 
-        // Gravity (a little hang time at the apex while jump is held).
-        float g = gravityGridPerSec2;
-        if (held && Mathf.Abs(velGrid.y) < apexSpeedBand)
-            g *= apexGravityMultiplier;
-        velGrid.y -= g * dt;
-        if (velGrid.y < -maxFallSpeed)
-            velGrid.y = -maxFallSpeed;
-
-        Vector2 nextPos = posGrid;
-
-        // Horizontal step + collision.
-        nextPos.x = posGrid.x + velGrid.x * dt;
-        ResolveHorizontalPlatforms(ref nextPos);
-
-        // Vertical sweep should use Y from before this frame's vertical move but X after horizontal
-        // (matches diagonal motion; avoids false collisions when strafing along stepped platforms).
-        Vector2 prevForVerticalSweep = new Vector2(nextPos.x, posGrid.y);
-
-        // Vertical step + collision.
-        nextPos.y = posGrid.y + velGrid.y * dt;
-        ResolveVerticalPlatforms(prevForVerticalSweep, ref nextPos, ref grounded);
-
-        // Hazard check.
-        if (OverlapsAny(world.hazards, nextPos))
-        {
+        if (step.Has(PlayerMotorEvents.Died))
             Die();
-        }
-        else if (nextPos.y - playerHeightGrid / 2f < deathMinYGrid)
-        {
-            Die();
-        }
 
-        // Finish check.
-        if (IsInFinishZone(nextPos))
+        if (step.Has(PlayerMotorEvents.Finished))
         {
             isFinished = true;
             if (playerRect != null)
@@ -415,13 +347,61 @@ public class PlayerControllerUI2D : MonoBehaviour
             return;
         }
 
-        posGrid = nextPos;
-
-        ClampPositionToPlayBounds();
-
         TickDerivativeBackgroundTint(dt);
 
         ApplyVisualPosition();
+    }
+
+    /// <summary>Inspector movement values as the shared motor tuning.</summary>
+    public PlayerMotorTuning Tuning => new PlayerMotorTuning
+    {
+        MoveSpeed = moveSpeedGridPerSec,
+        Gravity = gravityGridPerSec2,
+        JumpVelocity = jumpVelocityGridPerSec,
+        GroundAccel = groundAccel,
+        GroundDecel = groundDecel,
+        AirAccel = airAccel,
+        CoyoteSeconds = coyoteSeconds,
+        JumpBufferSeconds = jumpBufferSeconds,
+        JumpCutMultiplier = jumpCutMultiplier,
+        ApexGravityMultiplier = apexGravityMultiplier,
+        ApexSpeedBand = apexSpeedBand,
+        MaxFallSpeed = maxFallSpeed,
+        DoubleJumpVelocityMultiplier = doubleJumpVelocityMultiplier,
+        DerivativeTouchRadius = derivativeTouchRadiusGrid,
+        Width = playerWidthGrid,
+        Height = playerHeightGrid,
+        GroundBounciness = groundBounciness,
+        BounceVelocityCutoff = bounceVelocityCutoffGridPerSec,
+        StrongFirstJumpMultiplier = PlayerMotorTuning.Default.StrongFirstJumpMultiplier,
+    };
+
+    PlayerMotorState PackMotorState() => new PlayerMotorState
+    {
+        Pos = posGrid,
+        Vel = velGrid,
+        Grounded = grounded,
+        CoyoteTimer = coyoteTimer,
+        JumpBufferTimer = jumpBufferTimer,
+        JumpCutAvailable = jumpCutAvailable,
+        AirJumpConsumedThisBand = derivativeAirJumpConsumedThisBand,
+        StrongFirstJumpPending = strongFirstGroundJumpPending,
+        GroundJumpBoost = groundJumpBoost,
+        TouchJumpHeld = touchJumpHeld,
+    };
+
+    void UnpackMotorState(in PlayerMotorState st)
+    {
+        posGrid = st.Pos;
+        velGrid = st.Vel;
+        grounded = st.Grounded;
+        coyoteTimer = st.CoyoteTimer;
+        jumpBufferTimer = st.JumpBufferTimer;
+        jumpCutAvailable = st.JumpCutAvailable;
+        derivativeAirJumpConsumedThisBand = st.AirJumpConsumedThisBand;
+        strongFirstGroundJumpPending = st.StrongFirstJumpPending;
+        groundJumpBoost = st.GroundJumpBoost;
+        touchJumpHeld = st.TouchJumpHeld;
     }
 
     /// <summary>Hard AABB limits so the avatar stays inside the padded playfield (safe area + touch bar insets).</summary>
@@ -430,11 +410,7 @@ public class PlayerControllerUI2D : MonoBehaviour
         if (world == null || !world.hasPlayBounds)
             return;
 
-        float halfW = playerWidthGrid * 0.5f;
-        float halfH = playerHeightGrid * 0.5f;
-        var b = world.playBounds;
-        posGrid.x = Mathf.Clamp(posGrid.x, b.XMin + halfW, b.XMax - halfW);
-        posGrid.y = Mathf.Clamp(posGrid.y, b.YMin + halfH, b.YMax - halfH);
+        posGrid = PlayerMotor.ClampToPlayBounds(world, Tuning, posGrid);
     }
 
     /// <summary>After rotation or Cartesian plane resize: refresh pixel scale, play-bound grid inset, and clamp.</summary>
@@ -458,12 +434,6 @@ public class PlayerControllerUI2D : MonoBehaviour
         ApplyVisualPosition();
     }
 
-    /// <summary>Air jump only while overlapping f′ and not already used until you leave the band.</summary>
-    private bool CanUseDerivativeAirJump()
-    {
-        return touchingDerivativeNow && !derivativeAirJumpConsumedThisBand;
-    }
-
     /// <summary>
     /// f′ proximity: highlight, hit feedback, and <see cref="touchingDerivativeNow"/> for air jump.
     /// </summary>
@@ -472,14 +442,9 @@ public class PlayerControllerUI2D : MonoBehaviour
         bool touching = false;
         if (derivativeLineRenderer != null)
         {
-            var pts = derivativeLineRenderer.points;
-            if (pts != null && pts.Count >= 2 && derivativeTouchRadiusGrid > 0.01f)
-                touching = MinDistanceToPolylineSq(posGrid, pts) <= derivativeTouchRadiusGrid * derivativeTouchRadiusGrid;
+            // Same clipped polyline that is drawn: off-plane parts of f′ are not touchable.
+            touching = PlayerMotor.IsTouchingPolyline(posGrid, derivativeLineRenderer.points, derivativeTouchRadiusGrid);
         }
-
-        // Leave f′ → can earn another air jump on the next approach while aloft.
-        if (!touching)
-            derivativeAirJumpConsumedThisBand = false;
 
         if (touching && !wasTouchingDerivativeLine)
         {
@@ -589,30 +554,6 @@ public class PlayerControllerUI2D : MonoBehaviour
             gridBackgroundImage.color = gridBackgroundRestColor;
     }
 
-    private static float MinDistanceToPolylineSq(Vector2 p, List<Vector2> pts)
-    {
-        float best = float.PositiveInfinity;
-        for (int i = 0; i < pts.Count - 1; i++)
-        {
-            float d = PointToSegmentDistanceSq(p, pts[i], pts[i + 1]);
-            if (d < best)
-                best = d;
-        }
-
-        return best;
-    }
-
-    private static float PointToSegmentDistanceSq(Vector2 p, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float den = ab.sqrMagnitude;
-        if (den < 1e-10f)
-            return (p - a).sqrMagnitude;
-        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / den);
-        Vector2 proj = a + t * ab;
-        return (p - proj).sqrMagnitude;
-    }
-
     private static float ReadHorizontalInput()
     {
         float inputX = 0f;
@@ -669,136 +610,6 @@ public class PlayerControllerUI2D : MonoBehaviour
             return true;
 
         return false;
-    }
-
-    private void ResolveHorizontalPlatforms(ref Vector2 pos)
-    {
-        float halfW = playerWidthGrid / 2f;
-        float halfH = playerHeightGrid / 2f;
-
-        float pxMin = pos.x - halfW;
-        float pxMax = pos.x + halfW;
-        float pyMin = pos.y - halfH;
-        float pyMax = pos.y + halfH;
-
-        // Basic AABB side resolution.
-        foreach (var p in world.platforms)
-        {
-            bool overlapsY = pyMin < p.yMax && pyMax > p.yMin;
-            if (!overlapsY)
-                continue;
-
-            bool overlapsX = pxMin < p.xMax && pxMax > p.xMin;
-            if (!overlapsX)
-                continue;
-
-            if (velGrid.x > 0f)
-            {
-                pos.x = p.xMin - halfW;
-            }
-            else if (velGrid.x < 0f)
-            {
-                pos.x = p.xMax + halfW;
-            }
-        }
-    }
-
-    /// <summary>Land on platform tops when falling; bonk head when rising into a true overhead solid.</summary>
-    private void ResolveVerticalPlatforms(Vector2 prevPos, ref Vector2 pos, ref bool groundedOut)
-    {
-        groundedOut = false;
-
-        float halfW = playerWidthGrid / 2f;
-        float halfH = playerHeightGrid / 2f;
-
-        float prevBottom = prevPos.y - halfH;
-        float prevTop = prevPos.y + halfH;
-        float nextBottom = pos.y - halfH;
-        float nextTop = pos.y + halfH;
-
-        float pxMin = pos.x - halfW;
-        float pxMax = pos.x + halfW;
-
-        const float eps = 0.001f;
-        // Graph levels use ~1-column × thin-slab platforms along the curve. The slab's bottom (yMin) sits
-        // under the walkable top (yMax); jumping forward along rising steps hits that underside and used to
-        // zero vy mid-air. Skip that "bonk" while the feet are still clearly below the step top.
-        const float maxLedgeSlabThicknessGrid = 0.95f;
-        const float maxLedgeSlabWidthGrid = 1.28f;
-        const float feetBelowStepTopClearanceGrid = 0.1f;
-
-        foreach (var p in world.platforms)
-        {
-            bool overlapsX = pxMin < p.xMax && pxMax > p.xMin;
-            if (!overlapsX)
-                continue;
-
-            // Falling onto platform.
-            if (velGrid.y <= 0f)
-            {
-                bool crossedTopSurface = prevBottom >= p.yMax - eps && nextBottom <= p.yMax + eps;
-                if (crossedTopSurface)
-                {
-                    pos.y = p.yMax + halfH;
-                    float impact = -velGrid.y;
-                    coyoteTimer = coyoteSeconds; // touching ground (even mid-bounce) counts for jumping
-                    LandedWithSpeed?.Invoke(impact);
-                    if (impact > bounceVelocityCutoffGridPerSec && groundBounciness > 0f)
-                    {
-                        velGrid.y = impact * groundBounciness;
-                        groundedOut = false;
-                    }
-                    else
-                    {
-                        velGrid.y = 0f;
-                        groundedOut = true;
-                    }
-                    TriggerLandingSquash(impact);
-                }
-            }
-            else // Rising — only bonk real ceilings, not the underside lip of the next stair tread.
-            {
-                float platW = p.xMax - p.xMin;
-                float platH = p.yMax - p.yMin;
-                bool thinStairSlab = platW <= maxLedgeSlabWidthGrid && platH <= maxLedgeSlabThicknessGrid;
-                if (thinStairSlab && nextBottom < p.yMax - feetBelowStepTopClearanceGrid)
-                    continue;
-
-                bool crossedBottomSurface = prevTop <= p.yMin + eps && nextTop >= p.yMin - eps;
-                if (crossedBottomSurface)
-                {
-                    pos.y = p.yMin - halfH;
-                    velGrid.y = 0f;
-                }
-            }
-        }
-    }
-
-    private bool OverlapsAny(List<GridRect> rects, Vector2 center)
-    {
-        float halfW = playerWidthGrid / 2f;
-        float halfH = playerHeightGrid / 2f;
-        float pxMin = center.x - halfW;
-        float pxMax = center.x + halfW;
-        float pyMin = center.y - halfH;
-        float pyMax = center.y + halfH;
-
-        for (int i = 0; i < rects.Count; i++)
-        {
-            var r = rects[i];
-            bool overlapX = pxMin < r.xMax && pxMax > r.xMin;
-            bool overlapY = pyMin < r.yMax && pyMax > r.yMin;
-            if (overlapX && overlapY)
-                return true;
-        }
-
-        return false;
-    }
-
-    private bool IsInFinishZone(Vector2 center)
-    {
-        // Finish check uses center X only (y doesn't matter; the goal is to reach the end).
-        return center.x >= world.finish.xMin && center.x <= world.finish.xMax;
     }
 
     private void ApplyVisualPosition()
