@@ -2,12 +2,14 @@
  * FunctionPlotter.cs — John Seong / First Principles
  *
  * Maintenance overview:
- *   • Update() only runs a full replot when parameters change or the Lorenz attractor is animating;
- *     during the left→right reveal, it only refreshes vertex alpha. (Avoids sampling f/f′ every frame.)
- *   • Points are in “grid space”: (MapDisplayX(xPlot) + gridOrigin.x, MapDisplayY(yPlot) + gridOrigin.y).
- *   • To add a new curve: extend FunctionType, EvaluateFunctionY, and UpdateEquationText.
- *   • LevelManager sets public fields to match LevelDefinition; differentiate=true feeds DerivRendererUI.
- *   • SampleCurvePlotterY / SetEquationExtraSuffix support Riemann overlay & TMP sub-lines.
+ *   - Update() only runs a full replot when parameters change (or the Lorenz phase is animated, which level
+ *     play turns off); during the left-to-right reveal it only refreshes vertex alpha.
+ *   - f and f′ come from GraphFunctionMath (analytic f′ where the family allows) and are mapped to grid space by
+ *     GraphViewMapping; GraphWorldBuilder uses the same two, so the drawn curves and the platforms always agree.
+ *   - Level mode draws f′ on its own axis (derivativeOwnAxis): f′ = 0 on the centre line, fitted to the plane.
+ *   - Both polylines are clipped to the plane with NaN breaks (PolylineClip); the renderers skip those segments.
+ *   - To add a new curve: extend FunctionType, GraphFunctionMath.Evaluate / Derivative and UpdateEquationText.
+ *   - SampleCurvePlotterY / SetEquationExtraSuffix support Riemann overlay and TMP sub-lines.
  */
 
 using System;
@@ -31,11 +33,8 @@ public class FunctionPlotter : MonoBehaviour
 
     public int power = 2;
 
-    // A infinitesimally small number chosen in order to perform numerical differentiation
-    private float hValue = (float)(Mathf.Pow(10, -4));
-
-    /// <summary>Step <c>h</c> used for numeric derivatives (graph overlays share this).</summary>
-    public float NumericalDerivativeStep => hValue;
+    /// <summary>Central-difference step used where f′ has no closed form (see <see cref="GraphFunctionMath.Derivative"/>).</summary>
+    public float NumericalDerivativeStep => TableCurveDerivativeStep;
 
     // The type of function to be plotted
     public FunctionType functionType;
@@ -68,11 +67,22 @@ public class FunctionPlotter : MonoBehaviour
     [Range(0.38f, 0.92f)]
     public float horizontalFillFraction = 0.74f;
 
-    public float verticalScaleClampMin = 0.38f;
-    public float verticalScaleClampMax = 7.5f;
+    public const float DefaultVerticalScaleClampMin = 0.38f;
+    public const float DefaultVerticalScaleClampMax = 7.5f;
+    public const float DefaultHorizontalScaleClampMin = 0.38f;
+    public const float DefaultHorizontalScaleClampMax = 7.5f;
 
-    public float horizontalScaleClampMin = 0.38f;
-    public float horizontalScaleClampMax = 7.5f;
+    public float verticalScaleClampMin = DefaultVerticalScaleClampMin;
+    public float verticalScaleClampMax = DefaultVerticalScaleClampMax;
+
+    public float horizontalScaleClampMin = DefaultHorizontalScaleClampMin;
+    public float horizontalScaleClampMax = DefaultHorizontalScaleClampMax;
+
+    [Tooltip("Level mode: draw f′ on its own vertical axis pivoted at 0 (f′ = 0 on the centre line, fitted to the plane). Off = f′ shares f's axis (graphing calculator).")]
+    public bool derivativeOwnAxis = false;
+
+    [Tooltip("Scroll the Lorenz time slice every frame. Off in level play: platforms are built once from the curve, so a moving curve would no longer match the ground.")]
+    public bool animateLorenzPhase = false;
 
     // Local points list
     private List<Vector2> points = new List<Vector2>();
@@ -84,6 +94,9 @@ public class FunctionPlotter : MonoBehaviour
     /// <summary>Horizontal map: plotter x → offset from center in grid columns before adding grid origin x.</summary>
     private float _autoMidX;
     private float _autoScaleX = 1f;
+    /// <summary>f′ vertical map (own axis in level mode; equals f's map otherwise).</summary>
+    private float _autoDMid;
+    private float _autoDScale = 1f;
     private int _cachedGridOriginY;
 
     [SerializeField] TextMeshProUGUI equationText;
@@ -128,8 +141,8 @@ public class FunctionPlotter : MonoBehaviour
     {
         UpdateGraphRevealAnimation();
 
-        // Lorenz stage scrolls phase every frame — full resample required.
-        if (functionType == FunctionType.ChaosLorenzButterflyX)
+        // Lorenz stage scrolls phase every frame (when animated) — full resample required.
+        if (functionType == FunctionType.ChaosLorenzButterflyX && animateLorenzPhase)
         {
             InitPlotFunction();
             return;
@@ -173,7 +186,7 @@ public class FunctionPlotter : MonoBehaviour
         {
             _graphRevealParamsHash = h;
             _graphRevealT01 = 0f;
-            if (functionType != FunctionType.ChaosLorenzButterflyX)
+            if (functionType != FunctionType.ChaosLorenzButterflyX || !animateLorenzPhase)
                 _lorenzPhaseScroll = 0f;
         }
 
@@ -185,7 +198,7 @@ public class FunctionPlotter : MonoBehaviour
         else
             _graphRevealT01 = Mathf.MoveTowards(_graphRevealT01, 1f, Time.deltaTime / dur);
 
-        if (functionType == FunctionType.ChaosLorenzButterflyX)
+        if (functionType == FunctionType.ChaosLorenzButterflyX && animateLorenzPhase)
         {
             float tMax = LorenzAttractorSamples.TimeMax;
             if (tMax > 1e-4f)
@@ -198,7 +211,7 @@ public class FunctionPlotter : MonoBehaviour
         int a = HashCode.Combine(functionType, xStart, xEnd, step, transA, transK);
         int b = HashCode.Combine(transC, transD, power, baseN, customExpression ?? "");
         int c = HashCode.Combine(autoScaleVertical, autoScaleHorizontal, lockVerticalPlotScaleToHorizontalWindow,
-            verticalFillFraction, horizontalFillFraction);
+            verticalFillFraction, horizontalFillFraction, derivativeOwnAxis);
         return HashCode.Combine(a, b, c);
     }
 
@@ -264,12 +277,45 @@ public class FunctionPlotter : MonoBehaviour
         grid.enabled = true;
     }
 
+    /// <summary>Current curve parameters (single source of truth for f, f′, platforms and audits).</summary>
+    public GraphFunctionParams CurrentParams =>
+        new GraphFunctionParams(functionType, transA, transK, transC, transD, power, baseN, customExpression, _lorenzPhaseScroll);
+
+    /// <summary>Plotter → grid map from the last <see cref="ComputeGraph"/>.</summary>
+    public GraphViewMapping CurrentMapping
+    {
+        get
+        {
+            Vector2Int gs = lineRenderer != null ? lineRenderer.gridSize : new Vector2Int(_cachedGridOriginY * 2, _cachedGridOriginY * 2);
+            return new GraphViewMapping
+            {
+                MidX = _autoMidX, ScaleX = _autoScaleX, MidY = _autoMid, ScaleY = _autoScale,
+                DMidY = _autoDMid, DScaleY = _autoDScale, GridSize = gs
+            };
+        }
+    }
+
+    /// <summary>Fit settings currently set on this plotter (inspector / LevelManager).</summary>
+    public GraphViewMapping.FitSettings CurrentFitSettings => new GraphViewMapping.FitSettings
+    {
+        AutoVertical = autoScaleVertical,
+        VerticalFill = verticalFillFraction,
+        AutoHorizontal = autoScaleHorizontal,
+        HorizontalFill = horizontalFillFraction,
+        VerticalScaleMin = verticalScaleClampMin,
+        VerticalScaleMax = verticalScaleClampMax,
+        HorizontalScaleMin = horizontalScaleClampMin,
+        HorizontalScaleMax = horizontalScaleClampMax,
+        LockVerticalToHorizontal = lockVerticalPlotScaleToHorizontalWindow,
+        DerivativeOwnAxis = derivativeOwnAxis,
+    };
+
     /// <summary>
     /// f(x) in plotter coordinates (before adding grid origin), using current transforms.
     /// </summary>
     public float SampleCurvePlotterY(float xPlotter)
     {
-        return EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xPlotter);
+        return GraphFunctionMath.Evaluate(CurrentParams, xPlotter);
     }
 
     /// <summary>Grid-space y of the curve at plotter x (includes auto vertical fit). Used by platforms &amp; Riemann UI.</summary>
@@ -286,7 +332,8 @@ public class FunctionPlotter : MonoBehaviour
     }
 
     /// <summary>
-    /// Graphing calculator: numeric <c>dⁿy/dxⁿ</c> at plotter <paramref name="xPlotter"/> (same vertical map as <see cref="ComputeGraph"/>).
+    /// Graphing calculator: <c>dⁿy/dxⁿ</c> at plotter <paramref name="xPlotter"/> (same vertical map as <see cref="ComputeGraph"/>).
+    /// Order 1 is the shared analytic / scaled-step derivative; higher orders use central differences.
     /// </summary>
     public float SampleNthDerivativeGridY(float xPlotter, int order)
     {
@@ -296,24 +343,30 @@ public class FunctionPlotter : MonoBehaviour
             return float.NaN;
 
         Vector2Int gridOrigin = lineRenderer.gridSize / 2;
-        float raw = MathNthDerivative.Evaluate(
-            xx => EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xx),
-            xPlotter,
-            Mathf.Clamp(order, 1, 4),
-            hValue);
+        order = Mathf.Clamp(order, 1, 4);
+        var prm = CurrentParams;
+        float raw = order == 1
+            ? GraphFunctionMath.Derivative(prm, xPlotter, TableCurveDerivativeStep)
+            : MathNthDerivative.Evaluate(xx => GraphFunctionMath.Evaluate(prm, xx), xPlotter, order,
+                GraphFunctionMath.NumericStep(xPlotter, 1e-2f));
         if (!IsFinite(raw))
             return float.NaN;
-        return MapDisplayY(raw) + gridOrigin.y;
+        return order == 1 ? CurrentMapping.DerivGridY(raw) : MapDisplayY(raw) + gridOrigin.y;
     }
 
-    /// <summary>Numeric f′(x) in <b>raw</b> plotter units (not affected by vertical exaggeration). For gameplay thresholds.</summary>
+    /// <summary>f′(x) in <b>raw</b> plotter units (not affected by vertical exaggeration). For gameplay thresholds.</summary>
     public float EvaluateNumericalDerivativeY(float xPlotter)
     {
-        float yp = (EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xPlotter + hValue)
-                    - EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xPlotter - hValue))
-                        / (hValue * 2f);
-        return yp;
+        return GraphFunctionMath.Derivative(CurrentParams, xPlotter, TableCurveDerivativeStep);
     }
+
+    /// <summary>
+    /// Fallback step for curves without a closed-form f′ (Lorenz table, Mandelbrot): half the plot step, so the drawn
+    /// f′ reads the slope of the drawn f instead of per-sample noise.
+    /// </summary>
+    float TableCurveDerivativeStep => TableCurveDerivativeStepFor(step);
+
+    public static float TableCurveDerivativeStepFor(float plotStep) => Mathf.Clamp(plotStep * 0.5f, 1e-3f, 0.25f);
 
     float MapDisplayY(float rawY) => (rawY - _autoMid) * _autoScale;
 
@@ -343,8 +396,8 @@ public class FunctionPlotter : MonoBehaviour
     /// <summary>
     /// Horizontal axis readout at a tick <paramref name="tickOffsetFromCenter"/> grid columns right of center
     /// (one column = one plotter unit in <c>x</c> or polar <c>θ</c>).
-    /// • Level / preset graphs: tick shows plotter <c>x</c> (or <c>θ</c>).
-    /// • Graphing calculator (<see cref="FunctionType.CustomExpression"/>): tick shows inner <c>u = transK×(x−transD)</c>
+    /// - Level / preset graphs: tick shows plotter <c>x</c> (or <c>θ</c>).
+    /// - Graphing calculator (<see cref="FunctionType.CustomExpression"/>): tick shows inner <c>u = transK×(x−transD)</c>
     ///   so numbers match <b>Trans</b> the same way your <c>f(u)</c> does.
     /// </summary>
     public float AxisTickOffsetToMathX(float tickOffsetFromCenter)
@@ -427,15 +480,9 @@ public class FunctionPlotter : MonoBehaviour
             // Refresh ONLY the derivative graph & show on the UI
             RefreshDeriv();
 
+            // ComputeGraph above already filled dPoints from the same samples as f (one pass, one map).
             if (derivRenderer != null)
-            {
-                dPoints.Clear();
-                points.Clear();
-                RefreshLine();
-
-                ComputeGraph(type, transA, transK, transC, transD, power, baseN);
                 derivRenderer.points = dPoints;
-            }
         }
         else if (differentiate == false)
         {
@@ -468,473 +515,29 @@ public class FunctionPlotter : MonoBehaviour
         if (equationText != null)
             UpdateEquationText(functionType, transA, transK, transC, transD, power, baseN);
 
-        Vector2Int gridOrigin = lineRenderer.gridSize / 2;
+        Vector2Int gridSize = lineRenderer.gridSize;
+        Vector2Int gridOrigin = gridSize / 2;
         _cachedGridOriginY = gridOrigin.y;
 
-        // --- Pass 1: measure vertical extent (raw y) for auto fit ---
-        float fLo = float.PositiveInfinity, fHi = float.NegativeInfinity;
-
-        for (float i = xStart; i <= xEnd; i += step)
-        {
-            AddFunctionExtentSample(functionType, transA, transK, transC, transD, power, baseN, i, ref fLo, ref fHi);
-        }
+        var prm = new GraphFunctionParams(functionType, transA, transK, transC, transD, power, baseN, customExpression, _lorenzPhaseScroll);
 
         // Fit primarily to f(x) (and drag-polar overlays) so flat teaching curves fill the grid; f′ uses the same map.
-        ComputeVerticalAutoFit(lineRenderer.gridSize.y, fLo, fHi);
-        ComputeHorizontalAutoFit(lineRenderer.gridSize.x, xStart, xEnd);
+        var map = GraphViewMapping.Fit(prm, xStart, xEnd, step, gridSize, CurrentFitSettings, TableCurveDerivativeStep);
+        _autoDMid = map.DMidY;
+        _autoDScale = map.DScaleY;
+        _autoMid = map.MidY;
+        _autoScale = map.ScaleY;
+        _autoMidX = map.MidX;
+        _autoScaleX = map.ScaleX;
 
-        if (lockVerticalPlotScaleToHorizontalWindow && !IsPolarPlotStyle(functionType))
-        {
-            _autoMid = 0f;
-            _autoScale = _autoScaleX;
-        }
-
-        // --- Pass 2: build polylines with display mapping ---
-        for (float i = xStart; i <= xEnd; i += step)
-        {
-            float xValue = i;
-            float yValue = EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xValue);
-            float dyValue = (EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xValue + hValue) - EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xValue - hValue)) / (hValue * 2);
-
-            if (IsFinite(yValue))
-                points.Add(new Vector2(MapDisplayX(xValue) + gridOrigin.x, MapDisplayY(yValue) + gridOrigin.y));
-
-            if (IsFinite(dyValue))
-                dPoints.Add(new Vector2(MapDisplayX(xValue) + gridOrigin.x, MapDisplayY(dyValue) + gridOrigin.y));
-        }
+        // Polylines: f and f′ from the shared math, clipped to the grid band (breaks instead of off-plane spikes).
+        GraphPolylines.Sample(prm, map, xStart, xEnd, step, TableCurveDerivativeStep, points, dPoints);
     }
 
-    void AddFunctionExtentSample(FunctionType functionType, float transA, float transK, float transC, float transD, int power, int baseN, float xValue,
-        ref float fLo, ref float fHi)
-    {
-        float yValue = EvaluateFunctionY(functionType, transA, transK, transC, transD, power, baseN, xValue);
-        if (IsFinite(yValue))
-        {
-            if (yValue < fLo) fLo = yValue;
-            if (yValue > fHi) fHi = yValue;
-        }
+    private float EvaluateFunctionY(FunctionType type, float transA, float transK, float transC, float transD, int power, int baseN, float xValue) =>
+        GraphFunctionMath.Evaluate(new GraphFunctionParams(type, transA, transK, transC, transD, power, baseN, customExpression, _lorenzPhaseScroll), xValue);
 
-        if (functionType == FunctionType.AeroDragPolarTriple)
-        {
-            float u = transK * (xValue - transD);
-            float yPar = transA * transC;
-            float yInd = transA * Mathf.Pow(u, power);
-            if (IsFinite(yPar))
-            {
-                if (yPar < fLo) fLo = yPar;
-                if (yPar > fHi) fHi = yPar;
-            }
-            if (IsFinite(yInd))
-            {
-                if (yInd < fLo) fLo = yInd;
-                if (yInd > fHi) fHi = yInd;
-            }
-        }
-    }
-
-    void ComputeVerticalAutoFit(int gridYCells, float fLo, float fHi)
-    {
-        if (!autoScaleVertical || float.IsInfinity(fLo) || float.IsInfinity(fHi) || fLo > fHi)
-        {
-            _autoMid = 0f;
-            _autoScale = 1f;
-            return;
-        }
-
-        float lo = fLo;
-        float hi = fHi;
-
-        bool useZeroPivot = lo <= 0f && hi >= 0f;
-        _autoMid = useZeroPivot ? 0f : (lo + hi) * 0.5f;
-
-        float halfSpan = Mathf.Max(
-            Mathf.Max(Mathf.Abs(lo - _autoMid), Mathf.Abs(hi - _autoMid)),
-            1e-3f);
-        halfSpan *= 1.085f;
-
-        const float marginCells = 0.85f;
-        float targetHalf = verticalFillFraction * (gridYCells * 0.5f - marginCells);
-        targetHalf = Mathf.Max(targetHalf, 0.72f);
-
-        _autoScale = Mathf.Clamp(targetHalf / halfSpan, verticalScaleClampMin, verticalScaleClampMax);
-    }
-
-    void ComputeHorizontalAutoFit(int gridXCells, float xDomainLo, float xDomainHi)
-    {
-        if (!autoScaleHorizontal
-            || gridXCells < 2
-            || float.IsInfinity(xDomainLo)
-            || float.IsInfinity(xDomainHi)
-            || Mathf.Abs(xDomainHi - xDomainLo) < 1e-6f)
-        {
-            _autoMidX = 0f;
-            _autoScaleX = 1f;
-            return;
-        }
-
-        float lo = Mathf.Min(xDomainLo, xDomainHi);
-        float hi = Mathf.Max(xDomainLo, xDomainHi);
-
-        bool useZeroPivot = lo <= 0f && hi >= 0f;
-        _autoMidX = useZeroPivot ? 0f : (lo + hi) * 0.5f;
-
-        float halfSpan = Mathf.Max(
-            Mathf.Max(Mathf.Abs(lo - _autoMidX), Mathf.Abs(hi - _autoMidX)),
-            1e-3f);
-        halfSpan *= 1.085f;
-
-        const float marginCells = 0.85f;
-        float targetHalf = horizontalFillFraction * (gridXCells * 0.5f - marginCells);
-        targetHalf = Mathf.Max(targetHalf, 0.72f);
-
-        _autoScaleX = Mathf.Clamp(targetHalf / halfSpan, horizontalScaleClampMin, horizontalScaleClampMax);
-    }
-
-    private float EvaluateFunctionY(FunctionType type, float transA, float transK, float transC, float transD, int power, int baseN, float xValue)
-    {
-        float u = transK * (xValue - transD);
-
-        return type switch
-        {
-            FunctionType.CustomExpression =>
-                EvaluateCustomExpression(transA, transC, u),
-
-            FunctionType.Power => transA * (Mathf.Pow(u, power) + transC),
-            FunctionType.Absolute => transA * (Mathf.Abs(u) + transC),
-            FunctionType.Exponential => transA * (Mathf.Pow(baseN, u) + transC),
-            FunctionType.NaturalExp => transA * (Mathf.Exp(u) + transC),
-            FunctionType.Log => transA * (Mathf.Log10(u) + transC),
-            FunctionType.NaturalLog => transA * (Mathf.Log(u) + transC),
-            FunctionType.SquareRoot => transA * (Mathf.Sqrt(u) + transC),
-            FunctionType.Sine => transA * (Mathf.Sin(u) + transC),
-            FunctionType.Cosine => transA * (Mathf.Cos(u) + transC),
-            FunctionType.Tangent => transA * (Mathf.Tan(u) + transC),
-
-            // Maclaurin (Taylor at 0) partial sums — `power` = number of nonzero terms beyond constant where applicable.
-            FunctionType.MaclaurinExpSeries => transA * (MaclaurinExpPartialSum(u, power) + transC),
-            FunctionType.MaclaurinSinSeries => transA * (MaclaurinSinPartialSum(u, power) + transC),
-            FunctionType.MaclaurinCosSeries => transA * (MaclaurinCosPartialSum(u, power) + transC),
-
-            // Geometric series partial sum Σ u^k, k=0..power — avoid |u|≥1 for stability in view.
-            FunctionType.GeometricSeriesPartial => transA * (GeometricPartialSum(u, power) + transC),
-
-            // Multivariable "slices": fix y0 = transC, plot z along x — u = transK*(x - transD). (transD is x-phase only.)
-            FunctionType.MultivarParaboloidSlice => transA * (u * u + transC * transC),
-            FunctionType.MultivarSaddleSlice => transA * (u * u - transC * transC),
-
-            // Engineering / applied: u = transK*(x - transD); `power` ↔ oscillation index; `baseN` ↔ decay strength.
-            FunctionType.SpringMassUndamped => SpringMassUndampedY(u, transA, transC, power),
-            FunctionType.DampedOscillator => DampedOscillatorY(u, transA, transC, power, baseN),
-            FunctionType.HyperbolicCosine => transA * ((float)System.Math.Cosh(Mathf.Clamp(u, -8f, 8f)) + transC),
-            FunctionType.FullWaveRectifiedSine => transA * (Mathf.Abs(Mathf.Sin(u)) + transC),
-
-            // AP Calculus BC & polar: u = transK*(x - transD) plays the role of θ in polar captions.
-            FunctionType.Arctangent => transA * Mathf.Atan(u) + transC,
-            FunctionType.Logistic => LogisticY(u, transA, transC, baseN),
-            FunctionType.HyperbolicSine => transA * (float)System.Math.Sinh(Mathf.Clamp(u, -4f, 4f)) + transC,
-            FunctionType.ExponentialDecay => transA * Mathf.Exp(-Mathf.Max(0.02f, transK) * Mathf.Abs(u)) + transC,
-            FunctionType.PolarCardioid => transA * (1f + Mathf.Cos(u)) + transC,
-            FunctionType.PolarRose => transA * Mathf.Cos(Mathf.Max(1, power) * u) + transC,
-
-            // Boss / BC: logarithmic “golden” spiral r ∝ φ^{kθ} with φ = (1+√5)/2; horizontal axis is θ (same as other polar presets).
-            FunctionType.PolarGoldenLogSpiral => GoldenLogSpiralPolarY(u, transA, transC, baseN),
-
-            // Upper half of (u)² + (y−k)² = R² with u = transK×(x−h), R = |transA|, k = transC, h = transD.
-            FunctionType.CircleUpper => CircleUpperY(u, transA, transC),
-
-            // Aerospace / aerodynamics teaching curves (u = transK×(x−transD)).
-            FunctionType.AeroLiftVsAlpha => AeroLiftVsAlphaY(u, transA, transC),
-            FunctionType.AeroIsothermalDensity => AeroIsothermalDensityY(u, transA, transC, baseN),
-            FunctionType.AeroNewtonianSinSquared => AeroNewtonianSinSquaredY(u, transA, transC),
-
-            // Thermodynamics: reversible adiabatic ideal gas, P ∝ V^{-γ} with γ from baseN/100 (e.g. 140 → 1.40); u > 0 is “volume-like”.
-            FunctionType.ThermoAdiabaticPV => ThermoAdiabaticPvY(u, transA, transC, baseN),
-
-            // Drag polar total C_D,tot: same closed form as Power — A×(u^power + C); overlays plot C_D,par = A×C and C_D,ind = A×u^power.
-            FunctionType.AeroDragPolarTriple => transA * (Mathf.Pow(u, power) + transC),
-
-            // Mandelbrot: escape-time vs Im(c) with Re(c)=transA; use |Im| inside iteration (same count as c̄) — cheap symmetry about the real axis.
-            FunctionType.MandelbrotEscapeImSlice => MandelbrotEscapeImSliceY(u, transA, transC, power, baseN),
-
-            // Qualitative economics teaching curves (not real market data; smooth spline through stylized knots).
-            FunctionType.EconomyDotcomBubbleStylized => EconomyDotcomBubbleStylizedY(u, transA, transC),
-            FunctionType.EconomySubprime2008Stylized => EconomySubprime2008StylizedY(u, transA, transC),
-
-            // Transforms (teaching): sinc ↔ rect spectrum; causal exponential ↔ Laplace kernel table intuition.
-            FunctionType.TransformFourierSinc => TransformFourierSincY(u, transA, transC),
-            FunctionType.TransformLaplaceCausalDecay => TransformLaplaceCausalDecayY(u, transA, transC, baseN),
-
-            // Final boss: Lorenz x(t) slice (normalized); chaos theory / sensitive dependence.
-            FunctionType.ChaosLorenzButterflyX => ChaosLorenzButterflyYEval(u, transA, transC),
-
-            // Boss: Newtonian-style potential slice Φ ∝ −1/√(r²+ε²) (softened 1/r “gravity well”).
-            FunctionType.PhysicsGravityWellInverseSqrt => GravityWellInverseSqrtY(u, transA, transC, transD),
-
-            // CS / algorithms: growth shape n ln n for n>0 (u plays the role of n on the horizontal axis).
-            FunctionType.BigONLogN => BigONLogNY(u, transA, transC),
-
-            _ => 0f
-        };
-    }
-
-    /// <summary>Knots for a smooth “index chart” arc: grind higher, parabolic enthusiasm, air-pocket, long recovery (dot-com era mood).</summary>
-    private static readonly float[] EconomyDotcomKnotsU =
-    {
-        -2.65f, -1.55f, -0.65f, 0.02f, 0.32f, 0.52f, 0.88f, 1.35f, 2.65f
-    };
-
-    private static readonly float[] EconomyDotcomKnotsY =
-    {
-        0.11f, 0.24f, 0.48f, 0.93f, 0.62f, 0.37f, 0.35f, 0.46f, 0.71f
-    };
-
-    /// <summary>Knots: pre-crisis climb, crest, cliff, trough, slow crawl up (2008 financial-crisis mood).</summary>
-    private static readonly float[] EconomySubprimeKnotsU =
-    {
-        -2.65f, -1.15f, -0.35f, 0.02f, 0.22f, 0.42f, 0.72f, 1.25f, 2.65f
-    };
-
-    private static readonly float[] EconomySubprimeKnotsY =
-    {
-        0.17f, 0.38f, 0.78f, 0.9f, 0.36f, 0.29f, 0.33f, 0.49f, 0.67f
-    };
-
-    private static float EconomyDotcomBubbleStylizedY(float u, float a, float c) =>
-        c + a * PiecewiseSmoothstepY(u, EconomyDotcomKnotsU, EconomyDotcomKnotsY);
-
-    private static float EconomySubprime2008StylizedY(float u, float a, float c) =>
-        c + a * PiecewiseSmoothstepY(u, EconomySubprimeKnotsU, EconomySubprimeKnotsY);
-
-    /// <summary>Piecewise segments with SmoothStep for a continuous, chart-like polyline (no real ticker data).</summary>
-    private static float PiecewiseSmoothstepY(float u, float[] xs, float[] ys)
-    {
-        if (xs == null || ys == null || xs.Length != ys.Length || xs.Length < 2)
-            return 0f;
-        if (u <= xs[0])
-            return ys[0];
-        if (u >= xs[xs.Length - 1])
-            return ys[xs.Length - 1];
-        for (int i = 0; i < xs.Length - 1; i++)
-        {
-            if (u <= xs[i + 1])
-            {
-                float denom = xs[i + 1] - xs[i];
-                float t = denom > 1e-6f ? (u - xs[i]) / denom : 0f;
-                t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t));
-                return Mathf.Lerp(ys[i], ys[i + 1], t);
-            }
-        }
-        return ys[ys.Length - 1];
-    }
-
-    private float EvaluateCustomExpression(float transA, float transC, float u)
-    {
-        if (MathExpressionEvaluator.TryEvaluate(customExpression, u, out float fy, out _))
-            return transA * fy + transC;
-        return float.NaN;
-    }
-
-    /// <summary>
-    /// 1D slice: c = c_r + i×u with u = transK×(x−D); height ∝ <b>smooth</b> escape-time (fractional iteration count).
-    /// Uses |u| in the iteration because escape-time is even in Im(c) (conjugate symmetry). See <see cref="MandelbrotFractalBackdrop"/> for the 2D set.
-    /// </summary>
-    private static float MandelbrotEscapeImSliceY(float u, float cr, float yOffset, int maxIter, int heightScaleFromBaseN)
-    {
-        maxIter = Mathf.Clamp(maxIter, 16, 160);
-        float amp = 0.17f * Mathf.Max(1, heightScaleFromBaseN);
-        float smooth = MandelbrotEscapeMath.SmoothIterations(cr, Mathf.Abs(u), maxIter);
-        float norm = smooth / maxIter;
-        return yOffset + amp * norm;
-    }
-
-    /// <summary>Crude CL(α): linear to ±α_stall then exponential decay (stall).</summary>
-    private static float AeroLiftVsAlphaY(float u, float liftSlope, float c)
-    {
-        float stall = 0.58f;
-        if (Mathf.Abs(u) <= stall)
-            return liftSlope * u + c;
-        float sign = Mathf.Sign(u);
-        float peak = liftSlope * stall * sign;
-        return peak * Mathf.Exp(-(Mathf.Abs(u) - stall) * 1.12f) + c;
-    }
-
-    /// <summary>ρ/ρ₀ ~ e^{−h/H} for h≥0; u as scaled altitude. baseN scales 1/H.</summary>
-    private static float AeroIsothermalDensityY(float u, float rhoScale, float c, int scaleHeightInv)
-    {
-        float h = Mathf.Max(0f, u);
-        float invH = 0.055f * Mathf.Max(1, scaleHeightInv > 0 ? scaleHeightInv : 1);
-        return rhoScale * Mathf.Exp(-invH * h) + c;
-    }
-
-    /// <summary>Newtonian impact theory mood: Cp ~ sin²α for α∈[0,π/2].</summary>
-    private static float AeroNewtonianSinSquaredY(float u, float a, float c)
-    {
-        float rad = Mathf.Clamp(u, 0f, 1.48f);
-        float s = Mathf.Sin(rad);
-        return a * s * s + c;
-    }
-
-    /// <summary>Adiabatic P–V relation P ∝ V^{-γ}, γ = clamp(baseN/100) (e.g. diatomic ~ 1.40); u is positive volume-like coordinate.</summary>
-    private static float ThermoAdiabaticPvY(float u, float a, float c, int baseNRaw)
-    {
-        float gamma = Mathf.Clamp(baseNRaw / 100f, 1.02f, 2.2f);
-        float v = Mathf.Max(0.04f, u);
-        return a * Mathf.Pow(v, -gamma) + c;
-    }
-
-    /// <summary>Golden ratio φ for spiral presets.</summary>
-    private static float GoldenRatioPhi => (1f + Mathf.Sqrt(5f)) * 0.5f;
-
-    /// <summary>r(θ) = A×φ^{kθ} + C with k scaled from <paramref name="baseNRaw"/> (growth rate knob).</summary>
-    private static float GoldenLogSpiralPolarY(float u, float a, float c, int baseNRaw)
-    {
-        float k = Mathf.Clamp(Mathf.Max(1, baseNRaw) / 750f, 0.055f, 0.19f);
-        float expArg = Mathf.Clamp(k * u, -5.2f, 5.2f);
-        float r = a * Mathf.Pow(GoldenRatioPhi, expArg);
-        return IsFinite(r) ? r + c : float.NaN;
-    }
-
-    /// <summary>sinc(u)=sin(u)/u, value 1 at 0 — spectrum shape of a rectangular pulse (Fourier mood).</summary>
-    private static float TransformFourierSincY(float u, float a, float c)
-    {
-        if (Mathf.Abs(u) < 1e-5f)
-            return a * 1f + c;
-        float s = Mathf.Sin(u) / u;
-        return a * s + c;
-    }
-
-    /// <summary>Causal decay e^{-s t} for t≥0 (table entry for Laplace-style exponentials); s from baseN/100.</summary>
-    private static float TransformLaplaceCausalDecayY(float u, float a, float c, int baseNRaw)
-    {
-        if (u < -1e-5f)
-            return float.NaN;
-        float s = Mathf.Clamp(baseNRaw / 100f, 0.1f, 4.5f);
-        return a * Mathf.Exp(-s * u) + c;
-    }
-
-    /// <summary>Lorenz attractor x-coordinate vs time (burn-in + normalized); u is time-like; phase scroll animates the slice.</summary>
-    float ChaosLorenzButterflyYEval(float u, float a, float c)
-    {
-        float tMax = LorenzAttractorSamples.TimeMax;
-        if (tMax < 1e-5f)
-            return float.NaN;
-        float t = Mathf.Repeat(u + _lorenzPhaseScroll, tMax);
-        return a * LorenzAttractorSamples.SampleNormalizedX(t) + c;
-    }
-
-    static float GravityWellInverseSqrtY(float u, float a, float c, float softFromD)
-    {
-        float eps = Mathf.Max(0.08f, Mathf.Abs(softFromD));
-        float r2 = u * u + eps * eps;
-        return a * (-1f / Mathf.Sqrt(r2)) + c;
-    }
-
-    static float BigONLogNY(float u, float a, float c)
-    {
-        float n = Mathf.Max(u, 0.02f);
-        return a * (n * Mathf.Log(n)) + c;
-    }
-
-    /// <summary>y = k + √(R² − u²) for |u|≤R; outside domain uses k so samples stay finite (flat shoulder).</summary>
-    private static float CircleUpperY(float u, float radiusSigned, float k)
-    {
-        float r = Mathf.Max(0.02f, Mathf.Abs(radiusSigned));
-        float s = r * r - u * u;
-        if (s < 0f)
-            return float.NaN;
-        return k + Mathf.Sqrt(s);
-    }
-
-    /// <summary>S-curve L/(1+e^{-s u}) + C; <paramref name="baseN"/> scales steepness (larger → sharper transition).</summary>
-    private static float LogisticY(float u, float carryingCapacity, float c, int steepnessFromBaseN)
-    {
-        float s = 0.05f * Mathf.Max(1, steepnessFromBaseN > 0 ? steepnessFromBaseN : 1);
-        float z = Mathf.Clamp(-s * u, -30f, 30f);
-        return carryingCapacity / (1f + Mathf.Exp(z)) + c;
-    }
-
-    /// <summary>Undamped spring: \(x=A\cos(\omega u)+x_0\); \(u=k(x-D)\) time-like; \(\omega\) from <paramref name="power"/>.</summary>
-    private static float SpringMassUndampedY(float u, float amplitude, float xEq, int power)
-    {
-        float omega = SpringMassUndampedOmega(power);
-        return amplitude * Mathf.Cos(omega * u) + xEq;
-    }
-
-    private static float SpringMassUndampedOmega(int power) => 0.118f * Mathf.Max(1, power);
-
-    /// <summary>Underdamped-style envelope A×e^(-α|u|)×sin(ωu) + C (u = scaled time/position).</summary>
-    private static float DampedOscillatorY(float u, float a, float c, int power, int baseN)
-    {
-        float omega = 0.28f * Mathf.Max(1, power);
-        float decay = 0.042f * Mathf.Max(1, baseN);
-        return a * Mathf.Exp(-decay * Mathf.Abs(u)) * Mathf.Sin(omega * u) + c;
-    }
-
-    /// <summary>e^u ≈ Σ_{k=0}^{N} u^k/k!</summary>
-    private static float MaclaurinExpPartialSum(float u, int maxDegree)
-    {
-        maxDegree = Mathf.Clamp(maxDegree, 0, 18);
-        float sum = 0f;
-        float term = 1f;
-        sum += term;
-        for (int k = 1; k <= maxDegree; k++)
-        {
-            term *= u / k;
-            sum += term;
-            if (!IsFinite(sum)) break;
-        }
-        return sum;
-    }
-
-    /// <summary>sin u ≈ Σ (-1)^n u^{2n+1}/(2n+1)! up to n = maxN.</summary>
-    private static float MaclaurinSinPartialSum(float u, int maxN)
-    {
-        maxN = Mathf.Clamp(maxN, 0, 12);
-        float sum = 0f;
-        float term = u;
-        sum += term;
-        for (int n = 1; n <= maxN; n++)
-        {
-            term *= -u * u / ((2f * n) * (2f * n + 1f));
-            sum += term;
-            if (!IsFinite(sum)) break;
-        }
-        return sum;
-    }
-
-    /// <summary>cos u ≈ Σ (-1)^n u^{2n}/(2n)! up to n = maxN.</summary>
-    private static float MaclaurinCosPartialSum(float u, int maxN)
-    {
-        maxN = Mathf.Clamp(maxN, 0, 12);
-        float sum = 0f;
-        float term = 1f;
-        sum += term;
-        for (int n = 1; n <= maxN; n++)
-        {
-            term *= -u * u / ((2f * n - 1f) * (2f * n));
-            sum += term;
-            if (!IsFinite(sum)) break;
-        }
-        return sum;
-    }
-
-    /// <summary>Σ_{k=0}^{N} u^k for N = maxPower (geometric partial sum).</summary>
-    private static float GeometricPartialSum(float u, int maxPower)
-    {
-        maxPower = Mathf.Clamp(maxPower, 0, 24);
-        float sum = 0f;
-        float uPow = 1f;
-        sum += uPow;
-        for (int k = 1; k <= maxPower; k++)
-        {
-            uPow *= u;
-            sum += uPow;
-            if (!IsFinite(sum)) break;
-        }
-        return sum;
-    }
-
-    private static bool IsFinite(float f) => !(float.IsNaN(f) || float.IsInfinity(f));
+    private static bool IsFinite(float f) => GraphFunctionMath.IsFinite(f);
 
     private static string EscapeTmpRichText(string raw)
     {
@@ -1004,7 +607,7 @@ public class FunctionPlotter : MonoBehaviour
                 break;
             case FunctionType.SpringMassUndamped:
             {
-                float omegaDisp = SpringMassUndampedOmega(power);
+                float omegaDisp = GraphFunctionMath.SpringMassUndampedOmega(power);
                 equationText.text =
                     $@"<b>\(\text{{Spring–mass (undamped)}}\)</b> \(x \approx {a}\cos({omegaDisp:0.###}\,u)+{c},\; u={k}(x-{d})\)\n" +
                     $@"<size=88%><color=#57534A>Hooke \(F=-kx\Rightarrow \ddot{{x}}=-\omega^2 x\), \(\omega=\sqrt{{k/m}}\).</color></size>";
@@ -1053,7 +656,7 @@ public class FunctionPlotter : MonoBehaviour
                 float thLo = Mathf.Min(transK * (xStart-transD), transK * (xEnd-transD));
                 float thHi = Mathf.Max(transK * (xStart-transD), transK * (xEnd-transD));
                 float kk = Mathf.Clamp(Mathf.Max(1, baseN) / 750f, 0.055f, 0.19f);
-                string phiStr = GoldenRatioPhi.ToString("0.###");
+                string phiStr = GraphFunctionMath.GoldenRatioPhi.ToString("0.###");
                 equationText.text =
                     $@"<b>\(\text{{Golden spiral}}\)</b> \(r(\theta)\approx {a}\varphi^{{{kk:0.###}\theta}}+{c}\)\n" +
                     $@"<size=88%><color=#57534A>\(\varphi=\frac{{1+\sqrt{{5}}}}{{2}}\approx {phiStr}\), \(\theta\in[{thLo:0.##},{thHi:0.##}]\), \(u={k}(x-{d})\).</color></size>";

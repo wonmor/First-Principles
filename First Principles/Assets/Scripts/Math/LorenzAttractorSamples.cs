@@ -29,6 +29,71 @@ public static class LorenzAttractorSamples
         return Mathf.Lerp(_xSeries[i], _xSeries[i + 1], f);
     }
 
+    /// <summary>
+    /// Level curve window (time units, about one loop of a wing). The raw x(t) oscillates ~130 times across the boss
+    /// level, far faster than the plot samples it (the drawn line was an alias and the platform rules were noise).
+    /// A triangle average (this box applied twice) keeps the chaotic wing switching, which is what the level reads
+    /// and plays, and has a smooth, exact derivative.
+    /// </summary>
+    public const float LevelSmoothingTime = 0.8f;
+
+    private static double[] _prefix;  // F(t_i) = ∫₀^{t_i} x
+    private static double[] _prefix2; // G(t_i) = ∫₀^{t_i} F
+
+    static void Locate(float t, out int i, out double f, out double dt)
+    {
+        int n = _xSeries.Length;
+        dt = _tMax / (n - 1);
+        double u = t / dt;
+        i = System.Math.Min((int)u, n - 2);
+        f = u - i;
+    }
+
+    /// <summary>F(t) = ∫₀ᵗ x of the piecewise-linear series, x held constant outside [0, TimeMax].</summary>
+    static double Integral(float t)
+    {
+        EnsureBuilt();
+        int n = _xSeries.Length;
+        if (t <= 0f)
+            return t * _xSeries[0];
+        if (t >= _tMax)
+            return _prefix[n - 1] + (t - _tMax) * _xSeries[n - 1];
+        Locate(t, out int i, out double f, out double dt);
+        double d = _xSeries[i + 1] - _xSeries[i];
+        return _prefix[i] + dt * (_xSeries[i] * f + 0.5 * d * f * f);
+    }
+
+    /// <summary>G(t) = ∫₀ᵗ F.</summary>
+    static double Integral2(float t)
+    {
+        EnsureBuilt();
+        int n = _xSeries.Length;
+        if (t <= 0f)
+            return 0.5 * t * t * _xSeries[0];
+        if (t >= _tMax)
+        {
+            double r = t - _tMax;
+            return _prefix2[n - 1] + _prefix[n - 1] * r + 0.5 * _xSeries[n - 1] * r * r;
+        }
+        Locate(t, out int i, out double f, out double dt);
+        double d = _xSeries[i + 1] - _xSeries[i];
+        return _prefix2[i] + dt * (_prefix[i] * f + dt * (_xSeries[i] * f * f / 2.0 + d * f * f * f / 6.0));
+    }
+
+    /// <summary>Triangle-weighted average of the normalized x over [t − w, t + w].</summary>
+    public static float SampleSmoothedX(float time, float window)
+    {
+        double w = Mathf.Max(window, 1e-3f);
+        return (float)((Integral2(time + (float)w) - 2.0 * Integral2(time) + Integral2(time - (float)w)) / (w * w));
+    }
+
+    /// <summary>Exact d/dt of <see cref="SampleSmoothedX"/>.</summary>
+    public static float SmoothedSlope(float time, float window)
+    {
+        double w = Mathf.Max(window, 1e-3f);
+        return (float)((Integral(time + (float)w) - 2.0 * Integral(time) + Integral(time - (float)w)) / (w * w));
+    }
+
     public static float TimeMax
     {
         get
@@ -101,6 +166,14 @@ public static class LorenzAttractorSamples
             _xSeries[i] = (_xSeries[i] - mid) / span * 2f;
 
         _tMax = (n - 1) * dt;
+        _prefix = new double[n];
+        _prefix2 = new double[n];
+        for (int i = 1; i < n; i++)
+        {
+            double d = _xSeries[i] - _xSeries[i - 1];
+            _prefix[i] = _prefix[i - 1] + 0.5 * dt * (_xSeries[i - 1] + _xSeries[i]);
+            _prefix2[i] = _prefix2[i - 1] + dt * (_prefix[i - 1] + dt * (_xSeries[i - 1] / 2.0 + d / 6.0));
+        }
         _built = true;
     }
 }

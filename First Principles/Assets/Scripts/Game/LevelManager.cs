@@ -610,6 +610,7 @@ public class LevelManager : MonoBehaviour
         functionPlotter.autoScaleHorizontal = true;
         // Pinch / Scale: same plotter units per grid row as per column (square math window).
         functionPlotter.lockVerticalPlotScaleToHorizontalWindow = true;
+        functionPlotter.derivativeOwnAxis = false;
         functionPlotter.showWindTunnelBackdrop = false;
 
         if (curveRenderer != null)
@@ -2685,7 +2686,7 @@ public class LevelManager : MonoBehaviour
             gridCenter: new Color(0.1f, 0.18f, 0.34f, 0.42f),
             gridOutside: new Color(0.07f, 0.12f, 0.22f, 0.12f),
             storyPauseSecondsOverride: 3.05f,
-            graphStep: 0.11f,
+            graphStep: 0.04f, // fine enough to draw the smoothed Lorenz series without chord error
             levelXStart: lorenzBossX0,
             levelXEnd: lorenzBossX1
         ));
@@ -3086,6 +3087,9 @@ public class LevelManager : MonoBehaviour
         functionPlotter.autoScaleHorizontal = def.autoFitGraphHorizontal;
         functionPlotter.horizontalFillFraction = def.graphHorizontalFillFraction;
         functionPlotter.lockVerticalPlotScaleToHorizontalWindow = false;
+        // f′ on its own axis (zero on the centre line) so it stays on the plane whatever f's offset is.
+        functionPlotter.derivativeOwnAxis = true;
+        functionPlotter.animateLorenzPhase = false;
 
         functionPlotter.transA = def.transA;
         functionPlotter.transK = def.transK;

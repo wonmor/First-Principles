@@ -113,24 +113,22 @@ public class LineRendererUI : Graphic
         if (points.Count < 2)
             return;
 
-        float angle = 0;
-
+        // NaN points (PolylineClip.Break) split the line: off-plane parts and discontinuities are not drawn.
+        int segments = 0;
         for (int i = 0; i < points.Count - 1; i++)
         {
             Vector2 point = points[i];
             Vector2 point2 = points[i + 1];
+            if (PolylineClip.IsBreak(point) || PolylineClip.IsBreak(point2))
+                continue;
 
-            if (i < points.Count - 1)
-                angle = GetAngle(point, point2) + 90f;
-
+            float angle = GetAngle(point, point2) + 90f;
             DrawVerticesForPoint(point, point2, vh, angle);
-        }
 
-        for (int i = 0; i < points.Count - 1; i++)
-        {
-            int index = i * 4;
+            int index = segments * 4;
             vh.AddTriangle(index + 0, index + 1, index + 2);
             vh.AddTriangle(index + 1, index + 2, index + 3);
+            segments++;
         }
     }
 
