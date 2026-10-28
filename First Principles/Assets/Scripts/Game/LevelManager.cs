@@ -642,8 +642,9 @@ public class LevelManager : MonoBehaviour
 
         GraphCalculatorEquationPanel.Ensure(hintParent, functionPlotter, equationStyleRef, equationPanelBottomY, 108f);
 
-        var transGo = GameObject.Find("TransButton");
-        var scaleGo = GameObject.Find("ScaleButton");
+        // The scene ships both buttons inactive (gameplay hides them); GameObject.Find skips inactive objects.
+        var transGo = FindSceneObjectIncludingInactive("TransButton");
+        var scaleGo = FindSceneObjectIncludingInactive("ScaleButton");
         LayoutCalculatorToolButtons(transGo, scaleGo, transRowBottom);
 
         TextMeshProUGUI paramHint = null;
@@ -773,9 +774,9 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // Trans / Scale only exist when the scene enables them; without them the keypad sits lower.
-        var transGo = GameObject.Find("TransButton");
-        var scaleGo = GameObject.Find("ScaleButton");
+        // Trans / Scale sit in the bottom row of the column; without them the keypad sits lower.
+        var transGo = FindSceneObjectIncludingInactive("TransButton");
+        var scaleGo = FindSceneObjectIncludingInactive("ScaleButton");
         bool transRow = transGo != null || scaleGo != null;
 
         if (storyText != null)
@@ -789,7 +790,7 @@ public class LevelManager : MonoBehaviour
         var hint = GameObject.Find("GraphicCalculatorParamHint")?.GetComponent<TextMeshProUGUI>();
         if (hint != null)
         {
-            Place(hint.rectTransform, transRow ? 0.565f : 0.52f, 0.78f);
+            Place(hint.rectTransform, transRow ? 0.575f : 0.52f, 0.78f);
             hint.alignment = TextAlignmentOptions.TopLeft;
             hint.enableAutoSizing = true;
             hint.fontSizeMin = UiTypography.Scale(12);
@@ -798,11 +799,12 @@ public class LevelManager : MonoBehaviour
         }
         var eq = GameObject.Find(GraphCalculatorEquationPanel.EquationRootObjectName);
         if (eq != null)
-            Place(eq.GetComponent<RectTransform>(), transRow ? 0.39f : 0.27f, transRow ? 0.55f : 0.5f);
+            Place(eq.GetComponent<RectTransform>(), transRow ? 0.33f : 0.27f, transRow ? 0.56f : 0.5f);
+        // With the Trans / Scale row the two button rows are a little shorter so the f(u) field keeps its height on phones.
         PlacePair(GameObject.Find("GraphCalcDerivButton"), GameObject.Find("GraphCalcIntegralButton"),
-            transRow ? 0.205f : 0.035f, transRow ? 0.365f : 0.235f);
+            transRow ? 0.18f : 0.035f, transRow ? 0.315f : 0.235f);
         if (transRow)
-            PlacePair(transGo, scaleGo, 0.03f, 0.19f);
+            PlacePair(transGo, scaleGo, 0.03f, 0.165f);
 
         // Plot fills the space right of the column (and above the footer).
         var plotParent = cartesianPlaneRect != null ? cartesianPlaneRect.parent as RectTransform : null;
@@ -820,6 +822,15 @@ public class LevelManager : MonoBehaviour
             if (functionPlotter != null)
                 functionPlotter.InitPlotFunction();
         }
+    }
+
+    /// <summary>Scene object by name, including inactive ones (<see cref="GameObject.Find"/> only sees active objects).</summary>
+    static GameObject FindSceneObjectIncludingInactive(string name)
+    {
+        foreach (var t in FindObjectsByType<RectTransform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            if (t != null && t.gameObject.name == name && t.gameObject.scene.IsValid())
+                return t.gameObject;
+        return null;
     }
 
     /// <summary>Trans / Scale labels use the project TMP default font and bold weight in calculator mode.</summary>

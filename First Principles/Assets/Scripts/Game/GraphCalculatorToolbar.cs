@@ -188,7 +188,7 @@ public class GraphCalculatorToolbar : MonoBehaviour
                 plot.xEnd.ToString("0.##"));
 
         hint.richText = true;
-        hint.alignment = TextAlignmentOptions.Center;
+        // Alignment comes from the calculator layout (top-left in the Bauhaus column); keep it on refresh.
         hint.text = line2 + "\n" + line3 + "\n" + line4;
         LocalizationManager.ApplyTextDirection(hint);
     }
