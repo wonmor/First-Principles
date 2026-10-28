@@ -174,12 +174,12 @@ PlayerSettings:
     Standalone: com.Orch-Aerospace-and-Game-Genesis.First-Principles
     iPhone: com.orchestrsim.FirstPrinciples
   buildNumber:
-    Standalone: 6
+    Standalone: 7
     VisionOS: 0
-    iPhone: 6
+    iPhone: 7
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
-  AndroidBundleVersionCode: 5
+  AndroidBundleVersionCode: 6
   AndroidMinSdkVersion: 26
   AndroidTargetSdkVersion: 36
   AndroidPreferredInstallLocation: 1
