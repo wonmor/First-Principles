@@ -29,7 +29,7 @@ public static class StoreShotsBuild
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneOSX);
             var options = new BuildPlayerOptions
             {
-                scenes = new[] { "Assets/Scenes/Menu.unity", "Assets/Scenes/LevelSelect.unity", "Assets/Scenes/Game.unity" },
+                scenes = new[] { "Assets/Scenes/Menu.unity", "Assets/Scenes/LevelSelect.unity", "Assets/Scenes/Game.unity", "Assets/Scenes/Space3D.unity" },
                 locationPathName = "../Builds/StoreShots/First Principles.app",
                 target = BuildTarget.StandaloneOSX,
                 options = BuildOptions.None,

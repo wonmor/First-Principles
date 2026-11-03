@@ -64,6 +64,14 @@ public class QaShots : MonoBehaviour
         Debug.Log($"QaShots: writing to {_dir} at {Screen.width}x{Screen.height} x{_scale}");
 
         SeedProgress();
+        if (Array.IndexOf(Environment.GetCommandLineArgs(), "-fp3d") >= 0)
+        {
+            yield return Tour3D();
+            Debug.Log("QaShots: done");
+            Application.Quit();
+            yield break;
+        }
+
         string rec = Arg("-fpRecord");
         if (!string.IsNullOrEmpty(rec))
         {
@@ -465,6 +473,96 @@ public class QaShots : MonoBehaviour
                 Debug.Log($"QaShots: zoom out x=[{fp.xStart},{fp.xEnd}]");
                 yield return Shot("calc-tools-zoom-out");
             }
+        }
+    }
+
+    /// <summary>
+    /// 1.5 3D tour: menu entry, 3D calculator (surface + helix, quadrics, inspect), stage select, a stage
+    /// before / after solving, mid-run and cleared, a rail stage mid-ride and the helicoid.
+    ///   -fp3d [-fp3dOnly calc|stages]
+    /// </summary>
+    IEnumerator Tour3D()
+    {
+        Entitlements.DebugOverride = true;
+        var d = ProgressStore.Data;
+        d.stars3d = new int[Stage3DCatalog.Count];
+        int[] seeded = { 3, 3, 2, 3 };
+        for (int i = 0; i < seeded.Length; i++)
+            d.stars3d[i] = seeded[i];
+        ProgressStore.Save();
+        string only = Arg("-fp3dOnly") ?? "";
+
+        if (only == "")
+        {
+            yield return new WaitForSecondsRealtime(4f);
+            yield return Shot("menu-3d");
+        }
+
+        Space3DSession.RequestedTab = 0;
+        SceneManager.LoadScene(Space3DSession.SceneName);
+        yield return new WaitForSecondsRealtime(2.5f);
+        var root = FindAnyObjectByType<Space3DScene>();
+        if (root == null)
+        {
+            Debug.LogError("QaShots: Space3D scene missing");
+            yield break;
+        }
+
+        if (only == "" || only == "calc")
+        {
+            root.Calculator.SetFunctions("sin(x)*cos(y)", "(2cos(t), 2sin(t), t/3), t = -3pi..3pi");
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Shot("3d-calc");
+            root.Rig.Yaw -= 50f;
+            root.Rig.Pitch = 34f;
+            yield return new WaitForSecondsRealtime(0.5f);
+            root.Calculator.QaInspect(new Vector2(Screen.width * 0.62f, Screen.height * 0.5f));
+            yield return new WaitForSecondsRealtime(0.6f);
+            yield return Shot("3d-calc-inspect");
+            root.Calculator.SetFunctions("x^2 + y^2 + z^2 = 9", "x^2 + y^2 - z^2 = 1", "(u*cos(v), u*sin(v), v/3), u = 0..3, v = 0..4pi");
+            root.Rig.Frame(Box3.Cube(5f));
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Shot("3d-calc-implicit");
+            root.Calculator.SetFunctions("a*x^2 - b*y^2 + c", "3*exp(-(x^2 + y^2)/4)");
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Shot("3d-calc-sliders");
+        }
+
+        if (only == "" || only == "stages")
+        {
+            root.ShowTab(1);
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Shot("3d-stage-select");
+
+            var sv = root.Stages;
+            sv.OpenStage(3); // the bowl
+            yield return new WaitForSecondsRealtime(1f);
+            yield return Shot("3d-stage-edit");
+            sv.QaApplySolution();
+            yield return new WaitForSecondsRealtime(0.6f);
+            yield return Shot("3d-stage-solved");
+            sv.QaAutopilot = true;
+            sv.QaGo();
+            yield return new WaitForSecondsRealtime(1.4f);
+            yield return Shot("3d-stage-run");
+            for (float w = 0f; w < 20f && sv.QaRunning; w += 0.2f)
+                yield return new WaitForSecondsRealtime(0.2f);
+            yield return new WaitForSecondsRealtime(0.8f);
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+            yield return Shot("3d-stage-clear");
+
+            foreach (int st in new[] { 6, 11, 12, 8 })
+            {
+                sv.OpenStage(st);
+                sv.QaApplySolution();
+                yield return new WaitForSecondsRealtime(0.8f);
+                yield return Shot($"3d-stage{st + 1}-edit");
+                sv.QaGo();
+                yield return new WaitForSecondsRealtime(st == 11 ? 3.2f : 1.8f);
+                yield return Shot($"3d-stage{st + 1}-run");
+            }
+
+            sv.QaAutopilot = false;
         }
     }
 

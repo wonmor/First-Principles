@@ -24,6 +24,7 @@ public class SceneFader : MonoBehaviour
 	private Image fadeOutUIImage;
 
 	private TextMeshProUGUI graphicCalculatorMenuButtonText;
+	private TextMeshProUGUI menu3dTmp;
 	private TextMeshProUGUI menuLanguageButtonLabel;
 	private Image playerIconMenuButtonImage; // kept for the picker refresh hook
 	private TextMeshProUGUI playerIconMenuGlyphTmp;
@@ -181,6 +182,12 @@ public class SceneFader : MonoBehaviour
             LocalizationManager.ApplyTextDirection(graphicCalculatorMenuButtonText);
         }
 
+        if (menu3dTmp != null)
+        {
+            menu3dTmp.text = LocalizationManager.Get("menu.space3d", "3D graphs\n& stages");
+            LocalizationManager.ApplyTextDirection(menu3dTmp);
+        }
+
         if (menuLanguageButtonLabel != null)
         {
             menuLanguageButtonLabel.text = LocalizationManager.GetLanguageChipDisplayText();
@@ -294,11 +301,14 @@ public class SceneFader : MonoBehaviour
         playBtn.transition = Selectable.Transition.ColorTint;
         Bauhaus.Button(playBtn, Bauhaus.Tone.Red, Bauhaus.PanelRule);
 
-        // Second row: graphing calculator (blue) + player icon (paper).
-        var calc = MenuBlockButton(col, "GraphicCalculatorEntryButton", new Vector2(0f, 0.255f), new Vector2(0.49f, 0.45f),
+        // Second row: graphing calculator (blue) + 3D graphs and stages (yellow, 1.5) + player icon (paper).
+        var calc = MenuBlockButton(col, "GraphicCalculatorEntryButton", new Vector2(0f, 0.255f), new Vector2(0.355f, 0.45f),
             Bauhaus.Tone.Blue, StarGlyph.Calculator, out graphicCalculatorMenuButtonText, LoadGraphCalculator, tablet);
         graphicCalculatorMenuButtonText.text = LocalizationManager.Get("ui.graphing_calculator_mode", "Graphing\ncalculator");
-        var iconBtn = MenuBlockButton(col, "MenuPlayerIconButton", new Vector2(0.51f, 0.255f), new Vector2(1f, 0.45f),
+        MenuBlockButton(col, "Space3DEntryButton", new Vector2(0.37f, 0.255f), new Vector2(0.725f, 0.45f),
+            Bauhaus.Tone.Yellow, StarGlyph.Axes3D, out menu3dTmp, LoadSpace3D, tablet);
+        menu3dTmp.text = LocalizationManager.Get("menu.space3d", "3D graphs\n& stages");
+        var iconBtn = MenuBlockButton(col, "MenuPlayerIconButton", new Vector2(0.74f, 0.255f), new Vector2(1f, 0.45f),
             Bauhaus.Tone.Paper, null, out playerIconMenuGlyphTmp, OpenMenuPlayerGlyphPickerOverlay, tablet);
         playerIconMenuButtonImage = iconBtn.GetComponent<Image>();
 
@@ -493,6 +503,17 @@ public class SceneFader : MonoBehaviour
 		fadeOutUIImage.enabled = true;
 		fadeOutUIImage.raycastTarget = true;
 		StartCoroutine(FadeAndLoadScene(FadeDirection.In, "Game"));
+	}
+
+	/// <summary>3D graphing calculator and 3D stages (Space3D scene, 1.5).</summary>
+	public void LoadSpace3D()
+	{
+		fadeOutUIImage.gameObject.SetActive(false);
+		fadeOutUIImage = fadeOutUIImage2;
+		fadeOutUIImage.gameObject.SetActive(true);
+		fadeOutUIImage.enabled = true;
+		fadeOutUIImage.raycastTarget = true;
+		StartCoroutine(FadeAndLoadScene(FadeDirection.In, Space3DSession.SceneName));
 	}
 
 	public void LoadMenu()

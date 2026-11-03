@@ -32,6 +32,9 @@ public static class StarGlyph
     public static Sprite ArrowLeft => _arrowL != null ? _arrowL : (_arrowL = BuildSdf(p => ArrowSdf(new Vector2(-p.x, p.y))));
     public static Sprite ArrowRight => _arrowR != null ? _arrowR : (_arrowR = BuildSdf(p => ArrowSdf(p)));
     public static Sprite Calculator => _calc != null ? _calc : (_calc = BuildSdf(CalculatorSdf));
+    /// <summary>Three axes from an origin (x, y receding, z up): the 3D graphing / stages glyph.</summary>
+    public static Sprite Axes3D => _axes3d != null ? _axes3d : (_axes3d = BuildSdf(Axes3DSdf));
+    static Sprite _axes3d;
     public static Sprite Globe => _globe != null ? _globe : (_globe = BuildSdf(GlobeSdf));
     public static Sprite Book => _book != null ? _book : (_book = BuildSdf(BookSdf));
     public static Sprite Help => _help != null ? _help : (_help = BuildSdf(HelpSdf));
@@ -298,6 +301,35 @@ public static class StarGlyph
         d = Mathf.Min(d, Segment(p, new Vector2(x1, y1), new Vector2(x0, y1), w));
         d = Mathf.Min(d, Segment(p, new Vector2(x0, y1), new Vector2(x0, y0), w));
         return d;
+    }
+
+    static float Axes3DSdf(Vector2 p)
+    {
+        const float w = 6f;
+        var o = new Vector2(-14f, -14f);
+        var x = new Vector2(36f, -14f);   // x axis to the right
+        var y = new Vector2(16f, 16f);    // y axis receding up-right
+        var z = new Vector2(-14f, 38f);   // z axis up
+        float d = Segment(p, o, x, w);
+        d = Mathf.Min(d, Segment(p, o, y, w));
+        d = Mathf.Min(d, Segment(p, o, z, w));
+        // Arrow heads.
+        d = Mathf.Min(d, Segment(p, x, x + new Vector2(-10f, 8f), w));
+        d = Mathf.Min(d, Segment(p, x, x + new Vector2(-10f, -8f), w));
+        d = Mathf.Min(d, Segment(p, z, z + new Vector2(-8f, -10f), w));
+        d = Mathf.Min(d, Segment(p, z, z + new Vector2(8f, -10f), w));
+        d = Mathf.Min(d, Segment(p, y, y + new Vector2(-12f, -2f), w));
+        d = Mathf.Min(d, Segment(p, y, y + new Vector2(-2f, -12f), w));
+        // A curve rising through the space (the graph).
+        float best = 999f;
+        for (int i = 0; i < 16; i++)
+        {
+            float t0 = i / 16f, t1 = (i + 1) / 16f;
+            Vector2 a = new Vector2(-34f + 64f * t0, -38f + 70f * t0 * t0);
+            Vector2 b = new Vector2(-34f + 64f * t1, -38f + 70f * t1 * t1);
+            best = Mathf.Min(best, Segment(p, a, b, w * 0.8f));
+        }
+        return Mathf.Min(d, best);
     }
 
     static float CalculatorSdf(Vector2 p)

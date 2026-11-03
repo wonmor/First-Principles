@@ -46,6 +46,10 @@ public class ProgressData
     public bool levelTourDone;
     public bool sfxMuted;
     public long savedUnix;
+
+    /// <summary>3D stages (1.5): stars per stage in <see cref="Stage3DCatalog"/> order (0 = not cleared).</summary>
+    public int[] stars3d = new int[0];
+    public bool tour3dDone;
 }
 
 public static class ProgressStore
@@ -453,6 +457,14 @@ public static class ProgressStore
             d.dailyLastKey = other.dailyLastKey;
             d.dailyStreak = other.dailyStreak;
         }
+        if (other.stars3d != null)
+        {
+            if (d.stars3d == null || d.stars3d.Length < other.stars3d.Length)
+                Array.Resize(ref d.stars3d, other.stars3d.Length);
+            for (int i = 0; i < other.stars3d.Length; i++)
+                d.stars3d[i] = Mathf.Max(d.stars3d[i], other.stars3d[i]);
+        }
+        d.tour3dDone |= other.tour3dDone;
         foreach (var a in other.achievements)
             if (!d.achievements.Contains(a))
                 d.achievements.Add(a);

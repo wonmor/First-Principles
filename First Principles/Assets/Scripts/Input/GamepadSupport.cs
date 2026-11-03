@@ -250,7 +250,13 @@ public class GamepadSupport : MonoBehaviour
         }
 
         string scene = SceneManager.GetActiveScene().name;
-        if (scene == GameSceneName || scene == LevelSelectSceneName)
+        if (scene == Space3DSession.SceneName)
+        {
+            var root = FindAnyObjectByType<Space3DScene>();
+            if (root != null)
+                root.OnBack();
+        }
+        else if (scene == GameSceneName || scene == LevelSelectSceneName)
         {
             var backGo = GameObject.Find("BackButton");
             var backBtn = backGo != null ? backGo.GetComponent<Button>() : null;

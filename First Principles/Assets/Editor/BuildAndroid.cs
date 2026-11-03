@@ -21,9 +21,9 @@ using UnityEngine;
 
 public static class BuildHelper
 {
-    public const string Version = "1.4.1";
-    public const int IosBuildNumber = 8;
-    public const int AndroidVersionCode = 6;
+    public const string Version = "1.5.0";
+    public const int IosBuildNumber = 9;
+    public const int AndroidVersionCode = 7;
     public const string IosBundleId = "com.orchestrsim.FirstPrinciples";
     public const string AndroidPackage = "com.OrchAerospaceandGameGenesis.FirstPrinciples";
     public const string AppleTeamId = "Z64KRUX3W3";
@@ -34,6 +34,7 @@ public static class BuildHelper
         "Assets/Scenes/Menu.unity",
         "Assets/Scenes/LevelSelect.unity",
         "Assets/Scenes/Game.unity",
+        "Assets/Scenes/Space3D.unity",
     };
 
     static void ApplyCommonPlayerSettings()
@@ -79,6 +80,19 @@ public static class BuildHelper
         SetSteamDefine(NamedBuildTarget.Standalone, true);
         EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
         Run(BuildTarget.StandaloneWindows64, "../Builds/Steam/Windows/First Principles.exe", BuildOptions.None);
+    }
+
+    /// <summary>
+    /// Windows x64 for the Microsoft Store: premium like Steam (every level open, no store UI) but without
+    /// Steamworks. tools/msstore/prepare.py turns it into an MSIX layout.
+    /// </summary>
+    [MenuItem("Build/Windows x64 (Microsoft Store)")]
+    public static void BuildWindowsStore()
+    {
+        ApplyCommonPlayerSettings();
+        SetSteamDefine(NamedBuildTarget.Standalone, false);
+        EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+        Run(BuildTarget.StandaloneWindows64, "../Builds/MSStore/Windows/First Principles.exe", BuildOptions.None);
     }
 
     [MenuItem("Build/macOS (Steam)")]
