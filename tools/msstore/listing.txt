@@ -1,0 +1,29 @@
+Product name: First Principles: A Calculus Platformer
+Category: Games > Educational (secondary: Puzzle & trivia)
+Pricing: paid, USD 4.99 (matches Steam); no in-app purchases in the Windows build
+
+Short description (max 100 words):
+A platformer where the level is the graph. Walk on f(x), leap the gaps where the slope drops, and now build your own 3D surfaces and rails, then walk them to the goal.
+
+Description:
+First Principles turns calculus into a place you can stand on.
+
+2D: 59 stages from Maclaurin series to Riemann sums, AP Calculus BC, aerospace curves and Big O, with stars, daily challenges and hints. The platforms follow f(x); the gaps follow its derivative.
+
+New in 1.5, 3D graphing: plot surfaces z = f(x, y), curves (x(t), y(t), z(t)), parametric surfaces and implicit shapes like x² + y² + z² = 9. Orbit, zoom, tap any point for its coordinates and partial derivatives, and drag sliders a, b, c.
+
+13 3D stages: shape planes, bowls, saddles, waves, helix rails and a spiral staircase, then walk your own graph from the start pad to the goal.
+
+Keyboard and mouse, touch, and Xbox controllers. 14 interface languages.
+
+Features (one per line):
+3D graphing calculator: surfaces, curves, parametric and implicit plots
+13 3D stages where your function becomes the path
+59 2D calculus stages with stars and hints
+Daily challenge and achievements
+Full controller support
+
+Search terms: calculus, graphing calculator, 3D graph, math game, platformer, derivative, education
+Age rating: IARC questionnaire, no objectionable content (expected: Everyone / PEGI 3)
+Privacy policy URL: same as the App Store listing (privacy-policy.md in the repo)
+Screenshots: 1920x1080 set in the shots folder (store-final-1.5/desktop-1920 (not in git))
