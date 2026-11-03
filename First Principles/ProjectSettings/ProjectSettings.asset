@@ -149,7 +149,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 1.4
+  bundleVersion: 1.5.0
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -174,12 +174,12 @@ PlayerSettings:
     Standalone: com.Orch-Aerospace-and-Game-Genesis.First-Principles
     iPhone: com.orchestrsim.FirstPrinciples
   buildNumber:
-    Standalone: 7
+    Standalone: 9
     VisionOS: 0
-    iPhone: 7
+    iPhone: 9
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
-  AndroidBundleVersionCode: 6
+  AndroidBundleVersionCode: 7
   AndroidMinSdkVersion: 26
   AndroidTargetSdkVersion: 36
   AndroidPreferredInstallLocation: 1
@@ -868,7 +868,7 @@ PlayerSettings:
   webProgressiveAssetLoading: 0
   scriptingDefineSymbols:
     Android: 
-    Standalone: STEAMWORKS_NET
+    Standalone: STEAMWORKS_NET;FP_STEAM
     iPhone: 
   additionalCompilerArguments: {}
   platformArchitecture: {}
