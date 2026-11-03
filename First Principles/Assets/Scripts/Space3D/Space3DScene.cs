@@ -22,6 +22,12 @@ public static class Space3DSession
 
     /// <summary>QA / deep link: open this stage directly (-1 = none).</summary>
     public static int RequestedStage = -1;
+
+    /// <summary>QA offscreen capture (batchmode player): the render size used instead of Screen.</summary>
+    public static Vector2Int ScreenOverride;
+
+    public static int ScreenW => ScreenOverride.x > 0 ? ScreenOverride.x : Screen.width;
+    public static int ScreenH => ScreenOverride.y > 0 ? ScreenOverride.y : Screen.height;
 }
 
 public class Space3DScene : MonoBehaviour
@@ -101,9 +107,10 @@ public class Space3DScene : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         // Landscape everywhere; portrait desktop windows fall back to width so panels still fit.
-        scaler.matchWidthOrHeight = Screen.width >= Screen.height ? 1f : 0f;
+        int sw = Space3DSession.ScreenW, sh = Space3DSession.ScreenH;
+        scaler.matchWidthOrHeight = sw >= sh ? 1f : 0f;
         cgo.AddComponent<GraphicRaycaster>();
-        CanvasWidth = Screen.width >= Screen.height ? 1080f * Screen.width / Mathf.Max(1, Screen.height) : 1920f;
+        CanvasWidth = sw >= sh ? 1080f * sw / Mathf.Max(1, sh) : 1920f;
 
         Labels = UiKit.Rect("AxisLabels", Canvas.transform, Vector2.zero, Vector2.one);
         Safe = UiKit.Rect("Safe", Canvas.transform, Vector2.zero, Vector2.one);

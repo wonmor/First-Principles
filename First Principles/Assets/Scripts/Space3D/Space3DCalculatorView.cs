@@ -135,7 +135,7 @@ public class Space3DCalculatorView
         var vlg = content.gameObject.AddComponent<VerticalLayoutGroup>();
         vlg.spacing = 12f;
         vlg.padding = new RectOffset(8, 8, 6, 16);
-        vlg.childControlHeight = false;
+        vlg.childControlHeight = true;
         vlg.childControlWidth = true;
         vlg.childForceExpandHeight = false;
         vlg.childForceExpandWidth = true;
@@ -223,7 +223,6 @@ public class Space3DCalculatorView
         v.childControlWidth = true;
         v.childForceExpandHeight = false;
         v.childForceExpandWidth = true;
-        rt.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         return rt;
     }
 

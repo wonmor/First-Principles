@@ -61,7 +61,20 @@ public class QaShots : MonoBehaviour
         _dir = Arg("-fpShots") ?? Path.Combine(Application.persistentDataPath, "qa-shots");
         int.TryParse(Arg("-fpShotScale") ?? Environment.GetEnvironmentVariable("FP_SHOT_SCALE") ?? "1", out _scale);
         Directory.CreateDirectory(_dir);
-        Debug.Log($"QaShots: writing to {_dir} at {Screen.width}x{Screen.height} x{_scale}");
+        if (Application.isBatchMode)
+        {
+            // Offscreen (screen locked / headless): render into a texture at the requested size.
+            int.TryParse(Arg("-screen-width") ?? "1920", out int ow);
+            int.TryParse(Arg("-screen-height") ?? "1080", out int oh);
+            Space3DSession.ScreenOverride = new Vector2Int(ow, oh);
+            Screen.SetResolution(ow, oh, FullScreenMode.Windowed);
+            _rt = new RenderTexture(ow, oh, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
+            _rt.Create();
+            SceneManager.sceneLoaded += (s, m) => Retarget();
+            Retarget();
+        }
+
+        Debug.Log($"QaShots: writing to {_dir} at {Screen.width}x{Screen.height} x{_scale} (offscreen {(_rt != null ? _rt.width + "x" + _rt.height : "off")})");
 
         SeedProgress();
         if (Array.IndexOf(Environment.GetCommandLineArgs(), "-fp3d") >= 0)
@@ -516,7 +529,7 @@ public class QaShots : MonoBehaviour
             root.Rig.Yaw -= 50f;
             root.Rig.Pitch = 34f;
             yield return new WaitForSecondsRealtime(0.5f);
-            root.Calculator.QaInspect(new Vector2(Screen.width * 0.62f, Screen.height * 0.5f));
+            root.Calculator.QaInspect(new Vector2(Space3DSession.ScreenW * 0.62f, Space3DSession.ScreenH * 0.5f));
             yield return new WaitForSecondsRealtime(0.6f);
             yield return Shot("3d-calc-inspect");
             root.Calculator.SetFunctions("x^2 + y^2 + z^2 = 9", "x^2 + y^2 - z^2 = 1", "(u*cos(v), u*sin(v), v/3), u = 0..3, v = 0..4pi");
@@ -630,8 +643,112 @@ public class QaShots : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.5f);
     }
 
+    static RenderTexture _rt;
+
+    static Camera _uiCam;
+    static RenderTexture _rtUi;
+    static readonly Vector3 UiPlace = new Vector3(0f, -5000f, 0f);
+
+    /// <summary>
+    /// Offscreen mode: scene cameras draw into the capture texture; overlay canvases become a world-space sheet
+    /// (1080 units tall, like the real canvas) far below the scene, drawn on top by an orthographic UI camera.
+    /// </summary>
+    static Texture2D ReadRt(RenderTexture rt)
+    {
+        var prev = RenderTexture.active;
+        RenderTexture.active = rt;
+        var t = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+        t.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+        t.Apply();
+        RenderTexture.active = prev;
+        return t;
+    }
+
+    static void Retarget()
+    {
+        if (_rt == null)
+            return;
+        float h = 1080f, w = 1080f * _rt.width / _rt.height;
+        if (_uiCam == null)
+        {
+            var go = new GameObject("QaUiCamera");
+            _uiCam = go.AddComponent<Camera>();
+            _uiCam.orthographic = true;
+            _uiCam.orthographicSize = h * 0.5f;
+            _uiCam.clearFlags = CameraClearFlags.SolidColor;
+            _uiCam.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            _rtUi = new RenderTexture(_rt.width, _rt.height, 24, RenderTextureFormat.ARGB32);
+            _rtUi.Create();
+            _uiCam.targetTexture = _rtUi;
+            _uiCam.nearClipPlane = 0.1f;
+            _uiCam.farClipPlane = 50f;
+            _uiCam.depth = 100f;
+            go.transform.position = UiPlace + new Vector3(0f, 0f, -10f);
+        }
+
+        foreach (var cam in FindObjectsByType<Camera>(FindObjectsSortMode.None))
+            if (cam != _uiCam)
+                cam.targetTexture = _rt;
+        foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+        {
+            if (!c.isRootCanvas || c.renderMode == RenderMode.WorldSpace)
+                continue;
+            c.renderMode = RenderMode.WorldSpace;
+            c.worldCamera = _uiCam;
+            var rt = c.GetComponent<RectTransform>();
+            rt.SetPositionAndRotation(UiPlace, Quaternion.identity);
+            rt.localScale = Vector3.one;
+            rt.sizeDelta = new Vector2(w, h);
+        }
+    }
+
     IEnumerator Shot(string name)
     {
+        if (_rt != null)
+        {
+            Retarget();
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+            yield return null;
+            yield return new WaitForEndOfFrame();
+            // Batchmode players do not render on their own: draw every camera into the texture now.
+            Canvas.ForceUpdateCanvases();
+            var cams = new System.Collections.Generic.List<Camera>(FindObjectsByType<Camera>(FindObjectsSortMode.None));
+            cams.Sort((x, y) => x.depth.CompareTo(y.depth));
+            foreach (var cam in cams)
+            {
+                if (!cam.isActiveAndEnabled || cam == _uiCam) continue;
+                cam.targetTexture = _rt;
+                cam.Render();
+            }
+
+            _uiCam.targetTexture = _rtUi;
+            _uiCam.Render();
+            var scene = ReadRt(_rt);
+            var ui = ReadRt(_rtUi);
+            var a = scene.GetPixels32();
+            var b = ui.GetPixels32();
+            for (int i = 0; i < a.Length; i++)
+            {
+                int k = b[i].a;
+                if (k == 0) continue;
+                // UI was alpha-blended over transparent black, so its colour is already premultiplied.
+                a[i].r = (byte)Mathf.Min(255, b[i].r + a[i].r * (255 - k) / 255);
+                a[i].g = (byte)Mathf.Min(255, b[i].g + a[i].g * (255 - k) / 255);
+                a[i].b = (byte)Mathf.Min(255, b[i].b + a[i].b * (255 - k) / 255);
+            }
+
+            var tex = new Texture2D(_rt.width, _rt.height, TextureFormat.RGBA32, false);
+            tex.SetPixels32(a);
+            tex.Apply();
+            Destroy(scene);
+            Destroy(ui);
+            string f = Path.Combine(_dir, $"{++_n:00}-{name}.png");
+            File.WriteAllBytes(f, tex.EncodeToPNG());
+            Destroy(tex);
+            Debug.Log($"QaShots: {f}");
+            yield break;
+        }
+
         if (Array.IndexOf(Environment.GetCommandLineArgs(), "-fpStore") >= 0)
         {
             // Store set: no keyboard / controller focus tint and no hover from wherever the desktop cursor

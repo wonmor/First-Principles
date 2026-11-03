@@ -499,7 +499,7 @@ public static class Plot3DSampler
             {
                 float p = a0 + (a1 - a0) * i / n;
                 var pt = spec.SurfacePoint(p, q, prm);
-                bool good = Finite(pt) && box.Contains(pt, (w1 - w0) * 1e-3f);
+                bool good = Finite(pt);
                 ok[j * (n + 1) + i] = good;
                 m.Vertices.Add(good ? pt : new Vector3(p, q, 0f));
             }
@@ -510,8 +510,8 @@ public static class Plot3DSampler
             for (int i = 0; i < n; i++)
             {
                 int i00 = j * (n + 1) + i, i10 = i00 + 1, i01 = i00 + n + 1, i11 = i01 + 1;
-                AddTri(m, ok, i00, i01, i11, spec.DependentAxis, jump);
-                AddTri(m, ok, i00, i11, i10, spec.DependentAxis, jump);
+                AddTri(m, ok, i00, i01, i11, spec.DependentAxis, jump, w0, w1);
+                AddTri(m, ok, i00, i11, i10, spec.DependentAxis, jump, w0, w1);
             }
         }
 
@@ -519,16 +519,57 @@ public static class Plot3DSampler
         return m;
     }
 
-    static void AddTri(Plot3DMesh m, bool[] ok, int a, int b, int c, int axis, float jump)
+    static void AddTri(Plot3DMesh m, bool[] ok, int a, int b, int c, int axis, float jump, float lo, float hi)
     {
         if (!ok[a] || !ok[b] || !ok[c])
             return;
         float wa = Comp(m.Vertices[a], axis), wb = Comp(m.Vertices[b], axis), wc = Comp(m.Vertices[c], axis);
         if (Math.Abs(wa - wb) > jump || Math.Abs(wb - wc) > jump || Math.Abs(wa - wc) > jump)
             return;
-        m.Triangles.Add(a);
-        m.Triangles.Add(b);
-        m.Triangles.Add(c);
+        float mn = Math.Min(wa, Math.Min(wb, wc)), mx = Math.Max(wa, Math.Max(wb, wc));
+        if (mx < lo || mn > hi)
+            return;
+        if (mn >= lo && mx <= hi)
+        {
+            m.Triangles.Add(a);
+            m.Triangles.Add(b);
+            m.Triangles.Add(c);
+            return;
+        }
+
+        // Straddles the top or bottom of the box: clip so the edge is a clean level line, not a sawtooth.
+        var poly = new List<Vector3> { m.Vertices[a], m.Vertices[b], m.Vertices[c] };
+        poly = ClipAxis(poly, axis, lo, true);
+        poly = ClipAxis(poly, axis, hi, false);
+        if (poly.Count < 3)
+            return;
+        int baseIdx = m.Vertices.Count;
+        m.Vertices.AddRange(poly);
+        for (int k = 1; k < poly.Count - 1; k++)
+        {
+            m.Triangles.Add(baseIdx);
+            m.Triangles.Add(baseIdx + k);
+            m.Triangles.Add(baseIdx + k + 1);
+        }
+    }
+
+    /// <summary>Sutherland-Hodgman against one axis-aligned plane (keep the side &gt;= v when <paramref name="keepAbove"/>).</summary>
+    static List<Vector3> ClipAxis(List<Vector3> poly, int axis, float v, bool keepAbove)
+    {
+        var res = new List<Vector3>();
+        for (int i = 0; i < poly.Count; i++)
+        {
+            var p = poly[i];
+            var q = poly[(i + 1) % poly.Count];
+            float dp = keepAbove ? Comp(p, axis) - v : v - Comp(p, axis);
+            float dq = keepAbove ? Comp(q, axis) - v : v - Comp(q, axis);
+            if (dp >= 0f)
+                res.Add(p);
+            if ((dp >= 0f) != (dq >= 0f))
+                res.Add(p + (q - p) * (dp / (dp - dq)));
+        }
+
+        return res;
     }
 
     public static Plot3DMesh SampleParamSurface(Plot3DSpec spec, Box3 box, float[] prm, int n)

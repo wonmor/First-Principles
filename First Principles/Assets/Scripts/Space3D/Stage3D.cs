@@ -260,8 +260,8 @@ public static class Stage3DCatalog
             Start = new Vector3(-4f, 0f, 3f),
             Goal = new Vector3(4f, 0f, 3f),
             Water = 0.5f,
-            Half = 5.5f, ZMin = -2f, ZMax = 6f,
-            Blocks = new[] { new Block3(-0.3f, 1.5f, -2f, 0.3f, 5.5f, 9f), new Block3(-0.3f, -5.5f, -2f, 0.3f, -1.5f, 9f) },
+            Half = 5f, ZMin = -2f, ZMax = 6f,
+            Blocks = new[] { new Block3(-0.3f, 1.5f, -2f, 0.3f, 5f, 6f), new Block3(-0.3f, -5f, -2f, 0.3f, -1.5f, 6f) },
             Pickups = new[] { new Vector3(0f, 0f, 1.9f), new Vector3(-2f, 1f, 2.35f) },
             SolutionParams = new[] { 0.1f, 1.4f },
         });

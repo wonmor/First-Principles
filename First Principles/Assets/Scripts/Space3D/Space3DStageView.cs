@@ -182,7 +182,8 @@ public class Space3DStageView
         tileGrid = Space3DUi.Rect("Tiles", viewport, new Vector2(0f, 1f), new Vector2(1f, 1f));
         tileGrid.pivot = new Vector2(0.5f, 1f);
         var grid = tileGrid.gameObject.AddComponent<GridLayoutGroup>();
-        float avail = host.CanvasWidth - 60f;
+        var safe = DeviceLayout.SafeArea;
+        float avail = host.CanvasWidth * (safe.width / Mathf.Max(1f, Screen.width)) - 80f;
         int cols = avail > 1700f ? 5 : avail > 1300f ? 4 : 3;
         float cw = (avail - (cols - 1) * 18f - 20f) / cols;
         grid.cellSize = new Vector2(cw, 250f);
@@ -393,7 +394,7 @@ public class Space3DStageView
         cardBody.enableAutoSizing = true;
         cardBody.fontSizeMin = 14f;
         var cp = Space3DUi.Rect("Primary", card, new Vector2(0.5f, 0.06f), new Vector2(0.95f, 0.26f), new Vector2(8f, 0f), Vector2.zero);
-        cardPrimary = Space3DUi.Button(cp, "", Bauhaus.Tone.Red, StarGlyph.ArrowRight, null, 24f, 32f);
+        cardPrimary = Space3DUi.Button(cp, "Next", Bauhaus.Tone.Red, StarGlyph.ArrowRight, null, 24f, 32f);
         var cs = Space3DUi.Rect("Secondary", card, new Vector2(0.05f, 0.06f), new Vector2(0.5f, 0.26f), Vector2.zero, new Vector2(-8f, 0f));
         cardSecondary = Space3DUi.Button(cs, "", Bauhaus.Tone.Paper, null, null, 24f);
         card.gameObject.SetActive(false);
@@ -747,8 +748,12 @@ public class Space3DStageView
         host.Rig.TouchOrbitRegion = null;
         host.Rig.AllowPan = true;
         host.Rig.MinPitch = -10f;
+        host.Axes.gameObject.SetActive(true);
         if (frame)
+        {
             host.Rig.Frame(stage.Box, -38f, 30f);
+            host.Rig.Distance *= 0.82f;
+        }
         jumpRt.gameObject.SetActive(false);
         joystickRoot.gameObject.SetActive(false);
         for (int i = 0; i < pickups.Count; i++)
@@ -789,8 +794,9 @@ public class Space3DStageView
         host.Rig.FollowPoint = () => Space3DRender.ToWorld(motor != null ? motor.Center : stage.Start) + Vector3.up * 0.4f;
         host.Rig.TouchOrbitRegion = p => p.x > Screen.width * 0.5f;
         host.Rig.AllowPan = false;
-        host.Rig.Distance = 7.5f;
-        host.Rig.Pitch = 24f;
+        host.Rig.Distance = 8.5f;
+        host.Rig.Pitch = 34f;
+        host.Axes.gameObject.SetActive(false);
         host.Rig.MinPitch = -10f;
         // Start looking from the start toward the goal.
         var d = Space3DRender.ToWorld(stage.Goal) - Space3DRender.ToWorld(stage.Start);
@@ -897,6 +903,7 @@ public class Space3DStageView
         PlaceAvatar(motor.Feet);
         UpdateDropLine();
 
+        KeepCameraAboveGround(dt);
         if (motor.State == Stage3DMotorState.Rail)
         {
             var tan = Space3DRender.ToWorld(motor.RailTangent());
@@ -908,6 +915,16 @@ public class Space3DStageView
             OnDead();
         else if (motor.State == Stage3DMotorState.Won)
             OnWon();
+    }
+
+    /// <summary>Third-person camera: tilt up when the view would dip under the ground or into a wall.</summary>
+    void KeepCameraAboveGround(float dt)
+    {
+        var cp = Space3DRender.ToMath(host.Cam.transform.position);
+        float g = runWorld.SupportBelow(cp.X, cp.Y, float.PositiveInfinity, out _);
+        bool inBlock = runWorld.InsideBlock(cp, 0.3f);
+        if (inBlock || (!float.IsNaN(g) && cp.Z < g + 0.8f))
+            host.Rig.Pitch = Mathf.Min(78f, host.Rig.Pitch + 90f * dt);
     }
 
     void HandleEditShortcuts()

@@ -61,7 +61,7 @@ public static class Space3DRender
             if (_unlit == null)
             {
                 var sh = Resources.Load<Shader>("Space3D_Unlit") ?? Shader.Find("FirstPrinciples/Space3DUnlit");
-                _unlit = new Material(sh) { name = "Space3DUnlit" };
+                _unlit = new Material(sh) { name = "Space3DUnlit", renderQueue = 2450 }; // lines: before transparent UI
             }
 
             return _unlit;
@@ -77,7 +77,7 @@ public static class Space3DRender
             {
                 _unlitNoDepth = new Material(Unlit) { name = "Space3DUnlitTranslucent" };
                 _unlitNoDepth.SetFloat("_ZWrite", 0f);
-                _unlitNoDepth.renderQueue = 3100;
+                _unlitNoDepth.renderQueue = 2990; // after opaque geometry, before UI
             }
 
             return _unlitNoDepth;

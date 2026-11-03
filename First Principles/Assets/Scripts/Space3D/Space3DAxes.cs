@@ -144,7 +144,7 @@ public class Space3DAxes : MonoBehaviour
                 tmp.gameObject.SetActive(on);
             if (!on)
                 continue;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, sp, null, out var local);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, sp, canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null, out var local);
             tmp.rectTransform.anchoredPosition = local;
         }
     }
